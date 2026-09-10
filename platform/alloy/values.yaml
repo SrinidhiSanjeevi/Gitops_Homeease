@@ -1,0 +1,73 @@
+# ============================================================
+# Grafana Alloy — ships every pod's stdout/stderr to Loki.
+#
+# Not Promtail: Promtail reached end-of-life 2026-03-02. Alloy is
+# its documented successor and what this repo standardizes on.
+#
+# The River config below was validated against the real binary
+# before this file was written:
+#   docker run --rm -v ./config.river:/etc/alloy/config.river:ro \
+#     grafana/alloy:v1.19.2 validate /etc/alloy/config.river
+# (exit 0, no output — Alloy's validate prints nothing on success)
+#
+# What it does: discovers every pod in the cluster, relabels
+# namespace/pod/container/service onto each log line (the same label
+# names Prometheus uses, via app.kubernetes.io/name — so a Grafana
+# panel can pivot from a metric to matching logs without translating
+# label names), and forwards to Loki. No app changes needed — the
+# four HomeEase services already emit structured pino JSON to
+# stdout, which is exactly what a DaemonSet log shipper expects.
+# ============================================================
+
+alloy:
+  configMap:
+    create: true
+    content: |
+      discovery.kubernetes "pods" {
+        role = "pod"
+      }
+
+      discovery.relabel "pods" {
+        targets = discovery.kubernetes.pods.targets
+
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          target_label  = "namespace"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_name"]
+          target_label  = "pod"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_container_name"]
+          target_label  = "container"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+          target_label  = "service"
+        }
+      }
+
+      loki.source.kubernetes "pods" {
+        targets    = discovery.relabel.pods.output
+        forward_to = [loki.write.default.receiver]
+      }
+
+      loki.write "default" {
+        endpoint {
+          url = "http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push"
+        }
+      }
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# DaemonSet — one Alloy pod per node, tiny, no dev-specific sizing
+# needed beyond the resources above.
+controller:
+  type: daemonset

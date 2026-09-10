@@ -1,0 +1,111 @@
+# ============================================================
+# kube-prometheus-stack — Prometheus Operator + Prometheus +
+# Alertmanager + Grafana + node-exporter + kube-state-metrics.
+#
+# Sized for a 1-3 node Standard_D2s_v5 dev cluster (2 vCPU / 8GB per
+# node) on trial credit, not a production fleet. Bump requests/limits
+# when Grafana shows sustained throttling, not before — guessing high
+# "to be safe" is how a monitoring stack eats the budget it exists to
+# protect.
+# ============================================================
+
+# ------------------------------------------------------------
+# THE LINE THAT MATTERS MOST IN THIS FILE.
+#
+# By default this chart's Prometheus only watches ServiceMonitors
+# carrying ITS OWN Helm release label — meaning ServiceMonitors added
+# later by the four HomeEase app charts (a different Helm release
+# entirely) would silently never be scraped. Setting these to false
+# makes Prometheus watch every ServiceMonitor/PodMonitor/
+# PrometheusRule in the cluster, in any namespace, regardless of who
+# created it.
+# ------------------------------------------------------------
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorNamespaceSelector: {}
+    podMonitorSelectorNilUsesHelmValues: false
+    podMonitorNamespaceSelector: {}
+    ruleSelectorNilUsesHelmValues: false
+    ruleNamespaceSelector: {}
+
+    retention: 15d
+
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
+
+  # Single replica — this is a dev cluster, not an HA control plane.
+  # Revisit if this is ever pushed toward a real multi-node prod.
+  service:
+    type: ClusterIP
+
+alertmanager:
+  alertmanagerSpec:
+    resources:
+      requests:
+        cpu: 25m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+    storage:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 1Gi
+  # Slack routing + receivers are Task 5.4, deliberately not here —
+  # this task only gets the stack installed and scraping. Until then
+  # every alert (including the always-firing Watchdog) goes to the
+  # chart's default "null" receiver, which is a documented no-op, not
+  # a bug.
+
+grafana:
+  # No admin password set here on purpose — the chart auto-generates
+  # a random one into a Secret if you don't. A real value written to
+  # this file would be exactly the anti-pattern the Key Vault secrets
+  # module got deleted for (see Infrastruture_Homeease/terraform/
+  # azure/modules/keyvault/SECRETS.md), just in a different repo.
+  # Retrieve it with:
+  #   kubectl get secret -n monitoring kube-prometheus-stack-grafana \
+  #     -o jsonpath="{.data.admin-password}" | base64 -d
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+  # Loki as a second datasource, alongside the Prometheus one this
+  # chart wires automatically — one Grafana, both signals, same
+  # label set (namespace, service) so a panel can pivot from a
+  # metric to its logs without leaving the UI.
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      url: http://loki.monitoring.svc.cluster.local:3100
+      access: proxy
+
+  # No ingress yet — nothing in front of the cluster to attach a
+  # hostname to (see platform/README.md on ingress-nginx). Reach
+  # Grafana with:
+  #   kubectl port-forward -n monitoring svc/kube-prometheus-stack-grafana 3000:80
+
+# node-exporter and kube-state-metrics keep their chart defaults —
+# both are already small (DaemonSet / single Deployment) and don't
+# need dev-specific tuning.

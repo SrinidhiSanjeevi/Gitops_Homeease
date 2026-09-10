@@ -7,8 +7,8 @@ code + CI) and `Infrastruture_Homeease` (Terraform).
 ## Repo layout
 
 ```
-bootstrap/          the one Application you kubectl apply by hand — everything downstream is generated from here (app-of-apps)
-platform/           cluster-wide components: ingress, cert-manager, kube-prometheus-stack, Loki
+bootstrap/          the one Application you kubectl apply by hand — everything downstream is generated from here (app-of-apps). Also holds the multi-source Applications for each platform/ component.
+platform/           cluster-wide component VALUES (reference data, not watched directly — see platform/README.md): kube-prometheus-stack, Loki, Alloy (done); ingress-nginx, cert-manager (placeholder)
 charts/common/      library chart — Deployment/Service/HPA/PDB/ServiceAccount/SecretProviderClass/NetworkPolicy templates, shared by all 4 services
 apps/               one thin chart per service (frontend, backend, admin-backend, payment-service), each declaring charts/common as a dependency
 projects/           the `homeease` AppProject — scopes what the 4 service Applications are allowed to touch
@@ -39,15 +39,23 @@ for exactly which fields are templated and why.
 
 ```bash
 kubectl create namespace argocd
-helm install argocd argo/argo-cd -n argocd -f platform/argocd/values.yaml   # one-time, not GitOps-managed — see note below
+helm repo add argo https://argoproj.github.io/argo-helm
+helm install argocd argo/argo-cd -n argocd   # one-time, not GitOps-managed
 kubectl apply -f bootstrap/root-app.yaml
 ```
 
 ArgoCD cannot install its own first Application — something has to
 create the first one by hand. After `root-app.yaml` is applied,
-everything else (AppProject, platform components, the
+everything else (AppProject, kube-prometheus-stack, Loki, Alloy, the
 ApplicationSet, and every service it generates) is reconciled from
 this repo automatically.
+
+```bash
+kubectl get applications -n argocd
+# expect: homeease-root, homeease-project, homeease-applicationsets,
+#         kube-prometheus-stack, loki, alloy,
+#         frontend-dev, backend-dev, admin-backend-dev, payment-service-dev
+```
 
 ## Environments
 
