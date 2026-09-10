@@ -1,0 +1,19 @@
+apiVersion: v2
+name: common
+description: >
+  HomeEase library chart. Provides named templates only (Deployment,
+  Service, HPA, PDB, ServiceAccount, SecretProviderClass,
+  NetworkPolicy) — it renders nothing by itself. Every service chart
+  under apps/ declares this as a dependency and calls these templates
+  from its own templates/*.yaml files.
+
+  Why a library chart instead of copy-pasting a Deployment manifest
+  into all four services: the four HomeEase services are structurally
+  identical (Node.js HTTP server, /health/live + /health/ready +
+  /metrics, one container, one Key Vault-backed secret set) and
+  differ only in values — image, port, resource sizing, and whether
+  extra hardening (NetworkPolicy, SecretProviderClass) is turned on.
+  A fifth service reuses this chart entirely; a bug fix to the probe
+  wiring is fixed once, not four times.
+type: library
+version: 0.1.0
