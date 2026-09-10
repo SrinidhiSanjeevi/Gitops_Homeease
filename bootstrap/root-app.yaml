@@ -1,0 +1,44 @@
+# ============================================================
+# THE ONE MANUAL STEP.
+#
+# Everything else in this repo is applied BY ArgoCD, declaratively.
+# This file is the one exception — it's what you `kubectl apply -f`
+# by hand, once, after ArgoCD itself is installed (ArgoCD can't
+# bootstrap its own first Application; something has to create it).
+#
+#   kubectl create namespace argocd
+#   helm install argocd argo/argo-cd -n argocd   # platform/argocd values, one-time
+#   kubectl apply -f bootstrap/root-app.yaml
+#
+# From that point on, this Application watches the `bootstrap/`
+# directory itself (this file plus its siblings) and Git is the only
+# thing anyone needs to touch again — this is the "app of apps"
+# pattern: one root Application whose job is only to create more
+# Applications, never to run a workload itself.
+# ============================================================
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: homeease-root
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/SrinidhiSanjeevi/gitops_homeease.git
+    targetRevision: main
+    path: bootstrap
+    directory:
+      recurse: false
+      exclude: "root-app.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
