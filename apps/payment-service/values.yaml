@@ -130,11 +130,11 @@ secretProviderClass:
   keyvaultName: "REPLACE-WITH-KEYVAULT-NAME"     # e.g. kv-homeease-dev-hs01 — terraform output key_vault_name
   tenantId: "REPLACE-WITH-AZURE-TENANT-ID"
   objects:
-    - objectName: RAZORPAY-KEY-ID
+    - objectName: razorpay-key-id
       objectType: secret
-    - objectName: RAZORPAY-KEY-SECRET
+    - objectName: razorpay-key-secret
       objectType: secret
-    - objectName: RAZORPAY-WEBHOOK-SECRET
+    - objectName: razorpay-webhook-secret
       objectType: secret
   # Sync into a native k8s Secret too, so the three RAZORPAY_* names
   # the app actually reads from process.env can be wired via envFrom
@@ -143,11 +143,11 @@ secretProviderClass:
     - secretName: payment-service-razorpay
       type: Opaque
       data:
-        - objectName: RAZORPAY-KEY-ID
+        - objectName: razorpay-key-id
           key: RAZORPAY_KEY_ID
-        - objectName: RAZORPAY-KEY-SECRET
+        - objectName: razorpay-key-secret
           key: RAZORPAY_KEY_SECRET
-        - objectName: RAZORPAY-WEBHOOK-SECRET
+        - objectName: razorpay-webhook-secret
           key: RAZORPAY_WEBHOOK_SECRET
 
 # Default-deny, explicit-allow. The ONLY caller of payment-service in
