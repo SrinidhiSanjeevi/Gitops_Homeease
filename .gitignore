@@ -1,0 +1,9 @@
+# Helm dependency artifacts — re-downloaded by `helm dependency build`,
+# never committed. Chart.lock IS committed (like a package-lock.json)
+# so `helm dependency build` is reproducible; only the extracted
+# copies and tarballs it produces are ignored.
+apps/*/charts/
+*.tgz
+
+# Local scratch from `helm template`/`helm lint` runs during review.
+/.render/
