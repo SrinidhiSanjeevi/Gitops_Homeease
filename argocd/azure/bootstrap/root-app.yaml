@@ -1,0 +1,48 @@
+# THE ONE MANUAL STEP for the Azure cluster.
+#
+# Everything else in argocd/azure/ is applied BY this cluster's ArgoCD,
+# declaratively. This file is the one exception — it's what you
+# `kubectl apply -f` by hand, once, after ArgoCD itself is installed on
+# THIS cluster (ArgoCD can't bootstrap its own first Application;
+# something has to create it):
+#
+#   kubectl config use-context aks-homeease-dev
+#   kubectl create namespace argocd
+#   helm repo add argo https://argoproj.github.io/argo-helm
+#   helm install argocd argo/argo-cd -n argocd   # one-time, not GitOps-managed
+#   kubectl apply -f argocd/azure/bootstrap/root-app.yaml
+#
+# From that point on, this Application watches the argocd/azure/bootstrap
+# directory itself (this file plus its siblings) and Git is the only thing
+# anyone needs to touch again — the "app of apps" pattern: one root
+# Application whose only job is to create more Applications, never to run
+# a workload itself.
+#
+# The AWS cluster has its own, separate copy of all of this under
+# argocd/aws/ — its own ArgoCD install, its own root-app, applied to the
+# AWS cluster the same way. The two never talk to each other.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: homeease-root
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git
+    targetRevision: main
+    path: argocd/azure/bootstrap
+    directory:
+      recurse: false
+      exclude: "root-app.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false

@@ -1,0 +1,14 @@
+# maxUnavailable (not minAvailable) so this works even at replicaCount: 1 —
+# see apps/backend/base/pdb.yaml for why.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: payment-service
+  labels:
+    app.kubernetes.io/name: payment-service
+    app.kubernetes.io/part-of: homeease
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: payment-service

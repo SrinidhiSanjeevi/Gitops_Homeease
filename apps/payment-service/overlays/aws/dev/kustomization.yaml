@@ -1,0 +1,34 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: homeease-dev
+
+resources:
+  - ../../../base
+  - secretproviderclass.yaml
+
+labels:
+  - pairs:
+      homeease.io/environment: dev
+      homeease.io/cloud: aws
+    includeSelectors: false
+
+images:
+  - name: homeease/payment-service
+    newName: REPLACE-WITH-ACCOUNT-ID.dkr.ecr.REPLACE-WITH-REGION.amazonaws.com/homeease/payment-service
+    newTag: REPLACE-WITH-GIT-SHA
+
+patches:
+  # IRSA: this role-arn is what the pod actually assumes. No pod-level
+  # label needed (unlike Azure Workload Identity) — the EKS Pod Identity
+  # webhook keys off the ServiceAccount annotation alone.
+  - target:
+      kind: ServiceAccount
+      name: payment-service
+    patch: |-
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: payment-service
+        annotations:
+          eks.amazonaws.com/role-arn: "REPLACE-WITH-IAM-ROLE-ARN" # e.g. arn:aws:iam::<account-id>:role/homeease-dev-payment-service

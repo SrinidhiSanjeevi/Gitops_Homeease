@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app.kubernetes.io/name: frontend
+    app.kubernetes.io/part-of: homeease
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: frontend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: frontend
+    spec:
+      serviceAccountName: frontend
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        # nginxinc/nginx-unprivileged's built-in `nginx` user is uid/gid
+        # 101, not the 1001 the Node services use — checked directly
+        # against the image (`docker run ... id nginx`). Getting this
+        # wrong means CrashLoopBackOff on a permission error that doesn't
+        # obviously point at securityContext.
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: frontend
+      containers:
+        - name: frontend
+          # Placeholder — real registry + tag set per cloud/environment by
+          # the `images:` block in overlays/<cloud>/<env>/kustomization.yaml.
+          image: homeease/frontend:placeholder
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          # No startupProbe: static content baked into the image at build
+          # time, nothing to warm up.
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          volumeMounts:
+            # This image's nginx.conf already redirects every temp path
+            # (proxy/client_body/fastcgi/uwsgi/scgi) to /tmp, and
+            # access/error logs are symlinked to stdout/stderr — verified
+            # against the actual image, so this one emptyDir is enough.
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

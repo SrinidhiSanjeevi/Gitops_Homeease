@@ -1,0 +1,39 @@
+# Default-deny, explicit-allow — tighter than the other three services on
+# purpose. The ONLY caller of payment-service anywhere in the system is
+# backend (verified against backend's paymentClient.js — admin-backend and
+# frontend never call it directly, and Razorpay's webhook lands on
+# backend, which forwards it internally rather than reaching
+# payment-service from outside the cluster). So: allow ingress from
+# backend's pods only, on the app port. Not ingress-nginx, not
+# admin-backend, not frontend, not the internet.
+#
+# Requires the cluster's CNI to actually enforce NetworkPolicy — see
+# apps/backend/base/networkpolicy.yaml for the AKS/EKS specifics.
+#
+# Revisit if/when Razorpay is switched to call a webhook endpoint on
+# payment-service directly: that would need a second ingress rule scoped
+# to the ingress-nginx namespace and the specific webhook path, not a
+# blanket allow.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: payment-service
+  labels:
+    app.kubernetes.io/name: payment-service
+    app.kubernetes.io/part-of: homeease
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: payment-service
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: backend
+      ports:
+        - protocol: TCP
+          port: 5002
+  # No egress block: egress stays unrestricted (payment-service needs to
+  # reach Razorpay's API on the internet).

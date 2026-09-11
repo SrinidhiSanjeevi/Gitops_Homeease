@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: admin-backend
+  labels:
+    app.kubernetes.io/name: admin-backend
+    app.kubernetes.io/part-of: homeease
+  annotations:
+    # No-op until platform/cert-manager is actually installed (still a
+    # placeholder per platform/README.md).
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - admin.dev.example.com # overwritten per cloud/environment, see overlays/*/kustomization.yaml
+      secretName: admin-backend-tls
+  rules:
+    - host: admin.dev.example.com # overwritten per cloud/environment, see overlays/*/kustomization.yaml
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: admin-backend
+                port:
+                  name: http

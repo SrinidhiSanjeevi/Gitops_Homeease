@@ -1,0 +1,29 @@
+# One plain Application per service, not an ApplicationSet generator —
+# with 4 services and 1 environment today, 4 files you can read top to
+# bottom is simpler than a generator you have to mentally expand. If/when
+# staging and prod are added (service x environment starts multiplying),
+# revisit this in favour of an ApplicationSet — see the note in the repo
+# README.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: frontend-dev
+  namespace: argocd
+  labels:
+    homeease.io/service: frontend
+    homeease.io/environment: dev
+spec:
+  project: homeease
+  source:
+    repoURL: https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git
+    targetRevision: main
+    path: apps/frontend/overlays/azure/dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: homeease-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

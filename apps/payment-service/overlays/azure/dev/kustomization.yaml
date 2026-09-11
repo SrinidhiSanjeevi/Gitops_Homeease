@@ -1,0 +1,51 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: homeease-dev
+
+resources:
+  - ../../../base
+  - secretproviderclass.yaml
+
+labels:
+  - pairs:
+      homeease.io/environment: dev
+      homeease.io/cloud: azure
+    includeSelectors: false
+
+images:
+  - name: homeease/payment-service
+    newName: acrhomeeasedev.azurecr.io/homeease/payment-service
+    newTag: REPLACE-WITH-GIT-SHA
+
+patches:
+  # Azure AD Workload Identity: the client-id annotation tells the identity
+  # federation which Azure AD app this ServiceAccount maps to.
+  - target:
+      kind: ServiceAccount
+      name: payment-service
+    patch: |-
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: payment-service
+        labels:
+          azure.workload.identity/use: "true"
+        annotations:
+          azure.workload.identity/client-id: "REPLACE-WITH-WORKLOAD-IDENTITY-CLIENT-ID"
+  # Required on the POD itself, not just the ServiceAccount — the workload
+  # identity mutating webhook checks this label here before it will inject
+  # the federated-token projected volume.
+  - target:
+      kind: Deployment
+      name: payment-service
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: payment-service
+      spec:
+        template:
+          metadata:
+            labels:
+              azure.workload.identity/use: "true"

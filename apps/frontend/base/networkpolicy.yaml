@@ -1,0 +1,30 @@
+# Default-deny ingress, explicit allow only — see
+# apps/backend/base/networkpolicy.yaml for the CNI requirement notes
+# (AKS: Azure NPM/Calico; EKS: VPC CNI v1.14+ with ENABLE_NETWORK_POLICY,
+# or Calico/Cilium). Without one of those this object is accepted but not
+# enforced.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: frontend
+  labels:
+    app.kubernetes.io/name: frontend
+    app.kubernetes.io/part-of: homeease
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: frontend
+  policyTypes:
+    - Ingress
+  ingress:
+    # Only the ingress-nginx controller talks to frontend directly —
+    # nothing else in the cluster needs to.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+  # No egress block: frontend calls backend's public API through the same
+  # ingress path a browser would, so egress stays unrestricted.

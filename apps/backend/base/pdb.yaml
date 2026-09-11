@@ -1,0 +1,16 @@
+# maxUnavailable (not minAvailable) so this works even at replicaCount: 1 —
+# minAvailable: 1 with a single replica would block 100% of voluntary node
+# drains/evictions, which makes cluster maintenance impossible instead of
+# safer.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: backend
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/part-of: homeease
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: backend

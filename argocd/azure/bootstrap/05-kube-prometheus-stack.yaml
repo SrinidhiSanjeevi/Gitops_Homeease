@@ -1,0 +1,44 @@
+# MULTI-SOURCE Application — the standard Argo CD pattern for "a
+# third-party Helm chart, with values I keep in my own repo."
+#
+# source[0] is the remote chart itself (prometheus-community's Helm repo,
+# pinned to an exact version — never a floating "latest"). source[1] is
+# THIS git repo, referenced only so source[0]'s helm.valueFiles can point
+# at $values/platform/.../values.yaml. Argo CD resolves the $values alias
+# via source[1]'s ref.
+#
+# platform/kube-prometheus-stack/values.yaml is shared with the AWS
+# cluster's copy of this same Application (see ../../aws/bootstrap) — one
+# values file, installed independently on both clusters. Not touched as
+# part of this cloud-split; see platform/README.md.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      targetRevision: "90.0.0"
+      helm:
+        valueFiles:
+          - $values/platform/kube-prometheus-stack/values.yaml
+    - repoURL: https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      # The CRDs this chart installs (ServiceMonitor, PrometheusRule,
+      # Alertmanager, Prometheus, ...) are large and Argo CD's default
+      # 3-way diff/prune ordering can otherwise fight with Helm's own CRD
+      # install step on the very first sync.
+      - ServerSideApply=true

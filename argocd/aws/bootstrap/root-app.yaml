@@ -1,0 +1,37 @@
+# THE ONE MANUAL STEP for the AWS (EKS) cluster — mirrors
+# ../../azure/bootstrap/root-app.yaml exactly, applied to the EKS cluster
+# instead:
+#
+#   kubectl config use-context eks-homeease-dev
+#   kubectl create namespace argocd
+#   helm repo add argo https://argoproj.github.io/argo-helm
+#   helm install argocd argo/argo-cd -n argocd   # one-time, not GitOps-managed
+#   kubectl apply -f argocd/aws/bootstrap/root-app.yaml
+#
+# This cluster's ArgoCD only ever reads argocd/aws/** and apps/*/overlays/
+# aws/** — it has no visibility into the Azure side, and vice versa.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: homeease-root
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git
+    targetRevision: main
+    path: argocd/aws/bootstrap
+    directory:
+      recurse: false
+      exclude: "root-app.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false

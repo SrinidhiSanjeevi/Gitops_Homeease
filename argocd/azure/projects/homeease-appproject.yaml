@@ -1,0 +1,68 @@
+# AppProject — scopes what Applications under this project are allowed to
+# do, independent of any single Application's own spec. Without this,
+# every Application uses the `default` AppProject, which permits ANY
+# source repo and ANY destination namespace/cluster — no boundary at all.
+#
+# One of these exists per cloud (see ../../aws/projects for the AWS
+# equivalent) because each cloud runs its own ArgoCD on its own cluster —
+# this is not a cross-cluster resource.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: homeease
+  namespace: argocd
+spec:
+  description: HomeEase application services on AKS (frontend, backend, admin-backend, payment-service)
+
+  # Only this repo may be a source. An Application in this project
+  # pointing at a different Git URL is rejected at admission, not just
+  # discouraged by convention.
+  sourceRepos:
+    - "https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git"
+
+  # Add homeease-staging / homeease-prod here once those environments
+  # exist (see apps/<service>/overlays/azure/ for how to add the matching
+  # overlay).
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: "homeease-dev"
+
+  # Cluster-scoped resources are the highest blast-radius risk if a
+  # compromised or mis-templated Application tries to create them.
+  # HomeEase's services never need to — deny everything cluster-scoped by
+  # leaving this list empty rather than allowing "*".
+  clusterResourceWhitelist: []
+
+  # Namespace-scoped kinds the four services legitimately need. Notably
+  # absent: ResourceQuota/LimitRange (namespace-owner concern, managed by
+  # platform/, not by an app team's Application) and anything RBAC-shaped
+  # (Role/RoleBinding) — a service Application should never be able to
+  # grant itself permissions.
+  namespaceResourceWhitelist:
+    - group: "apps"
+      kind: Deployment
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: ServiceAccount
+    - group: ""
+      kind: ConfigMap
+    - group: "autoscaling"
+      kind: HorizontalPodAutoscaler
+    - group: "policy"
+      kind: PodDisruptionBudget
+    - group: "networking.k8s.io"
+      kind: NetworkPolicy
+    - group: "networking.k8s.io"
+      kind: Ingress
+    - group: "secrets-store.csi.x-k8s.io"
+      kind: SecretProviderClass
+    - group: "monitoring.coreos.com"
+      kind: ServiceMonitor
+
+  roles:
+    - name: readonly
+      description: Read-only access for viewing sync status and history
+      policies:
+        - p, proj:homeease:readonly, applications, get, homeease/*, allow
+      groups: []

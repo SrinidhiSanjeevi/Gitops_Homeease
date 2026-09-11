@@ -1,0 +1,25 @@
+# Child Application: syncs the AppProject definition from
+# argocd/azure/projects/. Kept as its own Application (rather than folding
+# the AppProject into root-app's own directory scan) so the project
+# boundary can be reviewed/synced independently of everything that depends
+# on it.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: homeease-project
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git
+    targetRevision: main
+    path: argocd/azure/projects
+    directory:
+      recurse: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

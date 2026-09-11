@@ -1,9 +1,13 @@
-# Helm dependency artifacts — re-downloaded by `helm dependency build`,
-# never committed. Chart.lock IS committed (like a package-lock.json)
-# so `helm dependency build` is reproducible; only the extracted
-# copies and tarballs it produces are ignored.
-apps/*/charts/
-*.tgz
-
-# Local scratch from `helm template`/`helm lint` runs during review.
+# Local scratch from `kustomize build` / `kubectl kustomize` dry-runs
+# during review — never committed.
 /.render/
+
+# Personal, machine-local Kustomize overrides (e.g. testing a patch before
+# it's ready to commit). Never used by ArgoCD — if a value needs to be
+# real for ArgoCD to deploy it, it belongs in a committed overlay file,
+# not here.
+kustomization.local.yaml
+*.local.yaml
+
+# Editor/OS noise
+.DS_Store

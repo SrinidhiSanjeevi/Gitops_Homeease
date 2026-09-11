@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: backend-dev
+  namespace: argocd
+  labels:
+    homeease.io/service: backend
+    homeease.io/environment: dev
+spec:
+  project: homeease
+  source:
+    repoURL: https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git
+    targetRevision: main
+    path: apps/backend/overlays/aws/dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: homeease-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

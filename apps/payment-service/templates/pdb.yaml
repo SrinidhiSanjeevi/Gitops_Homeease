@@ -1,3 +1,0 @@
-{{- if .Values.podDisruptionBudget.enabled }}
-{{ include "common.pdb" . }}
-{{- end }}

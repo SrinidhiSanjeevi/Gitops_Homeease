@@ -1,0 +1,109 @@
+# payment-service gets more here than the other three services — it's the
+# one place a mistake has a real (simulated) financial consequence, so its
+# blast radius is deliberately smaller: no public Ingress, secrets pulled
+# straight from the cloud's own secret store (never baked into an image or
+# env var literal here), and NetworkPolicy locked to "only backend may
+# call this" (see networkpolicy.yaml).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  labels:
+    app.kubernetes.io/name: payment-service
+    app.kubernetes.io/part-of: homeease
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: payment-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: payment-service
+    spec:
+      serviceAccountName: payment-service
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: payment-service
+      containers:
+        - name: payment-service
+          # Placeholder — real registry + tag set per cloud/environment by
+          # the `images:` block in overlays/<cloud>/<env>/kustomization.yaml.
+          image: homeease/payment-service:placeholder
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - name: http
+              containerPort: 5002
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 5
+            failureThreshold: 24
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          # Populated by the Secrets Store CSI driver's secretObjects sync
+          # (see overlays/<cloud>/dev/secretproviderclass.yaml) — the app
+          # reads RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET /
+          # RAZORPAY_WEBHOOK_SECRET from process.env exactly as it already
+          # does locally via .env; it never needs to know these came from
+          # a CSI mount, or which cloud's secret store they came from.
+          envFrom:
+            - secretRef:
+                name: payment-service-razorpay
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: secrets-store
+              mountPath: /mnt/secrets-store
+              readOnly: true
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            # Must match metadata.name of the SecretProviderClass created
+            # per cloud in overlays/<cloud>/dev/secretproviderclass.yaml.
+            volumeAttributes:
+              secretProviderClass: payment-service

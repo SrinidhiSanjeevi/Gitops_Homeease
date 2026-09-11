@@ -1,0 +1,40 @@
+# Default-deny ingress, explicit allow only — see
+# apps/backend/base/networkpolicy.yaml for the CNI requirement notes
+# (AKS: Azure NPM/Calico; EKS: VPC CNI v1.14+ with ENABLE_NETWORK_POLICY,
+# or Calico/Cilium). Without one of those this object is accepted but not
+# enforced.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: admin-backend
+  labels:
+    app.kubernetes.io/name: admin-backend
+    app.kubernetes.io/part-of: homeease
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: admin-backend
+  policyTypes:
+    - Ingress
+  ingress:
+    # Admin UI/API traffic, arrives via the ingress-nginx controller.
+    # Consider narrowing this further with an nginx.ingress.kubernetes.io/
+    # whitelist-source-range annotation on the Ingress once the office/VPN
+    # egress IPs are known — admin surfaces are a better target for that
+    # than the customer-facing frontend/backend.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 5001
+    # Other HomeEase services in this same namespace calling admin-backend
+    # server-to-server.
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 5001
+  # No egress block: egress stays unrestricted (admin-backend needs to
+  # reach MongoDB and other internal services).
