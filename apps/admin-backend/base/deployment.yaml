@@ -75,9 +75,27 @@ spec:
             limits:
               cpu: 500m
               memory: 256Mi
+          # Populated by the Secrets Store CSI driver's secretObjects sync
+          # (see overlays/<cloud>/dev/secretproviderclass.yaml) — the app
+          # reads MONGO_URI / JWT_SECRET from process.env exactly as it
+          # already does locally via .env.
+          envFrom:
+            - secretRef:
+                name: admin-backend-secrets
           volumeMounts:
             - name: tmp
               mountPath: /tmp
+            - name: secrets-store
+              mountPath: /mnt/secrets-store
+              readOnly: true
       volumes:
         - name: tmp
           emptyDir: {}
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            # Must match metadata.name of the SecretProviderClass created
+            # per cloud in overlays/<cloud>/dev/secretproviderclass.yaml.
+            volumeAttributes:
+              secretProviderClass: admin-backend

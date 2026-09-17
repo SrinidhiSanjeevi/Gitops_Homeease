@@ -83,12 +83,32 @@ spec:
             limits:
               cpu: 500m
               memory: 256Mi
+          # Populated by the Secrets Store CSI driver's secretObjects sync
+          # (see overlays/<cloud>/dev/secretproviderclass.yaml) — the app
+          # reads MONGO_URI / JWT_SECRET / EMAIL_* from process.env exactly
+          # as it already does locally via .env; it never needs to know
+          # these came from a CSI mount, or which cloud's secret store they
+          # came from.
+          envFrom:
+            - secretRef:
+                name: backend-secrets
           volumeMounts:
             # readOnlyRootFilesystem is on above, but Node/npm write
             # scratch files to /tmp unconditionally — this avoids every
             # pod crashing on its first write to a read-only /tmp.
             - name: tmp
               mountPath: /tmp
+            - name: secrets-store
+              mountPath: /mnt/secrets-store
+              readOnly: true
       volumes:
         - name: tmp
           emptyDir: {}
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            # Must match metadata.name of the SecretProviderClass created
+            # per cloud in overlays/<cloud>/dev/secretproviderclass.yaml.
+            volumeAttributes:
+              secretProviderClass: backend
