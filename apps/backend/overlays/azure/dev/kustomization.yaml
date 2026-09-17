@@ -18,7 +18,7 @@ images:
   # hand-edited except to seed it the first time.
   - name: homeease/backend
     newName: acrhomeeasedev.azurecr.io/homeease/backend
-    newTag: REPLACE-WITH-GIT-SHA
+    newTag: 5d4e71d3fcd2
 
 patches:
   - target:

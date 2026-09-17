@@ -15,7 +15,7 @@ labels:
 images:
   - name: homeease/frontend
     newName: acrhomeeasedev.azurecr.io/homeease/frontend
-    newTag: REPLACE-WITH-GIT-SHA
+    newTag: 5d4e71d3fcd2
 
 patches:
   - target:
