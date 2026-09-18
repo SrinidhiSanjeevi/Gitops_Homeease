@@ -16,10 +16,10 @@ labels:
 images:
   - name: homeease/payment-service
     newName: acrhomeeasedev.azurecr.io/homeease/payment-service
-    # Manually built + pushed (not yet through CI) — includes the fix
-    # making RAZORPAY_WEBHOOK_SECRET optional at startup. Re-tag from CI
-    # once app_Homeease's payment-service changes are committed/merged.
-    newTag: 5d4e71d3fcd2-payment-fix
+    # Built by the real Azure DevOps CI pipeline from commit 8af82121
+    # ("feat: improve payment service validation and CI") — supersedes
+    # the earlier manual 5d4e71d3fcd2-payment-fix build.
+    newTag: 8af8212190cc
 
 patches:
   # Azure AD Workload Identity: the client-id annotation tells the identity

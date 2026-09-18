@@ -1,11 +1,16 @@
 # See homeease-business.yaml for how sidecar provisioning works.
 #
-# RED panels reuse the same http_requests_total / http_request_duration_seconds
-# metrics as homeease-http.yaml (confirmed present in all three services).
 # Kubernetes panels use kube-state-metrics + cAdvisor series that ship
 # enabled by default in kube-prometheus-stack (kubeStateMetrics.enabled
-# and kubelet.enabled are both chart defaults — not something this
-# platform values.yaml had to turn on), scoped to namespace=homeease-dev.
+# and kubelet.enabled are both chart defaults), scoped to
+# namespace=homeease-dev.
+#
+# Redesigned as a compact, all-Stat "Kubernetes" view (no time-series
+# graphs). The RED/HTTP panels that used to live here (Rate/Errors/
+# Duration by service) were dropped — they duplicated homeease-http.yaml
+# and homeease-red.yaml exactly. Title kept as-is for continuity; content
+# is now purely Kubernetes-health, matching the "KUBERNETES" section of
+# the requested layout.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -20,83 +25,76 @@ data:
       "timezone": "browser",
       "schemaVersion": 39,
       "refresh": "30s",
-      "time": { "from": "now-6h", "to": "now" },
+      "time": { "from": "now-1h", "to": "now" },
       "panels": [
         {
-          "id": 1, "title": "R: Requests/sec", "type": "timeseries",
-          "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
-          "targets": [{ "expr": "sum(rate(http_requests_total[5m])) by (job)", "legendFormat": "{{job}}" }]
+          "id": 14, "title": "Total Pods", "type": "stat",
+          "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
+          "fieldConfig": { "defaults": { "unit": "short" } },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
+          "targets": [{ "expr": "count(kube_pod_info{namespace=\"homeease-dev\"})" }]
         },
         {
-          "id": 2, "title": "E: Error Rate (%)", "type": "timeseries",
-          "gridPos": { "h": 6, "w": 8, "x": 8, "y": 0 },
-          "fieldConfig": { "defaults": { "unit": "percent" } },
-          "targets": [{ "expr": "100 * sum(rate(http_requests_total{code=~\"5..\"}[5m])) by (job) / clamp_min(sum(rate(http_requests_total[5m])) by (job), 1e-9)", "legendFormat": "{{job}}" }]
-        },
-        {
-          "id": 3, "title": "E: 5xx Rate", "type": "timeseries",
-          "gridPos": { "h": 6, "w": 8, "x": 16, "y": 0 },
-          "targets": [{ "expr": "sum(rate(http_requests_total{code=~\"5..\"}[5m])) by (job)", "legendFormat": "{{job}}" }]
-        },
-        {
-          "id": 4, "title": "D: P50 Latency", "type": "timeseries",
-          "gridPos": { "h": 6, "w": 8, "x": 0, "y": 6 },
-          "fieldConfig": { "defaults": { "unit": "s" } },
-          "targets": [{ "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job))", "legendFormat": "{{job}}" }]
-        },
-        {
-          "id": 5, "title": "D: P95 Latency", "type": "timeseries",
-          "gridPos": { "h": 6, "w": 8, "x": 8, "y": 6 },
-          "fieldConfig": { "defaults": { "unit": "s" } },
-          "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job))", "legendFormat": "{{job}}" }]
-        },
-        {
-          "id": 6, "title": "D: P99 Latency", "type": "timeseries",
-          "gridPos": { "h": 6, "w": 8, "x": 16, "y": 6 },
-          "fieldConfig": { "defaults": { "unit": "s" } },
-          "targets": [{ "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job))", "legendFormat": "{{job}}" }]
-        },
-        {
-          "id": 7, "title": "Running Pods (homeease-dev)", "type": "stat",
-          "gridPos": { "h": 5, "w": 6, "x": 0, "y": 12 },
+          "id": 7, "title": "Running Pods", "type": "stat",
+          "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
           "targets": [{ "expr": "sum(kube_pod_status_phase{namespace=\"homeease-dev\", phase=\"Running\"})" }]
         },
         {
-          "id": 8, "title": "Available Replicas by Deployment", "type": "timeseries",
-          "gridPos": { "h": 5, "w": 6, "x": 6, "y": 12 },
+          "id": 15, "title": "Ready Pods", "type": "stat",
+          "gridPos": { "h": 5, "w": 6, "x": 12, "y": 0 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
+          "targets": [{ "expr": "sum(kube_pod_status_ready{namespace=\"homeease-dev\", condition=\"true\"})" }]
+        },
+        {
+          "id": 8, "title": "Available Replicas (by deployment)", "type": "stat",
+          "gridPos": { "h": 5, "w": 6, "x": 18, "y": 0 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
           "targets": [{ "expr": "kube_deployment_status_replicas_available{namespace=\"homeease-dev\"}", "legendFormat": "{{deployment}}" }]
         },
         {
-          "id": 9, "title": "Pod Restarts (1h)", "type": "timeseries",
-          "gridPos": { "h": 5, "w": 6, "x": 12, "y": 12 },
+          "id": 9, "title": "Pod Restarts (1h, by pod)", "type": "stat",
+          "gridPos": { "h": 6, "w": 8, "x": 0, "y": 5 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 3 }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
           "targets": [{ "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=\"homeease-dev\"}[1h])) by (pod)", "legendFormat": "{{pod}}" }]
         },
         {
-          "id": 10, "title": "HPA Current Replicas", "type": "timeseries",
-          "gridPos": { "h": 5, "w": 6, "x": 18, "y": 12 },
-          "targets": [{ "expr": "kube_horizontalpodautoscaler_status_current_replicas{namespace=\"homeease-dev\"}", "legendFormat": "{{horizontalpodautoscaler}}" }]
-        },
-        {
-          "id": 11, "title": "CPU Usage by Pod (cores)", "type": "timeseries",
-          "gridPos": { "h": 6, "w": 8, "x": 0, "y": 17 },
+          "id": 11, "title": "CPU Usage (cores, by pod)", "type": "stat",
+          "gridPos": { "h": 6, "w": 8, "x": 8, "y": 5 },
+          "fieldConfig": { "defaults": { "unit": "short" } },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
           "targets": [{ "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"homeease-dev\", container!=\"\", container!=\"POD\"}[5m])) by (pod)", "legendFormat": "{{pod}}" }]
         },
         {
-          "id": 12, "title": "Memory Usage by Pod (bytes)", "type": "timeseries",
-          "gridPos": { "h": 6, "w": 8, "x": 8, "y": 17 },
+          "id": 12, "title": "Memory Usage (by pod)", "type": "stat",
+          "gridPos": { "h": 6, "w": 8, "x": 16, "y": 5 },
           "fieldConfig": { "defaults": { "unit": "bytes" } },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
           "targets": [{ "expr": "sum(container_memory_working_set_bytes{namespace=\"homeease-dev\", container!=\"\", container!=\"POD\"}) by (pod)", "legendFormat": "{{pod}}" }]
-        },
-        {
-          "id": 13,
-          "title": "HPA CPU Utilization (% of requested)",
-          "type": "timeseries",
-          "gridPos": { "h": 6, "w": 8, "x": 16, "y": 17 },
-          "fieldConfig": { "defaults": { "unit": "percent" } },
-          "targets": [{
-            "expr": "100 * sum(rate(container_cpu_usage_seconds_total{namespace=\"homeease-dev\", container!=\"\", container!=\"POD\"}[5m])) by (pod) / on(pod) group_left sum(kube_pod_container_resource_requests{namespace=\"homeease-dev\", resource=\"cpu\"}) by (pod)",
-            "legendFormat": "{{pod}}"
-          }]
         }
       ]
     }

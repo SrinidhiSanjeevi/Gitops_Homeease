@@ -1,12 +1,16 @@
 # Grafana dashboard provisioning via the chart's sidecar — see
 # grafana.sidecar.dashboards in ../values.yaml.
 #
-# All metric names below are copy-checked against
-# app_Homeease/backend/metrics.js — nothing invented. One caveat, called
-# out on its own panel: serviceexpress_professional_assignment_time_seconds
-# is defined and scraped, but no code path in the backend ever calls
-# .observe() on it (confirmed by grep across controllers/services), so
-# that panel reads "No data" until professionalMatcher.js is instrumented.
+# Redesigned as a compact, all-Stat "at a glance" overview (no time-series
+# graphs) for demo/presentation use. Same underlying PromQL as the
+# previous version where the panel still exists here; HTTP error/latency
+# detail moved to homeease-http.yaml, booking-rate detail moved to
+# homeease-business.yaml, to avoid duplicate panels across dashboards.
+#
+# Metric names copy-checked against app_Homeease/backend/metrics.js —
+# nothing invented. "Payment Service Health" reads "No data" until
+# payment-service is actually deployed (its ServiceMonitor exists, but
+# there's no pod yet) — that's expected, not a dashboard bug.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -24,35 +28,67 @@ data:
       "time": { "from": "now-1h", "to": "now" },
       "panels": [
         {
-          "id": 1, "title": "HTTP Request Rate (by method/route)", "type": "timeseries",
-          "gridPos": { "h": 7, "w": 12, "x": 0, "y": 0 },
+          "id": 1, "title": "Total HTTP Requests", "type": "stat",
+          "gridPos": { "h": 5, "w": 8, "x": 0, "y": 0 },
           "fieldConfig": { "defaults": { "unit": "reqps" } },
-          "targets": [{ "expr": "sum(rate(http_requests_total{job=\"backend\"}[5m])) by (method, route)", "legendFormat": "{{method}} {{route}}" }]
-        },
-        {
-          "id": 2, "title": "HTTP Error Rate (4xx / 5xx)", "type": "timeseries",
-          "gridPos": { "h": 7, "w": 12, "x": 12, "y": 0 },
-          "fieldConfig": { "defaults": { "unit": "reqps" } },
-          "targets": [
-            { "expr": "sum(rate(http_requests_total{job=\"backend\", code=~\"4..\"}[5m]))", "legendFormat": "4xx" },
-            { "expr": "sum(rate(http_requests_total{job=\"backend\", code=~\"5..\"}[5m]))", "legendFormat": "5xx" }
-          ]
-        },
-        {
-          "id": 3, "title": "HTTP Request Duration (p95)", "type": "timeseries",
-          "gridPos": { "h": 6, "w": 12, "x": 0, "y": 7 },
-          "fieldConfig": { "defaults": { "unit": "s" } },
-          "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"backend\"}[5m])) by (le))", "legendFormat": "p95" }]
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
+          "targets": [{ "expr": "sum(rate(http_requests_total{job=\"backend\"}[5m]))" }]
         },
         {
           "id": 4, "title": "Active Bookings", "type": "stat",
-          "gridPos": { "h": 6, "w": 4, "x": 12, "y": 7 },
+          "gridPos": { "h": 5, "w": 8, "x": 8, "y": 0 },
           "fieldConfig": { "defaults": { "unit": "short" } },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
           "targets": [{ "expr": "sum(serviceexpress_active_bookings)" }]
         },
         {
-          "id": 10, "title": "Backend Status (Prometheus target up)", "type": "stat",
-          "gridPos": { "h": 6, "w": 8, "x": 16, "y": 7 },
+          "id": 6, "title": "Confirmed Bookings (rate)", "type": "stat",
+          "gridPos": { "h": 5, "w": 8, "x": 16, "y": 0 },
+          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
+          "targets": [{ "expr": "sum(rate(serviceexpress_bookings_confirmed_total[5m]))" }]
+        },
+        {
+          "id": 7, "title": "Cancelled Bookings (rate)", "type": "stat",
+          "gridPos": { "h": 5, "w": 8, "x": 0, "y": 5 },
+          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
+          "targets": [{ "expr": "sum(rate(serviceexpress_bookings_cancelled_total[5m]))" }]
+        },
+        {
+          "id": 8, "title": "Completed Bookings (rate)", "type": "stat",
+          "gridPos": { "h": 5, "w": 8, "x": 8, "y": 5 },
+          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
+          "targets": [{ "expr": "sum(rate(serviceexpress_bookings_completed_total[5m]))" }]
+        },
+        {
+          "id": 11, "title": "Running Pods", "type": "stat",
+          "gridPos": { "h": 5, "w": 8, "x": 16, "y": 5 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
+          "targets": [{ "expr": "count(kube_pod_status_phase{namespace=\"homeease-dev\", phase=\"Running\"})" }]
+        },
+        {
+          "id": 12, "title": "Available Replicas", "type": "stat",
+          "gridPos": { "h": 5, "w": 8, "x": 0, "y": 10 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
+          "targets": [{ "expr": "sum(kube_deployment_status_replicas_available{namespace=\"homeease-dev\"})" }]
+        },
+        {
+          "id": 10, "title": "Backend Health (Target UP)", "type": "stat",
+          "gridPos": { "h": 5, "w": 8, "x": 8, "y": 10 },
           "fieldConfig": {
             "defaults": {
               "mappings": [
@@ -61,39 +97,22 @@ data:
               "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
             }
           },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
           "targets": [{ "expr": "up{job=\"backend\"}" }]
         },
         {
-          "id": 5, "title": "Booking Requests (rate)", "type": "timeseries",
-          "gridPos": { "h": 6, "w": 6, "x": 0, "y": 13 },
-          "fieldConfig": { "defaults": { "unit": "reqps" } },
-          "targets": [{ "expr": "sum(rate(serviceexpress_booking_requests_total[5m]))" }]
-        },
-        {
-          "id": 6, "title": "Bookings Confirmed (rate)", "type": "timeseries",
-          "gridPos": { "h": 6, "w": 6, "x": 6, "y": 13 },
-          "fieldConfig": { "defaults": { "unit": "reqps" } },
-          "targets": [{ "expr": "sum(rate(serviceexpress_bookings_confirmed_total[5m]))" }]
-        },
-        {
-          "id": 7, "title": "Bookings Cancelled (rate)", "type": "timeseries",
-          "gridPos": { "h": 6, "w": 6, "x": 12, "y": 13 },
-          "fieldConfig": { "defaults": { "unit": "reqps" } },
-          "targets": [{ "expr": "sum(rate(serviceexpress_bookings_cancelled_total[5m]))" }]
-        },
-        {
-          "id": 8, "title": "Bookings Completed (rate)", "type": "timeseries",
-          "gridPos": { "h": 6, "w": 6, "x": 18, "y": 13 },
-          "fieldConfig": { "defaults": { "unit": "reqps" } },
-          "targets": [{ "expr": "sum(rate(serviceexpress_bookings_completed_total[5m]))" }]
-        },
-        {
-          "id": 9,
-          "title": "Professional Assignment Time (p95) — NO DATA until professionalMatcher.js calls .observe()",
-          "type": "timeseries",
-          "gridPos": { "h": 6, "w": 12, "x": 0, "y": 19 },
-          "fieldConfig": { "defaults": { "unit": "s" } },
-          "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(serviceexpress_professional_assignment_time_seconds_bucket[5m])) by (le))" }]
+          "id": 13, "title": "Payment Service Health", "type": "stat",
+          "gridPos": { "h": 5, "w": 8, "x": 16, "y": 10 },
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+              ],
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
+          "targets": [{ "expr": "up{job=\"payment-service\"}" }]
         }
       ]
     }

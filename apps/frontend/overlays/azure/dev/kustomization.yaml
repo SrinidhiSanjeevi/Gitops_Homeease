@@ -28,3 +28,26 @@ patches:
       - op: replace
         path: /spec/tls/0/hosts/0
         value: app.4-224-88-104.nip.io
+      # Presentation URL: http://4.224.88.104 with no Host header match
+      # (bare IP) falls through to this second, host-less rule — the
+      # existing api./admin. host-specific rules on the OTHER two
+      # Ingress objects are untouched, so backend/admin-backend keep
+      # working exactly as before. ssl-redirect is disabled so the bare
+      # IP serves plain HTTP directly instead of 308-redirecting to
+      # https://4.224.88.104, which has no valid certificate for an IP
+      # address and would just reproduce the same warning nip.io gave.
+      - op: add
+        path: /metadata/annotations/nginx.ingress.kubernetes.io~1ssl-redirect
+        value: "false"
+      - op: add
+        path: /spec/rules/-
+        value:
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: frontend
+                    port:
+                      name: http

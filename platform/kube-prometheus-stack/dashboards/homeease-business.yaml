@@ -11,6 +11,10 @@
 # panel will show "No data" until a real assignment-latency measurement
 # is wired into professionalMatcher.js. Not fabricated, not omitted —
 # left in and labelled so the gap is visible instead of hidden.
+#
+# Redesigned as a compact, all-Stat/Gauge "Business Metrics" view (no
+# time-series graphs) — same PromQL as before, dropped the two pure-rate
+# panels that duplicated the 6h-total stats below them.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -25,68 +29,73 @@ data:
       "timezone": "browser",
       "schemaVersion": 39,
       "refresh": "30s",
-      "time": { "from": "now-6h", "to": "now" },
+      "time": { "from": "now-1h", "to": "now" },
       "panels": [
         {
-          "id": 1, "title": "Booking Requests Rate", "type": "timeseries",
-          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
-          "targets": [{ "expr": "sum(rate(serviceexpress_booking_requests_total[5m]))", "legendFormat": "requests/sec" }]
-        },
-        {
-          "id": 2, "title": "Confirmed vs Cancelled vs Completed (rate)", "type": "timeseries",
-          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
-          "targets": [
-            { "expr": "sum(rate(serviceexpress_bookings_confirmed_total[5m]))", "legendFormat": "confirmed/sec" },
-            { "expr": "sum(rate(serviceexpress_bookings_cancelled_total[5m]))", "legendFormat": "cancelled/sec" },
-            { "expr": "sum(rate(serviceexpress_bookings_completed_total[5m]))", "legendFormat": "completed/sec" }
-          ]
-        },
-        {
-          "id": 3, "title": "Total Booking Requests (6h)", "type": "stat",
-          "gridPos": { "h": 4, "w": 6, "x": 0, "y": 8 },
+          "id": 3, "title": "Booking Requests (6h)", "type": "stat",
+          "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+          "fieldConfig": { "defaults": { "unit": "short" } },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
           "targets": [{ "expr": "sum(increase(serviceexpress_booking_requests_total[6h]))" }]
         },
         {
-          "id": 4, "title": "Confirmed (6h)", "type": "stat",
-          "gridPos": { "h": 4, "w": 6, "x": 6, "y": 8 },
+          "id": 4, "title": "Confirmed Bookings (6h)", "type": "stat",
+          "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+          "fieldConfig": { "defaults": { "unit": "short" } },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
           "targets": [{ "expr": "sum(increase(serviceexpress_bookings_confirmed_total[6h]))" }]
         },
         {
-          "id": 5, "title": "Cancelled (6h)", "type": "stat",
-          "gridPos": { "h": 4, "w": 6, "x": 12, "y": 8 },
+          "id": 5, "title": "Cancelled Bookings (6h)", "type": "stat",
+          "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
+          "fieldConfig": { "defaults": { "unit": "short" } },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
           "targets": [{ "expr": "sum(increase(serviceexpress_bookings_cancelled_total[6h]))" }]
         },
         {
-          "id": 6, "title": "Completed (6h)", "type": "stat",
-          "gridPos": { "h": 4, "w": 6, "x": 18, "y": 8 },
+          "id": 6, "title": "Completed Bookings (6h)", "type": "stat",
+          "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
+          "fieldConfig": { "defaults": { "unit": "short" } },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
           "targets": [{ "expr": "sum(increase(serviceexpress_bookings_completed_total[6h]))" }]
         },
         {
           "id": 7, "title": "Active Bookings (current)", "type": "stat",
-          "gridPos": { "h": 6, "w": 6, "x": 0, "y": 12 },
+          "gridPos": { "h": 6, "w": 6, "x": 0, "y": 6 },
+          "fieldConfig": { "defaults": { "unit": "short" } },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
           "targets": [{ "expr": "sum(serviceexpress_active_bookings)" }]
         },
         {
-          "id": 8, "title": "Booking Confirmation Rate (%)", "type": "gauge",
-          "gridPos": { "h": 6, "w": 6, "x": 6, "y": 12 },
-          "fieldConfig": { "defaults": { "unit": "percent", "max": 100, "min": 0 } },
+          "id": 8, "title": "Booking Confirmation Rate", "type": "gauge",
+          "gridPos": { "h": 6, "w": 6, "x": 6, "y": 6 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent", "max": 100, "min": 0,
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 40 }, { "color": "green", "value": 70 }] }
+            }
+          },
           "targets": [{ "expr": "100 * sum(rate(serviceexpress_bookings_confirmed_total[15m])) / clamp_min(sum(rate(serviceexpress_booking_requests_total[15m])), 1e-9)" }]
         },
         {
-          "id": 9, "title": "Booking Cancellation Rate (%)", "type": "gauge",
-          "gridPos": { "h": 6, "w": 6, "x": 12, "y": 12 },
-          "fieldConfig": { "defaults": { "unit": "percent", "max": 100, "min": 0 } },
+          "id": 9, "title": "Booking Cancellation Rate", "type": "gauge",
+          "gridPos": { "h": 6, "w": 6, "x": 12, "y": 6 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent", "max": 100, "min": 0,
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 20 }, { "color": "red", "value": 40 }] }
+            }
+          },
           "targets": [{ "expr": "100 * sum(rate(serviceexpress_bookings_cancelled_total[15m])) / clamp_min(sum(rate(serviceexpress_booking_requests_total[15m])), 1e-9)" }]
         },
         {
           "id": 10,
-          "title": "Professional Assignment Latency (p50/p95) — NO DATA until professionalMatcher.js calls .observe()",
-          "type": "timeseries",
-          "gridPos": { "h": 6, "w": 6, "x": 18, "y": 12 },
-          "targets": [
-            { "expr": "histogram_quantile(0.50, sum(rate(serviceexpress_professional_assignment_time_seconds_bucket[15m])) by (le))", "legendFormat": "p50" },
-            { "expr": "histogram_quantile(0.95, sum(rate(serviceexpress_professional_assignment_time_seconds_bucket[15m])) by (le))", "legendFormat": "p95" }
-          ]
+          "title": "Professional Assignment Latency (p95) — NO DATA until professionalMatcher.js calls .observe()",
+          "type": "stat",
+          "gridPos": { "h": 6, "w": 6, "x": 18, "y": 6 },
+          "fieldConfig": { "defaults": { "unit": "s" } },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
+          "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(serviceexpress_professional_assignment_time_seconds_bucket[15m])) by (le))" }]
         }
       ]
     }
