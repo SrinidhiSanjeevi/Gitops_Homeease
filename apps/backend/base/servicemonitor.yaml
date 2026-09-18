@@ -1,0 +1,21 @@
+# Tells kube-prometheus-stack's Prometheus to scrape this service's
+# /metrics endpoint. Picked up automatically — the platform's Prometheus
+# is configured with serviceMonitorSelectorNilUsesHelmValues: false and
+# serviceMonitorNamespaceSelector: {} (see
+# platform/kube-prometheus-stack/values.yaml), so it watches every
+# ServiceMonitor in every namespace, not just its own release's.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: backend
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/part-of: homeease
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: backend
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

@@ -10,7 +10,11 @@ spec:
   selector:
     app.kubernetes.io/name: backend
   ports:
+    # Matches the container's port (5000), not 80 — frontend's nginx.conf
+    # upstream block hardcodes `server backend:5000;`, and Ingress
+    # references this port by name ("http"), not by number, so this is
+    # safe to set to whatever the app actually listens on.
     - name: http
-      port: 80
+      port: 5000
       targetPort: http
       protocol: TCP

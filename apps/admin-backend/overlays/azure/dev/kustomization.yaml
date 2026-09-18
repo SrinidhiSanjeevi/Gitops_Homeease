@@ -25,10 +25,10 @@ patches:
     patch: |-
       - op: replace
         path: /spec/rules/0/host
-        value: admin.dev.azure.example.com
+        value: admin.4-224-88-104.nip.io
       - op: replace
         path: /spec/tls/0/hosts/0
-        value: admin.dev.azure.example.com
+        value: admin.4-224-88-104.nip.io
   # Azure AD Workload Identity: the client-id annotation tells the identity
   # federation which Azure AD app this ServiceAccount maps to.
   - target:

@@ -1,0 +1,82 @@
+# Picked up automatically — no extra wiring needed. The platform's
+# Prometheus already watches every PrometheusRule in every namespace
+# (ruleSelectorNilUsesHelmValues: false, ruleNamespaceSelector: {} in
+# ../values.yaml). Alertmanager routing/receivers are out of scope here
+# (see the "Slack routing" note in ../values.yaml) — until that's built,
+# every alert lands in the chart's default "null" receiver: it fires and
+# is visible in Prometheus/Alertmanager's UI, it just doesn't page anyone
+# yet.
+#
+# Four alerts, deliberately not more — each one is gated to avoid firing
+# on normal, expected noise (a single pod restart during a rollout, a
+# brief latency blip):
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: homeease-alerts
+  labels:
+    # kube-prometheus-stack's own convention for rules it should load —
+    # harmless/ignored if the release label differs, since
+    # ruleSelectorNilUsesHelmValues: false already makes selection
+    # unconditional.
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: homeease.rules
+      rules:
+        - alert: BackendPodUnavailable
+          expr: kube_deployment_status_replicas_available{namespace="homeease-dev", deployment="backend"} < 1
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "backend has zero available replicas in homeease-dev"
+            description: >-
+              kube_deployment_status_replicas_available for the backend
+              Deployment has been below 1 for 2 minutes. The booking API
+              is down. Check `kubectl -n homeease-dev get pods,events`.
+
+        - alert: HighHttp5xxRate
+          expr: >-
+            100 * sum(rate(http_requests_total{code=~"5.."}[5m])) by (job)
+            / clamp_min(sum(rate(http_requests_total[5m])) by (job), 1e-9)
+            > 5
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "{{ $labels.job }} is returning >5% 5xx responses"
+            description: >-
+              5xx error rate for {{ $labels.job }} has been above 5% for
+              5 minutes ({{ $value | printf "%.1f" }}% now). Threshold is
+              deliberately loose (5%, sustained) to avoid paging on a
+              single failed request or a brief deploy blip.
+
+        - alert: HighHttpLatency
+          expr: >-
+            histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job))
+            > 1
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "{{ $labels.job }} p95 latency above 1s"
+            description: >-
+              p95 request latency for {{ $labels.job }} has been above 1
+              second for 5 minutes ({{ $value | printf "%.2f" }}s now).
+              1s is a starting threshold for a dev-sized cluster — tune
+              once real traffic patterns are known.
+
+        - alert: PodCrashLooping
+          expr: increase(kube_pod_container_status_restarts_total{namespace="homeease-dev"}[15m]) > 3
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "{{ $labels.pod }} has restarted more than 3 times in 15 minutes"
+            description: >-
+              {{ $labels.container }} in pod {{ $labels.pod }} has
+              restarted {{ $value | printf "%.0f" }} times in the last 15
+              minutes. Gated at >3 (not >0) so a single expected restart
+              during a rollout or an OOM-then-recover doesn't page —
+              this catches an actual crash loop.

@@ -1,0 +1,128 @@
+# Grafana dashboard provisioning via the chart's sidecar — see
+# grafana.sidecar.dashboards in ../values.yaml.
+#
+# http_requests_total / http_request_duration_seconds are identical
+# (same names, same method/route/code labels) in backend, admin-backend,
+# and payment-service metrics.js files — confirmed by reading all three,
+# not assumed. Frontend is deliberately excluded: its nginx.conf has no
+# /metrics route (returns 403 on it) and it has no ServiceMonitor, so
+# there is no usable Prometheus series for it — including it would mean
+# inventing a metric that doesn't exist.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homeease-red-dashboard
+  labels:
+    grafana_dashboard: "1"
+data:
+  homeease-red.json: |
+    {
+      "title": "HomeEase - RED Dashboard",
+      "uid": "homeease-red",
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "refresh": "30s",
+      "time": { "from": "now-1h", "to": "now" },
+      "panels": [
+        {
+          "id": 100, "title": "RATE", "type": "row",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }
+        },
+        {
+          "id": 1, "title": "Total HTTP Request Rate", "type": "stat",
+          "gridPos": { "h": 5, "w": 6, "x": 0, "y": 1 },
+          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "targets": [{ "expr": "sum(rate(http_requests_total[5m]))" }]
+        },
+        {
+          "id": 2, "title": "Request Rate by Service", "type": "timeseries",
+          "gridPos": { "h": 5, "w": 9, "x": 6, "y": 1 },
+          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "targets": [{ "expr": "sum(rate(http_requests_total[5m])) by (job)", "legendFormat": "{{job}}" }]
+        },
+        {
+          "id": 3, "title": "Request Rate by Route (top 8)", "type": "timeseries",
+          "gridPos": { "h": 5, "w": 9, "x": 15, "y": 1 },
+          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "targets": [{ "expr": "topk(8, sum(rate(http_requests_total[5m])) by (route))", "legendFormat": "{{route}}" }]
+        },
+
+        {
+          "id": 101, "title": "ERRORS", "type": "row",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 }
+        },
+        {
+          "id": 4, "title": "Total 4xx Error Rate", "type": "stat",
+          "gridPos": { "h": 5, "w": 6, "x": 0, "y": 7 },
+          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "targets": [{ "expr": "sum(rate(http_requests_total{code=~\"4..\"}[5m]))" }]
+        },
+        {
+          "id": 5, "title": "Total 5xx Error Rate", "type": "stat",
+          "gridPos": { "h": 5, "w": 6, "x": 6, "y": 7 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 0.01 }] }
+            }
+          },
+          "targets": [{ "expr": "sum(rate(http_requests_total{code=~\"5..\"}[5m]))" }]
+        },
+        {
+          "id": 6, "title": "5xx Errors by Service", "type": "timeseries",
+          "gridPos": { "h": 5, "w": 12, "x": 12, "y": 7 },
+          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "targets": [{ "expr": "sum(rate(http_requests_total{code=~\"5..\"}[5m])) by (job)", "legendFormat": "{{job}}" }]
+        },
+
+        {
+          "id": 102, "title": "DURATION", "type": "row",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 12 }
+        },
+        {
+          "id": 7, "title": "HTTP Request Latency (p95, overall)", "type": "stat",
+          "gridPos": { "h": 5, "w": 6, "x": 0, "y": 13 },
+          "fieldConfig": { "defaults": { "unit": "s" } },
+          "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))" }]
+        },
+        {
+          "id": 8, "title": "p95 Latency by Service", "type": "timeseries",
+          "gridPos": { "h": 5, "w": 9, "x": 6, "y": 13 },
+          "fieldConfig": { "defaults": { "unit": "s" } },
+          "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job))", "legendFormat": "{{job}}" }]
+        },
+        {
+          "id": 9, "title": "p95 Latency — Booking/Payment Routes", "type": "timeseries",
+          "gridPos": { "h": 5, "w": 9, "x": 15, "y": 13 },
+          "fieldConfig": { "defaults": { "unit": "s" } },
+          "targets": [{
+            "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{route=~\".*(?i)(booking|payment|order).*\"}[5m])) by (le, route))",
+            "legendFormat": "{{route}}"
+          }]
+        },
+
+        {
+          "id": 103, "title": "SERVICE HEALTH", "type": "row",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 }
+        },
+        {
+          "id": 10, "title": "Target UP/DOWN by Service", "type": "stat",
+          "gridPos": { "h": 5, "w": 12, "x": 0, "y": 19 },
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+              ],
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+            }
+          },
+          "targets": [{ "expr": "up{job=~\"backend|admin-backend|payment-service\"}", "legendFormat": "{{job}}" }]
+        },
+        {
+          "id": 11, "title": "Running Pod Count by Service", "type": "timeseries",
+          "gridPos": { "h": 5, "w": 12, "x": 12, "y": 19 },
+          "fieldConfig": { "defaults": { "unit": "short" } },
+          "targets": [{ "expr": "kube_deployment_status_replicas_available{namespace=\"homeease-dev\"}", "legendFormat": "{{deployment}}" }]
+        }
+      ]
+    }

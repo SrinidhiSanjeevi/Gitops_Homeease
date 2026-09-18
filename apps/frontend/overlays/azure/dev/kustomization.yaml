@@ -24,7 +24,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/rules/0/host
-        value: app.dev.azure.example.com
+        value: app.4-224-88-104.nip.io
       - op: replace
         path: /spec/tls/0/hosts/0
-        value: app.dev.azure.example.com
+        value: app.4-224-88-104.nip.io

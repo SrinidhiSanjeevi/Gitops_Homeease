@@ -39,5 +39,16 @@ spec:
       ports:
         - protocol: TCP
           port: 5000
+    # Prometheus (kube-prometheus-stack, namespace "monitoring") scraping
+    # /metrics. Without this, the ServiceMonitor exists and Prometheus
+    # "discovers" the target, but every scrape times out silently — same
+    # default-deny-ingress reasoning as the other two rules here.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 5000
   # No egress block: egress stays unrestricted (backend needs to reach
   # MongoDB, payment-service, and outbound notification providers).

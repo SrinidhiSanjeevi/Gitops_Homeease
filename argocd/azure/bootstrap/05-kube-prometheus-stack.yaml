@@ -28,6 +28,15 @@ spec:
     - repoURL: https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git
       targetRevision: main
       ref: values
+    # Grafana dashboards (ConfigMaps, picked up by the sidecar — see
+    # grafana.sidecar.dashboards in values.yaml) and alert rules
+    # (PrometheusRule, picked up automatically — see
+    # ruleSelectorNilUsesHelmValues in values.yaml). Plain directory
+    # source: every YAML file here is applied as-is, no kustomization.yaml
+    # needed.
+    - repoURL: https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git
+      targetRevision: main
+      path: platform/kube-prometheus-stack/dashboards
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring

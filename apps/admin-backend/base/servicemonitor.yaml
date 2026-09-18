@@ -1,0 +1,17 @@
+# See apps/backend/base/servicemonitor.yaml for why this needs no extra
+# wiring on the Prometheus side.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: admin-backend
+  labels:
+    app.kubernetes.io/name: admin-backend
+    app.kubernetes.io/part-of: homeease
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: admin-backend
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

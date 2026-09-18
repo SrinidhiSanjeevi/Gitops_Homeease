@@ -1,0 +1,100 @@
+# Grafana dashboard provisioning via the chart's sidecar — see
+# grafana.sidecar.dashboards in ../values.yaml.
+#
+# Metric names copy-checked against app_Homeease/payment-service/metrics.js
+# and confirmed actually incremented in controllers/paymentController.js
+# (paymentOrderCreatedTotal, paymentVerifySuccessTotal,
+# paymentVerifyFailedTotal, paymentRefundTotal — all real call sites, not
+# dead code). Scrape config comes from
+# gitops_homeease/apps/payment-service/base/servicemonitor.yaml (port
+# "http", path /metrics) — job label = "payment-service".
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homeease-payment-service-dashboard
+  labels:
+    grafana_dashboard: "1"
+data:
+  homeease-payment-service.json: |
+    {
+      "title": "HomeEase - Payment Service",
+      "uid": "homeease-payment-service",
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "refresh": "30s",
+      "time": { "from": "now-1h", "to": "now" },
+      "panels": [
+        {
+          "id": 1, "title": "Payment Service Availability", "type": "stat",
+          "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+              ],
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+            }
+          },
+          "targets": [{ "expr": "up{job=\"payment-service\"}" }]
+        },
+        {
+          "id": 10, "title": "Payment Service Pod Health (available replicas)", "type": "stat",
+          "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 },
+          "fieldConfig": { "defaults": { "unit": "short" } },
+          "targets": [{ "expr": "kube_deployment_status_replicas_available{namespace=\"homeease-dev\", deployment=\"payment-service\"}" }]
+        },
+        {
+          "id": 2, "title": "HTTP Request Rate", "type": "timeseries",
+          "gridPos": { "h": 5, "w": 12, "x": 12, "y": 0 },
+          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "targets": [{ "expr": "sum(rate(http_requests_total{job=\"payment-service\"}[5m])) by (method, route)", "legendFormat": "{{method}} {{route}}" }]
+        },
+        {
+          "id": 3, "title": "HTTP 4xx Errors", "type": "timeseries",
+          "gridPos": { "h": 6, "w": 8, "x": 0, "y": 5 },
+          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "targets": [{ "expr": "sum(rate(http_requests_total{job=\"payment-service\", code=~\"4..\"}[5m]))" }]
+        },
+        {
+          "id": 4, "title": "HTTP 5xx Errors", "type": "stat",
+          "gridPos": { "h": 6, "w": 8, "x": 8, "y": 5 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 0.01 }] }
+            }
+          },
+          "targets": [{ "expr": "sum(rate(http_requests_total{job=\"payment-service\", code=~\"5..\"}[5m]))" }]
+        },
+        {
+          "id": 5, "title": "HTTP Request Latency (p95)", "type": "timeseries",
+          "gridPos": { "h": 6, "w": 8, "x": 16, "y": 5 },
+          "fieldConfig": { "defaults": { "unit": "s" } },
+          "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"payment-service\"}[5m])) by (le))", "legendFormat": "p95" }]
+        },
+        {
+          "id": 6, "title": "Payment/Order Requests (rate)", "type": "timeseries",
+          "gridPos": { "h": 6, "w": 6, "x": 0, "y": 11 },
+          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "targets": [{ "expr": "sum(rate(payment_order_created_total[5m]))" }]
+        },
+        {
+          "id": 7, "title": "Successful Payments (rate)", "type": "timeseries",
+          "gridPos": { "h": 6, "w": 6, "x": 6, "y": 11 },
+          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "targets": [{ "expr": "sum(rate(payment_verify_success_total[5m]))" }]
+        },
+        {
+          "id": 8, "title": "Failed Payments (rate)", "type": "timeseries",
+          "gridPos": { "h": 6, "w": 6, "x": 12, "y": 11 },
+          "fieldConfig": { "defaults": { "unit": "reqps", "color": { "mode": "fixed", "fixedColor": "red" } } },
+          "targets": [{ "expr": "sum(rate(payment_verify_failed_total[5m]))" }]
+        },
+        {
+          "id": 9, "title": "Refund Activity (rate)", "type": "timeseries",
+          "gridPos": { "h": 6, "w": 6, "x": 18, "y": 11 },
+          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "targets": [{ "expr": "sum(rate(payment_refund_total[5m]))" }]
+        }
+      ]
+    }

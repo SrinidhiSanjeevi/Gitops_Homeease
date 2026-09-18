@@ -1,0 +1,92 @@
+# Grafana dashboard provisioning via the chart's sidecar (see
+# grafana.sidecar.dashboards in ../values.yaml) — this ConfigMap's label
+# is what the sidecar watches for, its `data` key is the dashboard JSON
+# exactly as Grafana's own export format expects it.
+#
+# All PromQL here uses ONLY metrics that actually exist in
+# app_Homeease/backend/metrics.js. One exception, called out on its own
+# panel: serviceexpress_professional_assignment_time_seconds is defined
+# and scraped, but nothing in the codebase ever calls .observe() on it
+# (grep confirms zero call sites outside metrics.js itself) — so that
+# panel will show "No data" until a real assignment-latency measurement
+# is wired into professionalMatcher.js. Not fabricated, not omitted —
+# left in and labelled so the gap is visible instead of hidden.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homeease-business-dashboard
+  labels:
+    grafana_dashboard: "1"
+data:
+  homeease-business.json: |
+    {
+      "title": "HomeEase Business Overview",
+      "uid": "homeease-business",
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "refresh": "30s",
+      "time": { "from": "now-6h", "to": "now" },
+      "panels": [
+        {
+          "id": 1, "title": "Booking Requests Rate", "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "targets": [{ "expr": "sum(rate(serviceexpress_booking_requests_total[5m]))", "legendFormat": "requests/sec" }]
+        },
+        {
+          "id": 2, "title": "Confirmed vs Cancelled vs Completed (rate)", "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "targets": [
+            { "expr": "sum(rate(serviceexpress_bookings_confirmed_total[5m]))", "legendFormat": "confirmed/sec" },
+            { "expr": "sum(rate(serviceexpress_bookings_cancelled_total[5m]))", "legendFormat": "cancelled/sec" },
+            { "expr": "sum(rate(serviceexpress_bookings_completed_total[5m]))", "legendFormat": "completed/sec" }
+          ]
+        },
+        {
+          "id": 3, "title": "Total Booking Requests (6h)", "type": "stat",
+          "gridPos": { "h": 4, "w": 6, "x": 0, "y": 8 },
+          "targets": [{ "expr": "sum(increase(serviceexpress_booking_requests_total[6h]))" }]
+        },
+        {
+          "id": 4, "title": "Confirmed (6h)", "type": "stat",
+          "gridPos": { "h": 4, "w": 6, "x": 6, "y": 8 },
+          "targets": [{ "expr": "sum(increase(serviceexpress_bookings_confirmed_total[6h]))" }]
+        },
+        {
+          "id": 5, "title": "Cancelled (6h)", "type": "stat",
+          "gridPos": { "h": 4, "w": 6, "x": 12, "y": 8 },
+          "targets": [{ "expr": "sum(increase(serviceexpress_bookings_cancelled_total[6h]))" }]
+        },
+        {
+          "id": 6, "title": "Completed (6h)", "type": "stat",
+          "gridPos": { "h": 4, "w": 6, "x": 18, "y": 8 },
+          "targets": [{ "expr": "sum(increase(serviceexpress_bookings_completed_total[6h]))" }]
+        },
+        {
+          "id": 7, "title": "Active Bookings (current)", "type": "stat",
+          "gridPos": { "h": 6, "w": 6, "x": 0, "y": 12 },
+          "targets": [{ "expr": "sum(serviceexpress_active_bookings)" }]
+        },
+        {
+          "id": 8, "title": "Booking Confirmation Rate (%)", "type": "gauge",
+          "gridPos": { "h": 6, "w": 6, "x": 6, "y": 12 },
+          "fieldConfig": { "defaults": { "unit": "percent", "max": 100, "min": 0 } },
+          "targets": [{ "expr": "100 * sum(rate(serviceexpress_bookings_confirmed_total[15m])) / clamp_min(sum(rate(serviceexpress_booking_requests_total[15m])), 1e-9)" }]
+        },
+        {
+          "id": 9, "title": "Booking Cancellation Rate (%)", "type": "gauge",
+          "gridPos": { "h": 6, "w": 6, "x": 12, "y": 12 },
+          "fieldConfig": { "defaults": { "unit": "percent", "max": 100, "min": 0 } },
+          "targets": [{ "expr": "100 * sum(rate(serviceexpress_bookings_cancelled_total[15m])) / clamp_min(sum(rate(serviceexpress_booking_requests_total[15m])), 1e-9)" }]
+        },
+        {
+          "id": 10,
+          "title": "Professional Assignment Latency (p50/p95) — NO DATA until professionalMatcher.js calls .observe()",
+          "type": "timeseries",
+          "gridPos": { "h": 6, "w": 6, "x": 18, "y": 12 },
+          "targets": [
+            { "expr": "histogram_quantile(0.50, sum(rate(serviceexpress_professional_assignment_time_seconds_bucket[15m])) by (le))", "legendFormat": "p50" },
+            { "expr": "histogram_quantile(0.95, sum(rate(serviceexpress_professional_assignment_time_seconds_bucket[15m])) by (le))", "legendFormat": "p95" }
+          ]
+        }
+      ]
+    }

@@ -36,5 +36,14 @@ spec:
       ports:
         - protocol: TCP
           port: 5001
+    # Prometheus (kube-prometheus-stack, namespace "monitoring") scraping
+    # /metrics.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 5001
   # No egress block: egress stays unrestricted (admin-backend needs to
   # reach MongoDB and other internal services).

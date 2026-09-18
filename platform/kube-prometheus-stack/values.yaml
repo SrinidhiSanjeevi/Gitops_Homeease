@@ -91,6 +91,19 @@ grafana:
       cpu: 200m
       memory: 256Mi
 
+  # Declarative dashboards: the sidecar watches for ConfigMaps carrying
+  # the label below (any namespace — this is a dev cluster, not multi-
+  # tenant) and loads/updates/removes them from Grafana automatically.
+  # This is how platform/kube-prometheus-stack/dashboards/*.yaml reach
+  # Grafana — no manual "Import Dashboard" click, no dashboard drift
+  # from what's committed here.
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      searchNamespace: ALL
+
   # Loki as a second datasource, alongside the Prometheus one this
   # chart wires automatically — one Grafana, both signals, same
   # label set (namespace, service) so a panel can pivot from a
