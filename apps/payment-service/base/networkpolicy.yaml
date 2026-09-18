@@ -35,5 +35,14 @@ spec:
       ports:
         - protocol: TCP
           port: 5002
+    # Prometheus (kube-prometheus-stack, namespace "monitoring") scraping
+    # /metrics.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 5002
   # No egress block: egress stays unrestricted (payment-service needs to
   # reach Razorpay's API on the internet).

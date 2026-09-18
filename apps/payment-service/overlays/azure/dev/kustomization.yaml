@@ -16,7 +16,10 @@ labels:
 images:
   - name: homeease/payment-service
     newName: acrhomeeasedev.azurecr.io/homeease/payment-service
-    newTag: 5d4e71d3fcd2
+    # Manually built + pushed (not yet through CI) — includes the fix
+    # making RAZORPAY_WEBHOOK_SECRET optional at startup. Re-tag from CI
+    # once app_Homeease's payment-service changes are committed/merged.
+    newTag: 5d4e71d3fcd2-payment-fix
 
 patches:
   # Azure AD Workload Identity: the client-id annotation tells the identity

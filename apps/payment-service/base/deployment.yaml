@@ -83,10 +83,12 @@ spec:
               memory: 256Mi
           # Populated by the Secrets Store CSI driver's secretObjects sync
           # (see overlays/<cloud>/dev/secretproviderclass.yaml) — the app
-          # reads RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET /
-          # RAZORPAY_WEBHOOK_SECRET from process.env exactly as it already
-          # does locally via .env; it never needs to know these came from
-          # a CSI mount, or which cloud's secret store they came from.
+          # reads MONGO_URI / RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET from
+          # process.env exactly as it already does locally via .env; it
+          # never needs to know these came from a CSI mount, or which
+          # cloud's secret store they came from. RAZORPAY_WEBHOOK_SECRET
+          # is intentionally not included — webhooks aren't configured
+          # yet and validateEnv.js doesn't require it.
           envFrom:
             - secretRef:
                 name: payment-service-razorpay

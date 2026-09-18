@@ -10,3 +10,4 @@ resources:
   - networkpolicy.yaml
   - hpa.yaml
   - pdb.yaml
+  - servicemonitor.yaml
