@@ -6,7 +6,13 @@ metadata:
     app.kubernetes.io/name: backend
     app.kubernetes.io/part-of: homeease
 spec:
-  replicas: 1
+  # No replicas field here on purpose — the HPA (hpa.yaml) owns
+  # spec.replicas. Committing a static value here creates two
+  # controllers fighting over the same field: HPA scales up under
+  # load, ArgoCD's selfHeal scales it back down to match Git on its
+  # next reconcile, and the service is least stable exactly when
+  # busiest. Kubernetes defaults to 1 replica on creation anyway, which
+  # is exactly what the HPA's own minReplicas already guarantees.
   selector:
     matchLabels:
       app.kubernetes.io/name: backend

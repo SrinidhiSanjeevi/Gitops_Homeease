@@ -12,7 +12,8 @@ metadata:
     app.kubernetes.io/name: payment-service
     app.kubernetes.io/part-of: homeease
 spec:
-  replicas: 1
+  # No replicas field here on purpose — see apps/backend/base/deployment.yaml
+  # for why (HPA owns spec.replicas, not Git).
   selector:
     matchLabels:
       app.kubernetes.io/name: payment-service
