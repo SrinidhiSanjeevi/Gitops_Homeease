@@ -22,6 +22,15 @@ spec:
         app.kubernetes.io/name: payment-service
     spec:
       serviceAccountName: payment-service
+      # Kubernetes auto-injects a PAYMENT_SERVICE_PORT env var for every
+      # Service named "payment-service" in this namespace (legacy Docker
+      # links compatibility, format tcp://<clusterIP>:<port>) — this
+      # collides with and silently overrides the app's OWN
+      # PAYMENT_SERVICE_PORT read in server.js, so it tries to bind to
+      # the literal string "tcp://10.20.x.x:80" instead of 5002 and
+      # crash-loops on the startup probe. Disabling service-links avoids
+      # the whole class of collision; nothing in this app relies on them.
+      enableServiceLinks: false
       terminationGracePeriodSeconds: 30
       securityContext:
         runAsNonRoot: true

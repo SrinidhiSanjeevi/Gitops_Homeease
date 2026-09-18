@@ -10,7 +10,9 @@ spec:
   selector:
     app.kubernetes.io/name: payment-service
   ports:
+    # Matches the container's port (5002), consistent with the same fix
+    # already applied to backend/admin-backend's Services.
     - name: http
-      port: 80
+      port: 5002
       targetPort: http
       protocol: TCP

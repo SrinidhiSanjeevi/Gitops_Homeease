@@ -89,6 +89,13 @@ spec:
           # as it already does locally via .env; it never needs to know
           # these came from a CSI mount, or which cloud's secret store they
           # came from.
+          # paymentClient.js falls back to http://127.0.0.1:5002 (a local-
+          # dev-only default) when this isn't set — without it, backend
+          # calls itself instead of payment-service, and every payment
+          # call fails.
+          env:
+            - name: PAYMENT_SERVICE_URL
+              value: http://payment-service:5002
           envFrom:
             - secretRef:
                 name: backend-secrets
