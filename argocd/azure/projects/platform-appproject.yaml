@@ -1,0 +1,64 @@
+# Picked up automatically by the existing "homeease-project" Application
+# (argocd/azure/bootstrap/00-project.yaml), which already watches every
+# file directly under argocd/azure/projects/ — no new Application needed.
+#
+# kube-prometheus-stack, Loki and Alloy previously ran under the
+# `default` AppProject (sourceRepos: ['*'], destinations: ['*'],
+# clusterResourceWhitelist: ['*']) — unconstrained, despite installing
+# CRDs, ClusterRoles and a DaemonSet with host access. That's the
+# opposite of the `homeease` project's least-privilege posture for the
+# four app services. This project makes the platform components' real,
+# legitimate need for cluster-scoped resources an explicit, reviewable
+# grant instead of an accidental blank check.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: platform
+  namespace: argocd
+spec:
+  description: Cluster platform components on AKS — Prometheus, Grafana, Alertmanager, Loki, Alloy
+
+  # This repo (for values.yaml/dashboards) plus the exact two Helm
+  # repos these three Applications actually pull from — not "*".
+  sourceRepos:
+    - "https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git"
+    - "https://prometheus-community.github.io/helm-charts"
+    - "https://grafana.github.io/helm-charts"
+
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: "monitoring"
+
+  # Platform genuinely needs these — that's the whole point of naming
+  # them explicitly instead of allowing "*". Anything else stays denied.
+  clusterResourceWhitelist:
+    - group: "apiextensions.k8s.io"
+      kind: CustomResourceDefinition
+    - group: "rbac.authorization.k8s.io"
+      kind: ClusterRole
+    - group: "rbac.authorization.k8s.io"
+      kind: ClusterRoleBinding
+    - group: "admissionregistration.k8s.io"
+      kind: MutatingWebhookConfiguration
+    - group: "admissionregistration.k8s.io"
+      kind: ValidatingWebhookConfiguration
+    - group: "monitoring.coreos.com"
+      kind: "*"
+
+  # Namespace-scoped: these three Applications create a lot of kinds
+  # (Deployment, DaemonSet, StatefulSet, Service, ConfigMap, Secret,
+  # ServiceAccount, Role/RoleBinding, PVC, ServiceMonitor,
+  # PrometheusRule, ...) — unlike the app services, restricting this
+  # list wouldn't buy much extra safety since the real risk (cluster-
+  # scoped access) is already fenced above, and third-party charts
+  # change what they ship between versions.
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+
+  roles:
+    - name: readonly
+      description: Read-only access for viewing sync status and history
+      policies:
+        - p, proj:platform:readonly, applications, get, platform/*, allow
+      groups: []

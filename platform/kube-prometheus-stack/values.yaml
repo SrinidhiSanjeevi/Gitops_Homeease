@@ -68,11 +68,41 @@ alertmanager:
           resources:
             requests:
               storage: 1Gi
-  # Slack routing + receivers are Task 5.4, deliberately not here —
-  # this task only gets the stack installed and scraping. Until then
-  # every alert (including the always-firing Watchdog) goes to the
-  # chart's default "null" receiver, which is a documented no-op, not
-  # a bug.
+    # Mounted at /etc/alertmanager/secrets/alertmanager-slack/ — see
+    # config.receivers below for how it's referenced (api_url_file).
+    secrets:
+      - alertmanager-slack
+  # Real routing: everything goes to Slack except the always-firing
+  # Watchdog (a deliberate dead-man's-switch alert this chart ships —
+  # if it ever STOPS firing, that means Prometheus/Alertmanager itself
+  # is broken, which a null receiver would otherwise hide completely).
+  #
+  # api_url_file, not api_url: a Slack webhook URL is a credential —
+  # anyone holding it can post to the channel. It's mounted from a
+  # Kubernetes Secret (alertmanager-slack, see alertmanagerSpec.secrets
+  # below), created directly via `kubectl create secret` with a real
+  # Slack Incoming Webhook URL — NOT sourced from Key Vault yet, since
+  # that would need a new federated credential for Alertmanager's own
+  # ServiceAccount (real Terraform work, deliberately deferred). This
+  # is a documented, temporary trade-off, not an oversight.
+  config:
+    route:
+      receiver: 'slack-default'
+      group_by: ['namespace', 'alertname']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 4h
+      routes:
+        - receiver: 'null'
+          matchers:
+            - alertname = "Watchdog"
+    receivers:
+      - name: 'null'
+      - name: 'slack-default'
+        slack_configs:
+          - api_url_file: /etc/alertmanager/secrets/alertmanager-slack/webhook-url
+            channel: '#homeease-alerts'
+            send_resolved: true
 
 grafana:
   # No admin password set here on purpose — the chart auto-generates
