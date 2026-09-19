@@ -21,8 +21,8 @@ spec:
     - "https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git"
 
   # Add homeease-staging / homeease-prod here once those environments
-  # exist (see apps/<service>/overlays/azure/ for how to add the matching
-  # overlay).
+  # exist (see charts/<service>/values-azure-<env>.yaml and a matching
+  # argocd/azure/bootstrap/1N-<service>-<env>.yaml Application).
   destinations:
     - server: https://kubernetes.default.svc
       namespace: "homeease-dev"
