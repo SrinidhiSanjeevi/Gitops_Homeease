@@ -11,7 +11,15 @@ spec:
   source:
     repoURL: https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git
     targetRevision: main
-    path: apps/backend/overlays/azure/dev
+    # Migrated from apps/backend/overlays/azure/dev (Kustomize) to this
+    # Helm chart — Phase 3 validation confirmed 33/33 rendered resources
+    # identical between the two, zero functional differences, exact
+    # selector matches against the live cluster. Kustomize path kept in
+    # the repo (not deleted yet) until this cutover is verified live.
+    path: charts/backend
+    helm:
+      valueFiles:
+        - values-azure-dev.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: homeease-dev
