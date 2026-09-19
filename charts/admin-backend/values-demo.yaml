@@ -1,0 +1,24 @@
+# Standalone demo values — see charts/backend/values-demo.yaml for the
+# full explanation of the workloadIdentity/secretProviderClass caveat
+# (same shared identity, same federation boundary applies here too).
+image:
+  repository: acrhomeeasedev.azurecr.io/homeease/admin-backend
+  tag: 5d4e71d3fcd2
+
+ingress:
+  host: admin-demo.4-224-88-104.nip.io
+
+workloadIdentity:
+  enabled: true
+  clientId: "89286efc-8fa8-4e09-9664-a3b86fdeff89"
+
+keyVault:
+  name: kv-homeease-dev-hs01
+  tenantId: "71aa34ea-4bb1-42f9-8f28-80e46897411d"
+
+secretProviderClass:
+  enabled: true
+
+extraLabels:
+  homeease.io/environment: demo
+  homeease.io/cloud: azure

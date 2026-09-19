@@ -1,0 +1,18 @@
+# Standalone demo values — proves this chart installs independently of
+# the live ArgoCD-managed homeease-dev release, in its own namespace.
+# Identical to values-azure-dev.yaml except for a unique Ingress
+# hostname, so it doesn't collide with the live Ingress objects at the
+# ingress-nginx admission-webhook level (host+path must be globally
+# unique across the cluster, not just per-namespace).
+image:
+  repository: acrhomeeasedev.azurecr.io/homeease/frontend
+  tag: 5d4e71d3fcd2
+
+ingress:
+  host: app-demo.4-224-88-104.nip.io
+  sslRedirect: false
+  extraHostlessRule: false # avoid a second host-less rule fighting with the live one for the same bare IP
+
+extraLabels:
+  homeease.io/environment: demo
+  homeease.io/cloud: azure
