@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "frontend.labels" . | nindent 4 }}
+spec:
+  # No replicas field here on purpose — the HPA (templates/hpa.yaml) owns
+  # spec.replicas. Committing a static value here creates two controllers
+  # fighting over the same field: HPA scales up under load, ArgoCD's
+  # selfHeal scales it back down to match Git on its next reconcile, and
+  # the service is least stable exactly when busiest. Kubernetes defaults
+  # to 1 replica on creation anyway, matching the HPA's own minReplicas.
+  selector:
+    matchLabels:
+      {{- include "frontend.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "frontend.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: frontend
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        # nginxinc/nginx-unprivileged's built-in `nginx` user is uid/gid
+        # 101, not the 1001 the Node services use — checked directly
+        # against the image. Getting this wrong means CrashLoopBackOff on
+        # a permission error that doesn't obviously point at securityContext.
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              {{- include "frontend.selectorLabels" . | nindent 14 }}
+      containers:
+        - name: frontend
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          # No startupProbe: static content baked into the image at build
+          # time, nothing to warm up.
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            # This image's nginx.conf already redirects every temp path
+            # (proxy/client_body/fastcgi/uwsgi/scgi) to /tmp, and
+            # access/error logs are symlinked to stdout/stderr — verified
+            # against the actual image, so this one emptyDir is enough.
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

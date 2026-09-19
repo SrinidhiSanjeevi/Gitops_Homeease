@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "backend.labels" . | nindent 4 }}
+spec:
+  # No replicas field here on purpose — the HPA (templates/hpa.yaml) owns
+  # spec.replicas. See templates/hpa.yaml / values.yaml for why.
+  selector:
+    matchLabels:
+      {{- include "backend.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "backend.selectorLabels" . | nindent 8 }}
+        {{- if .Values.workloadIdentity.enabled }}
+        # Required on the POD itself, not just the ServiceAccount — the
+        # workload identity mutating webhook checks this label here
+        # before it will inject the federated-token projected volume.
+        azure.workload.identity/use: "true"
+        {{- end }}
+    spec:
+      serviceAccountName: backend
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              {{- include "backend.selectorLabels" . | nindent 14 }}
+      containers:
+        - name: backend
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          # Mongo connection warm-up can outlast the readiness probe's
+          # initial delay on a cold start — this gives a new pod up to
+          # 2 minutes before liveness/readiness even start counting.
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 5
+            failureThreshold: 24
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          # PAYMENT_SERVICE_URL: without this, paymentClient.js falls back
+          # to http://127.0.0.1:5002 (local-dev-only default) and backend
+          # calls itself instead of payment-service — every payment call
+          # fails. Preserved exactly as it exists in the current manifests.
+          env:
+            - name: PAYMENT_SERVICE_URL
+              value: {{ .Values.env.paymentServiceUrl }}
+          {{- if .Values.secretProviderClass.enabled }}
+          # Populated by the Secrets Store CSI driver's secretObjects sync
+          # (see templates/secretproviderclass.yaml) — the app reads
+          # MONGO_URI / JWT_SECRET / EMAIL_* from process.env exactly as
+          # it already does locally via .env.
+          envFrom:
+            - secretRef:
+                name: {{ .Values.secretProviderClass.secretName }}
+          {{- end }}
+          volumeMounts:
+            # readOnlyRootFilesystem is on above, but Node/npm write
+            # scratch files to /tmp unconditionally — this avoids every
+            # pod crashing on its first write to a read-only /tmp.
+            - name: tmp
+              mountPath: /tmp
+            {{- if .Values.secretProviderClass.enabled }}
+            - name: secrets-store
+              mountPath: /mnt/secrets-store
+              readOnly: true
+            {{- end }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        {{- if .Values.secretProviderClass.enabled }}
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            # Must match metadata.name of the SecretProviderClass
+            # (templates/secretproviderclass.yaml).
+            volumeAttributes:
+              secretProviderClass: backend
+        {{- end }}

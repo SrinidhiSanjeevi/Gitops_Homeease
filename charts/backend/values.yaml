@@ -1,0 +1,89 @@
+# Cloud/environment-neutral defaults. Azure-dev-specific values (image
+# tag, ingress host, Workload Identity clientId, Key Vault name/tenant,
+# extra labels) live in values-azure-dev.yaml.
+
+image:
+  repository: homeease/backend
+  tag: placeholder
+  pullPolicy: IfNotPresent
+
+# No top-level `replicas` value on purpose — the HPA owns replica count.
+# See templates/deployment.yaml.
+
+service:
+  port: 5000
+  targetPortName: http
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+hpa:
+  minReplicas: 1
+  maxReplicas: 3
+  cpuTargetPercent: 70
+
+pdb:
+  maxUnavailable: 1
+
+ingress:
+  enabled: true
+  host: api.dev.example.com
+  tlsSecretName: backend-tls
+  clusterIssuer: letsencrypt-prod
+
+networkPolicy:
+  enabled: true
+
+# paymentClient.js (app_Homeease/backend/services/payment/paymentClient.js)
+# falls back to http://127.0.0.1:5002 — a local-dev-only default — when
+# this isn't set. "payment-service" is a same-namespace Kubernetes Service
+# short name, so this value is correct in any namespace payment-service is
+# also deployed into; not something that needs to vary per environment.
+env:
+  paymentServiceUrl: http://payment-service:5002
+
+# Azure AD Workload Identity — disabled by default so this chart is not
+# Azure-specific; azure-dev turns it on and supplies the real clientId.
+# When enabled, sets the ServiceAccount annotation + label AND the pod
+# template label the mutating webhook requires (see templates/
+# serviceaccount.yaml and templates/deployment.yaml). AZURE_CLIENT_ID /
+# AZURE_TENANT_ID / AZURE_FEDERATED_TOKEN_FILE / AZURE_AUTHORITY_HOST and
+# the projected token volume are injected automatically by that webhook —
+# nothing in this chart declares them directly, matching how the existing
+# Kustomize manifests never declared them either.
+workloadIdentity:
+  enabled: false
+  clientId: ""
+
+# Non-secret identifiers only (vault name, tenant ID) — never values here
+# for the secret contents themselves, which stay in Key Vault and are
+# synced by the Secrets Store CSI driver at runtime.
+keyVault:
+  name: ""
+  tenantId: ""
+
+# Direct data-model equivalent of the existing SecretProviderClass's
+# `objects` (what to fetch from Key Vault) and `secretObjects` (how to
+# project it into a native k8s Secret) — same two lists, expressed as
+# values instead of a hand-written array literal.
+secretProviderClass:
+  enabled: false
+  secretName: backend-secrets
+  objects:
+    - keyVaultObject: mongo-uri
+      envKey: MONGO_URI
+    - keyVaultObject: jwt-secret
+      envKey: JWT_SECRET
+    - keyVaultObject: email-user
+      envKey: EMAIL_USER
+    - keyVaultObject: email-pass
+      envKey: EMAIL_PASS
+    - keyVaultObject: email-from
+      envKey: EMAIL_FROM
+
+extraLabels: {}

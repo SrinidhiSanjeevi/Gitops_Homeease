@@ -1,0 +1,43 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "backend.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "backend.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+  ingress:
+    # Public API traffic — arrives from the ingress-nginx controller pod,
+    # which lives in its own namespace.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 5000
+    # Other HomeEase services in this same namespace calling backend
+    # server-to-server (frontend, admin-backend).
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 5000
+    # Prometheus (kube-prometheus-stack, namespace "monitoring") scraping
+    # /metrics.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 5000
+  # No egress block: egress stays unrestricted (backend needs to reach
+  # MongoDB, payment-service, and outbound notification providers).
+{{- end }}

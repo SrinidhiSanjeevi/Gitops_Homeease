@@ -1,0 +1,13 @@
+# Direct Helm equivalent of apps/frontend/overlays/azure/dev/kustomization.yaml.
+image:
+  repository: acrhomeeasedev.azurecr.io/homeease/frontend
+  tag: 5d4e71d3fcd2
+
+ingress:
+  host: app.4-224-88-104.nip.io
+  sslRedirect: false
+  extraHostlessRule: true
+
+extraLabels:
+  homeease.io/environment: dev
+  homeease.io/cloud: azure

@@ -1,0 +1,61 @@
+# Cloud/environment-neutral defaults. Azure-dev-specific values live in
+# values-azure-dev.yaml.
+
+image:
+  repository: homeease/admin-backend
+  tag: placeholder
+  pullPolicy: IfNotPresent
+
+# No top-level `replicas` value on purpose — the HPA owns replica count.
+
+service:
+  port: 5001
+  targetPortName: http
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+hpa:
+  minReplicas: 1
+  maxReplicas: 3
+  cpuTargetPercent: 70
+
+pdb:
+  maxUnavailable: 1
+
+ingress:
+  enabled: true
+  host: admin.dev.example.com
+  tlsSecretName: admin-backend-tls
+  clusterIssuer: letsencrypt-prod
+
+networkPolicy:
+  enabled: true
+
+# See charts/backend/values.yaml for the full explanation of this
+# section — same shared Azure AD workload identity as backend
+# (id-homeease-app-dev), disabled by default so this chart isn't
+# Azure-specific.
+workloadIdentity:
+  enabled: false
+  clientId: ""
+
+keyVault:
+  name: ""
+  tenantId: ""
+
+secretProviderClass:
+  enabled: false
+  secretName: admin-backend-secrets
+  objects:
+    - keyVaultObject: mongo-uri
+      envKey: MONGO_URI
+    - keyVaultObject: jwt-secret
+      envKey: JWT_SECRET
+
+extraLabels: {}

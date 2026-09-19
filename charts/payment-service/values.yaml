@@ -1,0 +1,86 @@
+# Cloud/environment-neutral defaults. Azure-dev-specific values live in
+# values-azure-dev.yaml.
+#
+# payment-service gets more isolation than the other three services —
+# it's the one place a mistake has a real (simulated) financial
+# consequence: no public Ingress, secrets pulled straight from the
+# cloud's own secret store, NetworkPolicy locked to "only backend may
+# call this."
+
+image:
+  repository: homeease/payment-service
+  tag: placeholder
+  pullPolicy: IfNotPresent
+
+# No top-level `replicas` value on purpose — the HPA owns replica count.
+
+service:
+  port: 5002
+  targetPortName: http
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+# No CPU/memory-based scaling reasoning applies here the way it does for
+# backend/admin-backend/frontend — a CPU target doesn't reflect actual
+# payment load. Kept as a fixed floor/ceiling (1-2), not a real
+# autoscaling policy.
+hpa:
+  minReplicas: 1
+  maxReplicas: 2
+  cpuTargetPercent: 70
+
+pdb:
+  maxUnavailable: 1
+
+# No ingress.enabled toggle at all — payment-service has never had an
+# Ingress template in this chart. It's reached only from backend,
+# in-cluster, on its ClusterIP Service. Do not add one here.
+
+networkPolicy:
+  enabled: true
+
+# This is NOT a values.yaml toggle. It's a hardcoded `false` directly in
+# templates/deployment.yaml (see that file) — Kubernetes auto-injects a
+# PAYMENT_SERVICE_PORT env var for every Service literally named
+# "payment-service" in this namespace (legacy Docker-links compatibility,
+# format tcp://<clusterIP>:<port>), which collides with and silently
+# overrides the app's own PAYMENT_SERVICE_PORT read in server.js — the
+# app tries to bind to that literal string instead of 5002 and
+# crash-loops on the startup probe. This is a required correctness
+# setting, not a preference, so it is never made configurable here.
+
+# Its own ServiceAccount, its own Azure AD workload identity — NOT shared
+# with backend/admin-backend's id-homeease-app-dev. Disabled by default so
+# this chart isn't Azure-specific; azure-dev turns it on with the real,
+# payment-specific clientId (id-homeease-payment-dev).
+workloadIdentity:
+  enabled: false
+  clientId: ""
+
+keyVault:
+  name: ""
+  tenantId: ""
+
+# razorpay-webhook-secret is deliberately NOT in this list — the CSI
+# driver fails the ENTIRE mount if any one requested object doesn't exist
+# in Key Vault, and Razorpay webhooks aren't configured yet
+# (config/validateEnv.js doesn't require RAZORPAY_WEBHOOK_SECRET). Add it
+# here once a real webhook secret exists and should be wired up.
+secretProviderClass:
+  enabled: false
+  secretName: payment-service-razorpay
+  objects:
+    - keyVaultObject: razorpay-key-id
+      envKey: RAZORPAY_KEY_ID
+    - keyVaultObject: razorpay-key-secret
+      envKey: RAZORPAY_KEY_SECRET
+    - keyVaultObject: mongo-uri
+      envKey: MONGO_URI
+
+extraLabels: {}

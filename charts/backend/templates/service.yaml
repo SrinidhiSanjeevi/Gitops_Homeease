@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "backend.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "backend.selectorLabels" . | nindent 4 }}
+  ports:
+    # Matches the container's port (5000), not 80 — frontend's nginx.conf
+    # upstream block hardcodes `server backend:5000;`, and Ingress
+    # references this port by name ("http"), not by number.
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPortName }}
+      protocol: TCP

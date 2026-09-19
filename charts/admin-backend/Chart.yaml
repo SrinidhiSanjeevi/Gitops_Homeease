@@ -1,0 +1,6 @@
+apiVersion: v2
+name: admin-backend
+description: HomeEase admin-backend API — Helm equivalent of apps/admin-backend Kustomize base+overlay
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

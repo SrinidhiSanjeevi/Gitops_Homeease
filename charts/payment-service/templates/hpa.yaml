@@ -1,0 +1,25 @@
+# No CPU/memory-based scaling reasoning applies here the way it does for
+# backend/admin-backend/frontend — a CPU target doesn't reflect actual
+# payment load. Kept as a fixed floor/ceiling (1-2), not a real
+# autoscaling policy.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: payment-service
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "payment-service.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: payment-service
+  minReplicas: {{ .Values.hpa.minReplicas }}
+  maxReplicas: {{ .Values.hpa.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.cpuTargetPercent }}

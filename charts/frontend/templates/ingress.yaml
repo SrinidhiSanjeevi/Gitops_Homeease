@@ -1,0 +1,51 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "frontend.labels" . | nindent 4 }}
+  annotations:
+    # No-op until platform/cert-manager is actually installed (still a
+    # placeholder per platform/README.md) — harmless to set now.
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer }}
+    {{- if not .Values.ingress.sslRedirect }}
+    # Presentation URL: serves plain HTTP directly instead of
+    # 308-redirecting to HTTPS, which has no valid certificate for an IP
+    # address and would just reproduce a browser warning.
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    {{- end }}
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host }}
+      secretName: {{ .Values.ingress.tlsSecretName }}
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  name: http
+    {{- if .Values.ingress.extraHostlessRule }}
+    # Host-less catch-all: requests with no matching Host header (e.g. a
+    # bare public IP) fall through to this rule instead of nginx's
+    # default-backend 404. The host-specific rule above, and every other
+    # service's own Ingress, are untouched.
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  name: http
+    {{- end }}
+{{- end }}
