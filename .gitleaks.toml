@@ -1,0 +1,11 @@
+title = "Gitops_Homeease gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+  description = "Confirmed non-secret pattern, not a one-off historical fix: Azure AD Workload Identity clientId GUIDs are public application identifiers, not credentials. The actual authorization boundary is the federated-credential subject binding (system:serviceaccount:<namespace>:<name>), which lives in Azure AD, not in this repo — the clientId alone can't be used to authenticate as anything."
+
+  regexes = [
+    '''(?i)client-?id["'':=\s]+["']?[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}''',
+  ]
