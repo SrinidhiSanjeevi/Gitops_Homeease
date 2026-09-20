@@ -13,7 +13,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TARGET_FILES = ["README.md", "platform/README.md"]
-KNOWN_TOP_LEVEL_DIRS = {"charts", "argocd", "platform", ".github"}
+KNOWN_TOP_LEVEL_DIRS = {"charts", "argocd", "platform", ".github", "docs"}
 
 PATH_TOKEN_RE = re.compile(r"\.?/?(?:[A-Za-z0-9_.\-<>]+/)+[A-Za-z0-9_.\-<>*]+")
 INLINE_CODE_RE = re.compile(r"`([^`]+)`")
