@@ -81,10 +81,18 @@ backend:
 # this cluster doesn't need for the value they add at this scale.
 test:
   enabled: false
+lokiCanary:
+  enabled: false
 monitoring:
   selfMonitoring:
     enabled: false
     grafanaAgent:
       installOperator: false
-  lokiCanary:
-    enabled: false
+
+# Memcached caches — disabled for singleBinary filesystem-backed mode on a 2-node dev cluster.
+# By default chart 7.3.0 allocates 8192MB (9830Mi) for chunks cache which cannot schedule on 8GiB nodes.
+chunksCache:
+  enabled: false
+resultsCache:
+  enabled: false
+

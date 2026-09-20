@@ -138,13 +138,20 @@ no new tooling needed. Once that Application doesn't get a
 `syncPolicy.automated` block, a change sits as "OutOfSync" until a human
 runs `argocd app sync` — that's the promotion gate for those environments.
 
+## Known gaps
+ 
+- **Alertmanager Slack Alerts**: Alertmanager routes to a `null` receiver by default until the `alertmanager-slack` Secret containing the Slack Incoming Webhook URL is created manually in the `monitoring` namespace (see `docs/monitoring-secrets.md`). Real webhook credentials are never committed to Git.
+- **Grafana Admin Credentials**: Grafana admin credentials use `grafana.admin.existingSecret` referencing an out-of-band secret (`grafana-admin-credentials`), preventing continuous GitOps drift in ArgoCD (see `docs/monitoring-secrets.md`).
+- **AKS Control Plane Monitoring**: On AKS, Kubernetes control plane components (`kube-controller-manager`, `kube-scheduler`, `etcd`, `kube-proxy`) are fully managed by Azure and not accessible from worker nodes. Their respective monitors and `kube-system` service creation are disabled in `platform/kube-prometheus-stack/values.yaml` to prevent invalid scraping targets and namespace permission violations in the `platform` AppProject.
+
 ## Keeping these docs honest
 
 `.github/workflows/docs-check.yml` runs
 `.github/scripts/check_doc_paths.py` on every push/PR: it scans this file
 and `platform/README.md` for backtick/code-block path references into
-`charts/`, `argocd/`, `platform/`, and `.github/`, and fails the build if
+`charts/`, `argocd/`, `platform/`, `.github/`, and `docs/`, and fails the build if
 any of them don't exist on disk. It won't catch every kind of drift, but
 it catches the specific failure mode that led to this rewrite — a repo
 layout section describing a tree (`apps/...`) that had already been
 deleted.
+
