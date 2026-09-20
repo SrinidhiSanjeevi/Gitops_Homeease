@@ -1,0 +1,56 @@
+# Consolidated Monitoring Stack Application
+#
+# Multi-source Argo CD Application combining:
+#   1. kube-prometheus-stack (Prometheus, Grafana, Alertmanager, node-exporter, kube-state-metrics)
+#   2. Loki (log aggregation)
+#   3. Alloy (log/metrics collection agent)
+#   4. Custom Grafana Dashboards and PrometheusRules
+#
+# All deployed into the `monitoring` namespace under the `platform` AppProject.
+# Exact Helm release names are explicitly preserved to maintain backwards
+# compatibility with existing in-cluster services and configuration endpoints.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoring
+  namespace: argocd
+spec:
+  project: platform
+  sources:
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      targetRevision: "90.0.0"
+      helm:
+        releaseName: kube-prometheus-stack
+        valueFiles:
+          - $values/platform/kube-prometheus-stack/values.yaml
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: loki
+      targetRevision: "7.3.0"
+      helm:
+        releaseName: loki
+        valueFiles:
+          - $values/platform/loki/values.yaml
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: alloy
+      targetRevision: "1.12.1"
+      helm:
+        releaseName: alloy
+        valueFiles:
+          - $values/platform/alloy/values.yaml
+    - repoURL: https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git
+      targetRevision: main
+      path: platform/kube-prometheus-stack/dashboards
+    - repoURL: https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
