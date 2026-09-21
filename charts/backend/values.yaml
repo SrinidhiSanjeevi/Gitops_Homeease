@@ -46,6 +46,7 @@ networkPolicy:
 # also deployed into; not something that needs to vary per environment.
 env:
   paymentServiceUrl: http://payment-service:5002
+  azureStorageAccountName: ""
 
 # Azure AD Workload Identity — disabled by default so this chart is not
 # Azure-specific; azure-dev turns it on and supplies the real clientId.

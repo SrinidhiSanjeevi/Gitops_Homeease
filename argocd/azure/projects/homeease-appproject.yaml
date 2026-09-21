@@ -12,7 +12,7 @@ metadata:
   name: homeease
   namespace: argocd
 spec:
-  description: HomeEase application services on AKS (frontend, backend, admin-backend, payment-service)
+  description: HomeEase application services on AKS (frontend, admin-frontend, backend, admin-backend, payment-service)
 
   # Only this repo may be a source. An Application in this project
   # pointing at a different Git URL is rejected at admission, not just

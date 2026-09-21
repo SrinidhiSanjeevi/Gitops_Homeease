@@ -1,0 +1,28 @@
+# Admin console, split out from the customer frontend into its own app
+# and its own deployment — see charts/admin-frontend.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: admin-frontend-dev
+  namespace: argocd
+  labels:
+    homeease.io/service: admin-frontend
+    homeease.io/environment: dev
+spec:
+  project: homeease
+  source:
+    repoURL: https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git
+    targetRevision: main
+    path: charts/admin-frontend
+    helm:
+      valueFiles:
+        - values-azure-dev.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: homeease-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

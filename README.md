@@ -16,7 +16,7 @@ cutover); nothing under `apps/` exists anymore.
 ## Repo layout
 
 ```
-charts/                      one Helm chart per service (frontend, backend, admin-backend, payment-service)
+charts/                      one Helm chart per service (frontend, admin-frontend, backend, admin-backend, payment-service)
   <service>/
     Chart.yaml
     values.yaml               cloud/environment-neutral defaults — no registry, no secrets, no hostnames
@@ -32,7 +32,7 @@ argocd/
   azure/                      the ONLY live ArgoCD config today, on aks-homeease-dev
     bootstrap/                root-app.yaml (the one manual kubectl apply) + the AppProjects + one
                               Application per service + one Application per done platform/ component
-    projects/                 homeease-appproject.yaml (scopes the 4 service Applications) and
+    projects/                 homeease-appproject.yaml (scopes the 5 service Applications) and
                               platform-appproject.yaml (scopes kube-prometheus-stack/Loki/Alloy)
   _aws-disabled/              PARKED, not read by any live ArgoCD — see its own README.md. Every
                               Application here still points at the deleted `apps/*/overlays/aws/dev`
@@ -50,14 +50,15 @@ platform/                    cluster-wide components' Helm VALUES only (kube-pro
 
 ## Charts: what's identical and what differs between services
 
-**Identical shape** across all four: Deployment (security context,
+**Identical shape** across all five: Deployment (security context,
 resource requests/limits, health probes), Service, ServiceAccount, HPA,
 PDB, NetworkPolicy (default-deny ingress + explicit allow rules).
 
 **Differs per service**, all expressed as chart templates + values, never
 as separate overlay trees:
-- `frontend` and `admin-backend` have a public `Ingress`; `payment-service`
-  is internal-only by design and has no `ingress.yaml` template at all.
+- `frontend`, `admin-frontend`, and `admin-backend` have a public
+  `Ingress`; `payment-service` is internal-only by design and has no
+  `ingress.yaml` template at all.
 - `backend`, `admin-backend`, and `payment-service` mount secrets via
   `SecretProviderClass` (Azure Key Vault, gated by `secretProviderClass.
   enabled` and `workloadIdentity.enabled` in values) and export a
@@ -70,7 +71,7 @@ as separate overlay trees:
 
 ## Why plain Applications instead of an ApplicationSet
 
-4 services × 1 environment is 4 Application objects today, hand-written
+5 services × 1 environment is 5 Application objects today, hand-written
 and readable individually (`argocd/azure/bootstrap/0N-<service>.yaml`)
 rather than a generator's matrix to mentally expand. If staging/prod get
 added later and the count grows past what's comfortable to hand-write,
@@ -103,13 +104,13 @@ kubectl apply -f argocd/azure/bootstrap/root-app.yaml
 
 ArgoCD can't install its own first Application — something has to create
 the first one by hand. After that, everything else (both AppProjects,
-kube-prometheus-stack, Loki, Alloy, and the 4 service Applications) is
+kube-prometheus-stack, Loki, Alloy, and the 5 service Applications) is
 reconciled from this repo automatically.
 
 ```bash
 kubectl get applications -n argocd
 # expect: homeease-root, homeease-project, kube-prometheus-stack, loki, alloy,
-#         frontend-dev, backend-dev, admin-backend-dev, payment-service-dev
+#         frontend-dev, admin-frontend-dev, backend-dev, admin-backend-dev, payment-service-dev
 ```
 
 ## Rendering locally before you push

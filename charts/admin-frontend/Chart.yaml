@@ -1,0 +1,6 @@
+apiVersion: v2
+name: admin-frontend
+description: HomeEase admin console (React SPA served by nginx-unprivileged) — the admin-only counterpart to the customer frontend chart
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
