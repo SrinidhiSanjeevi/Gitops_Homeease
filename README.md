@@ -2,9 +2,10 @@
 
 GitOps source of truth for the HomeEase platform, deployed today to one
 live cluster — **AKS (Azure), `aks-homeease-dev`** — via its own ArgoCD
-install. Companion to `app_Homeease` (application code + CI, which builds
-and pushes images, and — from Phase 4 — promotes them here) and
-`Infrastruture_Homeease` (Terraform).
+install. Companion to `app_Homeease` (application code + CI, which
+builds, scans, and pushes images to ACR, then promotes the tag here —
+see "How image tags get here" below) and `Infrastruture_Homeease`
+(Terraform).
 
 Every service ships as a real **Helm chart** under `charts/`. There is no
 Kustomize tree in this repo — the original `apps/<service>/base` +
@@ -137,6 +138,25 @@ adjust its image tag/hostname/replica values, then copy an existing
 no new tooling needed. Once that Application doesn't get a
 `syncPolicy.automated` block, a change sits as "OutOfSync" until a human
 runs `argocd app sync` — that's the promotion gate for those environments.
+
+## How image tags get here
+
+Nothing in this repo pushes to itself. `app_Homeease`'s CI (Azure
+Pipelines, stage 4 "Promote") does, after its Package stage pushes a
+newly built image to ACR: it clones this repo, bumps `image.tag` in
+`charts/<service>/values-azure-dev.yaml` for every service it actually
+rebuilt this run, commits, and pushes straight to `main` — one commit
+covering every changed service, since they all share a single
+Git-SHA-derived tag. `image.repository` is never touched; only the tag
+changes, and only in the one file each service's Application already
+reads via `helm.valueFiles`.
+
+That's also why this repo needs no Argo CD change to make promotion
+work: every service Application already has `syncPolicy.automated.
+selfHeal` and already watches exactly the file CI edits. A pushed tag
+bump gets picked up on Argo CD's next poll like any other commit — this
+mechanism, not a webhook or a new Application, is what closes the loop
+from "image pushed" to "cluster running it".
 
 ## Known gaps
  
