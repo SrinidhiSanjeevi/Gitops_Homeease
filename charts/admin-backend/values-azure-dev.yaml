@@ -21,3 +21,6 @@ secretProviderClass:
 extraLabels:
   homeease.io/environment: dev
   homeease.io/cloud: azure
+
+env:
+  azureStorageAccountName: "sthomeeaseimggvz8nk"

@@ -1,0 +1,12 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: admin-frontend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "admin-frontend.labels" . | nindent 4 }}
+spec:
+  maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+  selector:
+    matchLabels:
+      {{- include "admin-frontend.selectorLabels" . | nindent 6 }}

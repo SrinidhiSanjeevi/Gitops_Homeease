@@ -1,0 +1,31 @@
+{{- if .Values.networkPolicy.enabled }}
+# Default-deny ingress, explicit allow only. Only enforced if the
+# cluster's CNI implements NetworkPolicy (AKS: Azure NPM/Calico, turned
+# on at cluster creation).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: admin-frontend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "admin-frontend.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "admin-frontend.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+  ingress:
+    # Only the ingress-nginx controller talks to admin-frontend directly —
+    # nothing else in the cluster needs to.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+  # No egress block: admin-frontend proxies to admin-backend and backend's
+  # auth API through the same in-cluster Service DNS names a browser
+  # request resolves to, so egress stays unrestricted.
+{{- end }}

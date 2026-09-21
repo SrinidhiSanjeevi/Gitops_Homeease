@@ -72,6 +72,13 @@ spec:
             failureThreshold: 24
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.env }}
+          env:
+            {{- if .Values.env.azureStorageAccountName }}
+            - name: AZURE_STORAGE_ACCOUNT_NAME
+              value: {{ .Values.env.azureStorageAccountName | quote }}
+            {{- end }}
+          {{- end }}
           {{- if .Values.secretProviderClass.enabled }}
           # Populated by the Secrets Store CSI driver's secretObjects sync
           # (see templates/secretproviderclass.yaml) — the app reads
