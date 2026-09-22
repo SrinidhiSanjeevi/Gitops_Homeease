@@ -1,7 +1,7 @@
 # Direct Helm equivalent of apps/payment-service/overlays/azure/dev/{kustomization.yaml,secretproviderclass.yaml}.
 image:
   repository: acrhomeeasedev.azurecr.io/homeease/payment-service
-  tag: 8af8212190cc
+  tag: cff3c7711ce1
 
 workloadIdentity:
   enabled: true
