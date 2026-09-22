@@ -7,9 +7,15 @@
 # is visible in Prometheus/Alertmanager's UI, it just doesn't page anyone
 # yet.
 #
-# Four alerts, deliberately not more — each one is gated to avoid firing
-# on normal, expected noise (a single pod restart during a rollout, a
-# brief latency blip):
+# 7 alerts total — each one gated to avoid firing on normal noise
+# (a single pod restart during a rollout, a brief latency blip):
+#   1. BackendPodUnavailable — zero available replicas
+#   2. HighHttp5xxRate — >5% 5xx rate sustained 5m
+#   3. HighHttpLatency — p95 > 1s sustained 5m
+#   4. PodCrashLooping — >3 restarts in 15m
+#   5. ServiceUnavailable — any scrape target down 2m
+#   6. PaymentFailureRateHigh — >5% payment failure rate sustained 5m
+#   7. BookingQueueSizeHigh — queue > 100 items sustained 3m
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -80,3 +86,49 @@ spec:
               minutes. Gated at >3 (not >0) so a single expected restart
               during a rollout or an OOM-then-recover doesn't page —
               this catches an actual crash loop.
+
+        - alert: ServiceUnavailable
+          expr: up{job=~"backend|admin-backend|payment-service"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "{{ $labels.job }} scrape target is DOWN"
+            description: >-
+              Prometheus cannot scrape {{ $labels.job }} (instance
+              {{ $labels.instance }}) — the target has been down for 2
+              minutes. Check pod health: `kubectl -n homeease-dev get pods
+              -l app={{ $labels.job }}`.
+
+        - alert: PaymentFailureRateHigh
+          expr: >-
+            100 * sum(rate(payment_verify_failed_total{job="payment-service"}[5m]))
+            / clamp_min(
+              sum(rate(payment_verify_success_total{job="payment-service"}[5m]))
+              + sum(rate(payment_verify_failed_total{job="payment-service"}[5m])),
+              1e-9
+            ) > 5
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Payment failure rate above 5%"
+            description: >-
+              The Razorpay payment verification failure rate has been above
+              5% for 5 minutes ({{ $value | printf "%.1f" }}% now). This
+              may indicate a Razorpay API issue, a signature mismatch bug,
+              or a configuration problem (RAZORPAY_KEY_SECRET mismatch).
+              Check payment-service logs.
+
+        - alert: BookingQueueSizeHigh
+          expr: sum(serviceexpress_queue_length) > 100
+          for: 3m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Booking assignment queue has more than 100 items"
+            description: >-
+              serviceexpress_queue_length has been above 100 for 3 minutes
+              (current: {{ $value | printf "%.0f" }}). This suggests
+              professional capacity is insufficient for demand. Consider
+              scaling or activating more professionals.

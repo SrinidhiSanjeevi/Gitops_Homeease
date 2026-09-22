@@ -4,17 +4,18 @@
 # exactly as Grafana's own export format expects it.
 #
 # All PromQL here uses ONLY metrics that actually exist in
-# app_Homeease/backend/metrics.js. One exception, called out on its own
-# panel: serviceexpress_professional_assignment_time_seconds is defined
-# and scraped, but nothing in the codebase ever calls .observe() on it
-# (grep confirms zero call sites outside metrics.js itself) — so that
-# panel will show "No data" until a real assignment-latency measurement
-# is wired into professionalMatcher.js. Not fabricated, not omitted —
-# left in and labelled so the gap is visible instead of hidden.
+# app_Homeease/backend/metrics.js and are populated by metricsCollector.js
+# (DB-truth gauges) or by controller instrumentation (event counters).
 #
-# Redesigned as a compact, all-Stat/Gauge "Business Metrics" view (no
-# time-series graphs) — same PromQL as before, dropped the two pure-rate
-# panels that duplicated the 6h-total stats below them.
+# KEY FIX: Business KPI stats now use the DB-truth gauges
+# (serviceexpress_total_bookings, serviceexpress_bookings_by_status, etc.)
+# directly — not increase() on counters, which produced fractional values
+# due to Prometheus extrapolation. Gauges return exact integers.
+#
+# Row 1: Business KPIs (Authoritative DB-truth state, integer values only)
+# Row 2: Booking Lifecycle (event-rate panels — confirmation/cancellation rates)
+# Row 3: Performance (assignment latency, booking latency, throughput)
+# Row 4: Service Health (binary UP/DOWN for each service)
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -32,70 +33,402 @@ data:
       "time": { "from": "now-1h", "to": "now" },
       "panels": [
         {
-          "id": 3, "title": "Booking Requests (6h)", "type": "stat",
-          "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
-          "fieldConfig": { "defaults": { "unit": "short" } },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(increase(serviceexpress_booking_requests_total[6h]))" }]
-        },
-        {
-          "id": 4, "title": "Confirmed Bookings (6h)", "type": "stat",
-          "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
-          "fieldConfig": { "defaults": { "unit": "short" } },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(increase(serviceexpress_bookings_confirmed_total[6h]))" }]
-        },
-        {
-          "id": 5, "title": "Cancelled Bookings (6h)", "type": "stat",
-          "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
-          "fieldConfig": { "defaults": { "unit": "short" } },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(increase(serviceexpress_bookings_cancelled_total[6h]))" }]
-        },
-        {
-          "id": 6, "title": "Completed Bookings (6h)", "type": "stat",
-          "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
-          "fieldConfig": { "defaults": { "unit": "short" } },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(increase(serviceexpress_bookings_completed_total[6h]))" }]
-        },
-        {
-          "id": 7, "title": "Active Bookings (current)", "type": "stat",
-          "gridPos": { "h": 6, "w": 6, "x": 0, "y": 6 },
-          "fieldConfig": { "defaults": { "unit": "short" } },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(serviceexpress_active_bookings)" }]
-        },
-        {
-          "id": 8, "title": "Booking Confirmation Rate", "type": "gauge",
-          "gridPos": { "h": 6, "w": 6, "x": 6, "y": 6 },
+          "id": 1,
+          "title": "Total Bookings",
+          "description": "All-time total bookings from DB (serviceexpress_total_bookings gauge, refreshed every 30s by metricsCollector)",
+          "type": "stat",
+          "gridPos": { "h": 5, "w": 4, "x": 0, "y": 0 },
           "fieldConfig": {
             "defaults": {
-              "unit": "percent", "max": 100, "min": 0,
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 40 }, { "color": "green", "value": 70 }] }
+              "unit": "short",
+              "decimals": 0,
+              "color": { "mode": "fixed", "fixedColor": "blue" },
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] }
             }
           },
-          "targets": [{ "expr": "100 * sum(rate(serviceexpress_bookings_confirmed_total[15m])) / clamp_min(sum(rate(serviceexpress_booking_requests_total[15m])), 1e-9)" }]
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
+          "targets": [{ "expr": "serviceexpress_total_bookings", "legendFormat": "" }]
         },
         {
-          "id": 9, "title": "Booking Cancellation Rate", "type": "gauge",
-          "gridPos": { "h": 6, "w": 6, "x": 12, "y": 6 },
+          "id": 2,
+          "title": "Completed Bookings",
+          "description": "Current count of bookings in Completed status (DB gauge)",
+          "type": "stat",
+          "gridPos": { "h": 5, "w": 4, "x": 4, "y": 0 },
           "fieldConfig": {
             "defaults": {
-              "unit": "percent", "max": 100, "min": 0,
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 20 }, { "color": "red", "value": 40 }] }
+              "unit": "short",
+              "decimals": 0,
+              "color": { "mode": "fixed", "fixedColor": "green" },
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
             }
           },
-          "targets": [{ "expr": "100 * sum(rate(serviceexpress_bookings_cancelled_total[15m])) / clamp_min(sum(rate(serviceexpress_booking_requests_total[15m])), 1e-9)" }]
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
+          "targets": [{ "expr": "serviceexpress_bookings_by_status{status=\"Completed\"}", "legendFormat": "" }]
+        },
+        {
+          "id": 3,
+          "title": "Confirmed Bookings",
+          "description": "Current count of bookings in Confirmed status (DB gauge)",
+          "type": "stat",
+          "gridPos": { "h": 5, "w": 4, "x": 8, "y": 0 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": { "mode": "fixed", "fixedColor": "semi-dark-green" },
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "text", "value": null }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
+          "targets": [{ "expr": "serviceexpress_bookings_by_status{status=\"Confirmed\"}", "legendFormat": "" }]
+        },
+        {
+          "id": 4,
+          "title": "Cancelled Bookings",
+          "description": "Current count of bookings in Cancelled status (DB gauge)",
+          "type": "stat",
+          "gridPos": { "h": 5, "w": 4, "x": 12, "y": 0 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": { "mode": "fixed", "fixedColor": "red" },
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
+          "targets": [{ "expr": "serviceexpress_bookings_by_status{status=\"Cancelled\"}", "legendFormat": "" }]
+        },
+        {
+          "id": 5,
+          "title": "Active Bookings",
+          "description": "In-flight bookings (Created+Assigned+Confirmed) — in-process gauge per pod",
+          "type": "stat",
+          "gridPos": { "h": 5, "w": 4, "x": 16, "y": 0 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "text", "value": null }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
+          "targets": [{ "expr": "sum(serviceexpress_bookings_by_status{status=~\"Created|Assigned|Confirmed\"})", "legendFormat": "" }]
+        },
+        {
+          "id": 6,
+          "title": "Total Revenue (₹)",
+          "description": "Sum of totalPrice for Confirmed + Completed bookings (DB gauge)",
+          "type": "stat",
+          "gridPos": { "h": 5, "w": 4, "x": 20, "y": 0 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "currencyINR",
+              "decimals": 0,
+              "color": { "mode": "fixed", "fixedColor": "gold" },
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "gold", "value": null }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
+          "targets": [{ "expr": "serviceexpress_total_revenue", "legendFormat": "" }]
+        },
+        {
+          "id": 7,
+          "title": "Total Users",
+          "description": "Registered customer accounts (DB gauge)",
+          "type": "stat",
+          "gridPos": { "h": 5, "w": 4, "x": 0, "y": 5 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "text", "value": null }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
+          "targets": [{ "expr": "serviceexpress_total_users", "legendFormat": "" }]
+        },
+        {
+          "id": 8,
+          "title": "Total Professionals",
+          "description": "Registered professionals (DB gauge)",
+          "type": "stat",
+          "gridPos": { "h": 5, "w": 4, "x": 4, "y": 5 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "text", "value": null }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
+          "targets": [{ "expr": "serviceexpress_total_professionals", "legendFormat": "" }]
+        },
+        {
+          "id": 9,
+          "title": "Available Professionals",
+          "description": "Professionals with status=Available (DB gauge)",
+          "type": "stat",
+          "gridPos": { "h": 5, "w": 4, "x": 8, "y": 5 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": { "mode": "fixed", "fixedColor": "green" },
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
+          "targets": [{ "expr": "serviceexpress_available_professionals", "legendFormat": "" }]
         },
         {
           "id": 10,
-          "title": "Professional Assignment Latency (p95) — NO DATA until professionalMatcher.js calls .observe()",
+          "title": "Total Services",
+          "description": "Service catalog size (DB gauge)",
           "type": "stat",
-          "gridPos": { "h": 6, "w": 6, "x": 18, "y": 6 },
-          "fieldConfig": { "defaults": { "unit": "s" } },
+          "gridPos": { "h": 5, "w": 4, "x": 12, "y": 5 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "text", "value": null }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
+          "targets": [{ "expr": "serviceexpress_total_services", "legendFormat": "" }]
+        },
+        {
+          "id": 11,
+          "title": "Emergency Requests",
+          "description": "Total emergency requests ever created (DB gauge)",
+          "type": "stat",
+          "gridPos": { "h": 5, "w": 4, "x": 16, "y": 5 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "text", "value": null }, { "color": "orange", "value": 1 }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
+          "targets": [{ "expr": "serviceexpress_total_emergencies", "legendFormat": "" }]
+        },
+        {
+          "id": 12,
+          "title": "Active Emergencies",
+          "description": "Emergency requests not yet Resolved or Cancelled (DB gauge)",
+          "type": "stat",
+          "gridPos": { "h": 5, "w": 4, "x": 20, "y": 5 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none", "textMode": "value" },
+          "targets": [{ "expr": "serviceexpress_active_emergencies", "legendFormat": "" }]
+        },
+        {
+          "id": 13,
+          "title": "Booking Confirmation Rate (15m)",
+          "description": "% of booking requests that were confirmed in the last 15 minutes",
+          "type": "gauge",
+          "gridPos": { "h": 6, "w": 8, "x": 0, "y": 10 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 40 }, { "color": "green", "value": 70 }]
+              }
+            }
+          },
+          "targets": [{ "expr": "100 * sum(rate(serviceexpress_bookings_confirmed_total[15m])) / clamp_min(sum(rate(serviceexpress_booking_requests_total[15m])), 1e-9)", "legendFormat": "" }]
+        },
+        {
+          "id": 14,
+          "title": "Booking Cancellation Rate (15m)",
+          "description": "% of booking requests that were cancelled in the last 15 minutes",
+          "type": "gauge",
+          "gridPos": { "h": 6, "w": 8, "x": 8, "y": 10 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 20 }, { "color": "red", "value": 40 }]
+              }
+            }
+          },
+          "targets": [{ "expr": "100 * sum(rate(serviceexpress_bookings_cancelled_total[15m])) / clamp_min(sum(rate(serviceexpress_booking_requests_total[15m])), 1e-9)", "legendFormat": "" }]
+        },
+        {
+          "id": 15,
+          "title": "Booking Completion Rate (15m)",
+          "description": "% of confirmed bookings that reached Completed in the last 15 minutes",
+          "type": "gauge",
+          "gridPos": { "h": 6, "w": 8, "x": 16, "y": 10 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 50 }, { "color": "green", "value": 80 }]
+              }
+            }
+          },
+          "targets": [{ "expr": "100 * sum(rate(serviceexpress_bookings_completed_total[15m])) / clamp_min(sum(rate(serviceexpress_bookings_confirmed_total[15m])), 1e-9)", "legendFormat": "" }]
+        },
+        {
+          "id": 16,
+          "title": "Professional Assignment Latency (p95)",
+          "description": "95th percentile of time taken to assign a professional to a booking (seconds). Observed since pod start.",
+          "type": "stat",
+          "gridPos": { "h": 6, "w": 6, "x": 0, "y": 16 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "decimals": 2,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 5 }, { "color": "red", "value": 10 }]
+              }
+            }
+          },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(serviceexpress_professional_assignment_time_seconds_bucket[15m])) by (le))" }]
+          "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(serviceexpress_professional_assignment_time_seconds_bucket[15m])) by (le))", "legendFormat": "" }]
+        },
+        {
+          "id": 17,
+          "title": "Booking Completion Latency (p95)",
+          "description": "95th percentile end-to-end booking latency from creation to completion (seconds).",
+          "type": "stat",
+          "gridPos": { "h": 6, "w": 6, "x": 6, "y": 16 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1800 }, { "color": "red", "value": 7200 }]
+              }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
+          "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(serviceexpress_booking_latency_seconds_bucket[15m])) by (le))", "legendFormat": "" }]
+        },
+        {
+          "id": 18,
+          "title": "Booking Request Throughput",
+          "description": "Current booking request rate (requests per second)",
+          "type": "stat",
+          "gridPos": { "h": 6, "w": 6, "x": 12, "y": 16 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "decimals": 4,
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "text", "value": null }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
+          "targets": [{ "expr": "sum(rate(serviceexpress_booking_requests_total[5m]))", "legendFormat": "" }]
+        },
+        {
+          "id": 19,
+          "title": "Booking Queue Length",
+          "description": "Number of bookings currently waiting for professional assignment",
+          "type": "stat",
+          "gridPos": { "h": 6, "w": 6, "x": 18, "y": 16 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 10 }, { "color": "red", "value": 50 }]
+              }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
+          "targets": [{ "expr": "sum(serviceexpress_queue_length)", "legendFormat": "" }]
+        },
+        {
+          "id": 20,
+          "title": "Backend API",
+          "description": "Binary UP/DOWN for the backend service (up{job='backend'})",
+          "type": "stat",
+          "gridPos": { "h": 5, "w": 6, "x": 0, "y": 22 },
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+              ],
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
+          "targets": [{ "expr": "up{job=\"backend\"}", "legendFormat": "" }]
+        },
+        {
+          "id": 21,
+          "title": "Admin Backend",
+          "description": "Binary UP/DOWN for the admin-backend service",
+          "type": "stat",
+          "gridPos": { "h": 5, "w": 6, "x": 6, "y": 22 },
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+              ],
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
+          "targets": [{ "expr": "up{job=\"admin-backend\"}", "legendFormat": "" }]
+        },
+        {
+          "id": 22,
+          "title": "Payment Service",
+          "description": "Binary UP/DOWN for the payment-service",
+          "type": "stat",
+          "gridPos": { "h": 5, "w": 6, "x": 12, "y": 22 },
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+              ],
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+            }
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
+          "targets": [{ "expr": "up{job=\"payment-service\"}", "legendFormat": "" }]
+        },
+        {
+          "id": 23,
+          "title": "Service Availability %",
+          "description": "% of the 3 application services currently UP",
+          "type": "gauge",
+          "gridPos": { "h": 5, "w": 6, "x": 18, "y": 22 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 67 }, { "color": "green", "value": 100 }]
+              }
+            }
+          },
+          "targets": [{ "expr": "(sum(up{job=~\"backend|admin-backend|payment-service\"}) / 3) * 100", "legendFormat": "" }]
         }
       ]
     }
