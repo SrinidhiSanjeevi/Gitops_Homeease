@@ -1,7 +1,7 @@
 # Direct Helm equivalent of apps/frontend/overlays/azure/dev/kustomization.yaml.
 image:
   repository: acrhomeeasedev.azurecr.io/homeease/frontend
-  tag: cff3c7711ce1
+  tag: d84dfc1
 
 ingress:
   host: app.4-224-88-104.nip.io
