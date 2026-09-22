@@ -1,7 +1,7 @@
 # Azure dev overrides — same pattern as charts/frontend/values-azure-dev.yaml.
 image:
   repository: acrhomeeasedev.azurecr.io/homeease/admin-frontend
-  tag: 5d4e71d3fcd2
+  tag: 3346be89f3dc
 
 ingress:
   host: admin-console.4-224-88-104.nip.io
