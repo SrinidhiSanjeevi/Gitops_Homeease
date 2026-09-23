@@ -1,27 +1,20 @@
 # Direct Helm equivalent of apps/backend/overlays/azure/dev/{kustomization.yaml,secretproviderclass.yaml}.
 image:
   repository: acrhomeeasedev.azurecr.io/homeease/backend
-  tag: b741a64b50c4
-
+  tag: 72f6571e6ae4
 ingress:
   host: api.4-224-88-104.nip.io
-
 workloadIdentity:
   enabled: true
   # terraform output workload_identity_app_client_id (id-homeease-app-dev)
   clientId: "89286efc-8fa8-4e09-9664-a3b86fdeff89"
-
 keyVault:
   name: kv-homeease-dev-hs01 # terraform output key_vault_name
   tenantId: "71aa34ea-4bb1-42f9-8f28-80e46897411d" # az account show --query tenantId
-
 secretProviderClass:
   enabled: true
-
 extraLabels:
   homeease.io/environment: dev
   homeease.io/cloud: azure
-
 env:
   azureStorageAccountName: "sthomeeaseimggvz8nk"
-
