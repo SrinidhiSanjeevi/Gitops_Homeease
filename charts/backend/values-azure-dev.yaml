@@ -1,7 +1,7 @@
 # Direct Helm equivalent of apps/backend/overlays/azure/dev/{kustomization.yaml,secretproviderclass.yaml}.
 image:
   repository: acrhomeeasedev.azurecr.io/homeease/backend
-  tag: cff3c7711ce1
+  tag: b741a64b50c4
 
 ingress:
   host: api.4-224-88-104.nip.io
