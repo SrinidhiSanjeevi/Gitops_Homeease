@@ -47,7 +47,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "targets": [{ "expr": "serviceexpress_total_bookings", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "serviceexpress_total_bookings", "legendFormat": "" }]
         },
         {
           "id": 2,
@@ -64,7 +64,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "targets": [{ "expr": "serviceexpress_bookings_by_status{status=\"Completed\"}", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "serviceexpress_bookings_by_status{status=\"Completed\"}", "legendFormat": "" }]
         },
         {
           "id": 3,
@@ -81,7 +81,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "targets": [{ "expr": "serviceexpress_bookings_by_status{status=\"Confirmed\"}", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "serviceexpress_bookings_by_status{status=\"Confirmed\"}", "legendFormat": "" }]
         },
         {
           "id": 4,
@@ -98,7 +98,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "targets": [{ "expr": "serviceexpress_bookings_by_status{status=\"Cancelled\"}", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "serviceexpress_bookings_by_status{status=\"Cancelled\"}", "legendFormat": "" }]
         },
         {
           "id": 5,
@@ -114,7 +114,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "targets": [{ "expr": "sum(serviceexpress_bookings_by_status{status=~\"Created|Assigned|Confirmed\"})", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "sum(serviceexpress_bookings_by_status{status=~\"Created|Assigned|Confirmed\"})", "legendFormat": "" }]
         },
         {
           "id": 6,
@@ -131,7 +131,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "targets": [{ "expr": "serviceexpress_total_revenue", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "serviceexpress_total_revenue", "legendFormat": "" }]
         },
         {
           "id": 7,
@@ -147,7 +147,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "targets": [{ "expr": "serviceexpress_total_users", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "serviceexpress_total_users", "legendFormat": "" }]
         },
         {
           "id": 8,
@@ -163,7 +163,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "targets": [{ "expr": "serviceexpress_total_professionals", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "serviceexpress_total_professionals", "legendFormat": "" }]
         },
         {
           "id": 9,
@@ -180,7 +180,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "targets": [{ "expr": "serviceexpress_available_professionals", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "serviceexpress_available_professionals", "legendFormat": "" }]
         },
         {
           "id": 10,
@@ -196,7 +196,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "targets": [{ "expr": "serviceexpress_total_services", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "serviceexpress_total_services", "legendFormat": "" }]
         },
         {
           "id": 11,
@@ -212,7 +212,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "targets": [{ "expr": "serviceexpress_total_emergencies", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "serviceexpress_total_emergencies", "legendFormat": "" }]
         },
         {
           "id": 12,
@@ -228,7 +228,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none", "textMode": "value" },
-          "targets": [{ "expr": "serviceexpress_active_emergencies", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "serviceexpress_active_emergencies", "legendFormat": "" }]
         },
         {
           "id": 13,
@@ -247,7 +247,7 @@ data:
               }
             }
           },
-          "targets": [{ "expr": "100 * sum(rate(serviceexpress_bookings_confirmed_total[15m])) / clamp_min(sum(rate(serviceexpress_booking_requests_total[15m])), 1e-9)", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "100 * sum(rate(serviceexpress_bookings_confirmed_total[15m])) / clamp_min(sum(rate(serviceexpress_booking_requests_total[15m])), 1e-9)", "legendFormat": "" }]
         },
         {
           "id": 14,
@@ -266,7 +266,7 @@ data:
               }
             }
           },
-          "targets": [{ "expr": "100 * sum(rate(serviceexpress_bookings_cancelled_total[15m])) / clamp_min(sum(rate(serviceexpress_booking_requests_total[15m])), 1e-9)", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "100 * sum(rate(serviceexpress_bookings_cancelled_total[15m])) / clamp_min(sum(rate(serviceexpress_booking_requests_total[15m])), 1e-9)", "legendFormat": "" }]
         },
         {
           "id": 15,
@@ -285,7 +285,7 @@ data:
               }
             }
           },
-          "targets": [{ "expr": "100 * sum(rate(serviceexpress_bookings_completed_total[15m])) / clamp_min(sum(rate(serviceexpress_bookings_confirmed_total[15m])), 1e-9)", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "100 * sum(rate(serviceexpress_bookings_completed_total[15m])) / clamp_min(sum(rate(serviceexpress_bookings_confirmed_total[15m])), 1e-9)", "legendFormat": "" }]
         },
         {
           "id": 16,
@@ -304,7 +304,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(serviceexpress_professional_assignment_time_seconds_bucket[15m])) by (le))", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "histogram_quantile(0.95, sum(rate(serviceexpress_professional_assignment_time_seconds_bucket[15m])) by (le))", "legendFormat": "" }]
         },
         {
           "id": 17,
@@ -323,7 +323,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(serviceexpress_booking_latency_seconds_bucket[15m])) by (le))", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "histogram_quantile(0.95, sum(rate(serviceexpress_booking_latency_seconds_bucket[15m])) by (le))", "legendFormat": "" }]
         },
         {
           "id": 18,
@@ -339,7 +339,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(rate(serviceexpress_booking_requests_total[5m]))", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "sum(rate(serviceexpress_booking_requests_total[5m]))", "legendFormat": "" }]
         },
         {
           "id": 19,
@@ -358,7 +358,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(serviceexpress_queue_length)", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "sum(serviceexpress_queue_length)", "legendFormat": "" }]
         },
         {
           "id": 20,
@@ -375,7 +375,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-          "targets": [{ "expr": "up{job=\"backend\"}", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "up{job=\"backend\"}", "legendFormat": "" }]
         },
         {
           "id": 21,
@@ -392,7 +392,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-          "targets": [{ "expr": "up{job=\"admin-backend\"}", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "up{job=\"admin-backend\"}", "legendFormat": "" }]
         },
         {
           "id": 22,
@@ -409,7 +409,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-          "targets": [{ "expr": "up{job=\"payment-service\"}", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "up{job=\"payment-service\"}", "legendFormat": "" }]
         },
         {
           "id": 23,
@@ -428,7 +428,7 @@ data:
               }
             }
           },
-          "targets": [{ "expr": "(sum(up{job=~\"backend|admin-backend|payment-service\"}) / 3) * 100", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "738b4fa5-50d8-42df-a09b-47776df89c7e" }, "expr": "(sum(up{job=~\"backend|admin-backend|payment-service\"}) / 3) * 100", "legendFormat": "" }]
         }
       ]
     }
