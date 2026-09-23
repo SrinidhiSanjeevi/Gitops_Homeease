@@ -1,20 +1,16 @@
 # Direct Helm equivalent of apps/payment-service/overlays/azure/dev/{kustomization.yaml,secretproviderclass.yaml}.
 image:
   repository: acrhomeeasedev.azurecr.io/homeease/payment-service
-  tag: b741a64b50c4
-
+  tag: 72f6571e6ae4
 workloadIdentity:
   enabled: true
   # terraform output workload_identity_payment_client_id (id-homeease-payment-dev)
   clientId: "8c163fcc-20af-4071-a7c1-6758d7902866"
-
 keyVault:
   name: kv-homeease-dev-hs01
   tenantId: "71aa34ea-4bb1-42f9-8f28-80e46897411d"
-
 secretProviderClass:
   enabled: true
-
 extraLabels:
   homeease.io/environment: dev
   homeease.io/cloud: azure
