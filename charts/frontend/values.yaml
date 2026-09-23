@@ -36,7 +36,7 @@ pdb:
 
 ingress:
   enabled: true
-  host: app.dev.example.com
+  host: home.dev.example.com
   tlsSecretName: frontend-tls
   clusterIssuer: letsencrypt-prod
   # ssl-redirect true is the ingress-nginx default; azure-dev turns this
