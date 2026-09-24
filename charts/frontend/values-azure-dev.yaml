@@ -3,7 +3,7 @@ image:
   repository: acrhomeeasedev.azurecr.io/homeease/frontend
   tag: 72f6571e6ae4
 ingress:
-  host: app.4-224-88-104.nip.io
+  host: home.4-224-88-104.nip.io
   sslRedirect: false
   extraHostlessRule: true
 extraLabels:
