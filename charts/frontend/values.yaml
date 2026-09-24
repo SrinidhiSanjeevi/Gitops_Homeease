@@ -21,7 +21,7 @@ resources:
     memory: 64Mi
   limits:
     cpu: 200m
-    memory: 128Mie
+    memory: 128Mi
 
 hpa:
   minReplicas: 1
