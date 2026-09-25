@@ -20,6 +20,8 @@ charts/                      one Helm chart per service (frontend, admin-fronten
   <service>/
     Chart.yaml
     values.yaml               cloud/environment-neutral defaults — no registry, no secrets, no hostnames
+    values-azure-prod.yaml    PROD overrides (not deployed yet): same image repository as dev, REPLACE_ME
+                              placeholders for prod-only identifiers, minReplicas 2
     values-azure-dev.yaml     the live AKS-dev overrides this repo's ArgoCD Applications actually use:
                               image tag, ingress host, Workload Identity clientId, Key Vault name/tenant
     values-demo.yaml          standalone values for `helm install` into a throwaway namespace/cluster,
@@ -34,6 +36,10 @@ argocd/
                               Application per service + one Application per done platform/ component
     projects/                 homeease-appproject.yaml (scopes the 5 service Applications) and
                               platform-appproject.yaml (scopes kube-prometheus-stack/Loki/Alloy)
+  azure-prod/                 PROD twin of azure/, for a SEPARATE cluster (aks-homeease-prod) with its own
+                              ArgoCD. NOT APPLIED — that cluster does not exist yet. Nothing here is read by
+                              the dev cluster. Apps use charts/<service>/values-azure-prod.yaml, whose
+                              image.tag is written only by the approval-gated "Promote to PROD" stage.
   _aws-disabled/              PARKED, not read by any live ArgoCD — see its own README.md. Every
                               Application here still points at the deleted `apps/*/overlays/aws/dev`
                               Kustomize tree and was never migrated to Helm; no EKS cluster was ever

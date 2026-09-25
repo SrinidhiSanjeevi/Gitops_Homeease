@@ -3,7 +3,7 @@
 # every Application uses the `default` AppProject, which permits ANY
 # source repo and ANY destination namespace/cluster — no boundary at all.
 #
-# One of these exists per cloud (see ../../aws/projects for the AWS
+# PROD copy (argocd/azure-prod). One of these exists per cloud (see ../../aws/projects for the AWS
 # equivalent) because each cloud runs its own ArgoCD on its own cluster —
 # this is not a cross-cluster resource.
 apiVersion: argoproj.io/v1alpha1
@@ -12,7 +12,7 @@ metadata:
   name: homeease
   namespace: argocd
 spec:
-  description: HomeEase application services on AKS (frontend, admin-frontend, backend, admin-backend, payment-service)
+  description: HomeEase application services on AKS PROD (frontend, admin-frontend, backend, admin-backend, payment-service)
 
   # Only this repo may be a source. An Application in this project
   # pointing at a different Git URL is rejected at admission, not just
@@ -20,12 +20,11 @@ spec:
   sourceRepos:
     - "https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git"
 
-  # DEV cluster only. PROD is a separate cluster with its own ArgoCD and
-  # its own copy of this project — see argocd/azure-prod/ — so
-  # homeease-prod is deliberately NOT a destination here.
+  # PROD cluster only ever hosts homeease-prod. Same resource allow-lists
+  # as argocd/azure/projects/homeease-appproject.yaml — only this differs.
   destinations:
     - server: https://kubernetes.default.svc
-      namespace: "homeease-dev"
+      namespace: "homeease-prod"
 
   # Cluster-scoped resources are the highest blast-radius risk if a
   # compromised or mis-templated Application tries to create them.
