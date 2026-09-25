@@ -1,0 +1,36 @@
+# Azure PROD overrides — the prod twin of values-azure-dev.yaml.
+#
+# STATUS: NOT DEPLOYED. No prod AKS cluster exists yet — Infrastructure_
+# Homeease terraform/azure/environments/prod has never been applied, and
+# nothing syncs this file until argocd/azure-prod/bootstrap/root-app.yaml
+# is applied to that cluster. Every REPLACE_ME value comes from the prod
+# Terraform outputs once it is applied; the underscores are deliberate —
+# they are invalid in hostnames/UUIDs, so a premature sync fails loudly
+# instead of half-working.
+#
+# image.repository is the SAME registry + repository as DEV on purpose:
+# prod runs the exact image DEV verified (build once, promote the tag).
+# image.tag is written ONLY by azure-pipelines.yml "Promote to PROD",
+# which runs only after DEV verification and a human approval on the
+# homeease-prod Azure DevOps environment. Never edited by a DEV run.
+image:
+  repository: acrhomeeasedev.azurecr.io/homeease/admin-backend
+  tag: not-yet-promoted
+ingress:
+  host: REPLACE_ME_prod_admin_api_host
+hpa:
+  minReplicas: 2
+workloadIdentity:
+  enabled: true
+  # terraform output workload_identity_app_client_id (id-homeease-app-prod)
+  clientId: "REPLACE_ME_prod_app_client_id"
+keyVault:
+  name: kv-homeease-prod-hs01
+  tenantId: "REPLACE_ME_tenant_id"
+secretProviderClass:
+  enabled: true
+extraLabels:
+  homeease.io/environment: prod
+  homeease.io/cloud: azure
+env:
+  azureStorageAccountName: "REPLACE_ME_prod_storage_account"

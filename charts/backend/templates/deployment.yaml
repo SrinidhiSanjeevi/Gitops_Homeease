@@ -85,6 +85,12 @@ spec:
           env:
             - name: PAYMENT_SERVICE_URL
               value: {{ .Values.env.paymentServiceUrl }}
+            # Reported by /health/live so the pipeline's Verify DEV stage
+            # can confirm which image is actually serving. Same value as
+            # the image tag — changes only when the tag already changes,
+            # so it never causes an extra rollout.
+            - name: APP_VERSION
+              value: {{ .Values.image.tag | quote }}
             {{- if .Values.env.azureStorageAccountName }}
             - name: AZURE_STORAGE_ACCOUNT_NAME
               value: {{ .Values.env.azureStorageAccountName | quote }}
