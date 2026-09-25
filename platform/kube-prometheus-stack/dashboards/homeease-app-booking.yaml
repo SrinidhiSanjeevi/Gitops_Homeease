@@ -39,7 +39,7 @@ data:
           "gridPos": { "h": 5, "w": 8, "x": 8, "y": 0 },
           "fieldConfig": { "defaults": { "unit": "short" } },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(serviceexpress_active_bookings)" }]
+          "targets": [{ "expr": "sum(max by (status) (serviceexpress_bookings_by_status{status=~\"Created|Assigned|Confirmed\"}))" }]
         },
         {
           "id": 6, "title": "Confirmed Bookings (rate)", "type": "stat",

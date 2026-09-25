@@ -47,7 +47,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "serviceexpress_total_bookings", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_total_bookings)", "legendFormat": "" }]
         },
         {
           "id": 2,
@@ -64,7 +64,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "serviceexpress_bookings_by_status{status=\"Completed\"}", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_bookings_by_status{status=\"Completed\"})", "legendFormat": "" }]
         },
         {
           "id": 3,
@@ -81,7 +81,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "serviceexpress_bookings_by_status{status=\"Confirmed\"}", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_bookings_by_status{status=\"Confirmed\"})", "legendFormat": "" }]
         },
         {
           "id": 4,
@@ -98,7 +98,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "serviceexpress_bookings_by_status{status=\"Cancelled\"}", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_bookings_by_status{status=\"Cancelled\"})", "legendFormat": "" }]
         },
         {
           "id": 5,
@@ -114,7 +114,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(serviceexpress_bookings_by_status{status=~\"Created|Assigned|Confirmed\"})", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(max by (status) (serviceexpress_bookings_by_status{status=~\"Created|Assigned|Confirmed\"}))", "legendFormat": "" }]
         },
         {
           "id": 6,
@@ -131,7 +131,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "serviceexpress_total_revenue", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_total_revenue)", "legendFormat": "" }]
         },
         {
           "id": 7,
@@ -147,7 +147,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "serviceexpress_total_users", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_total_users)", "legendFormat": "" }]
         },
         {
           "id": 8,
@@ -163,7 +163,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "serviceexpress_total_professionals", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_total_professionals)", "legendFormat": "" }]
         },
         {
           "id": 9,
@@ -180,7 +180,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "serviceexpress_available_professionals", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_available_professionals)", "legendFormat": "" }]
         },
         {
           "id": 10,
@@ -196,7 +196,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "serviceexpress_total_services", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_total_services)", "legendFormat": "" }]
         },
         {
           "id": 11,
@@ -212,7 +212,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "serviceexpress_total_emergencies", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_total_emergencies)", "legendFormat": "" }]
         },
         {
           "id": 12,
@@ -228,7 +228,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "serviceexpress_active_emergencies", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_active_emergencies)", "legendFormat": "" }]
         },
         {
           "id": 13,

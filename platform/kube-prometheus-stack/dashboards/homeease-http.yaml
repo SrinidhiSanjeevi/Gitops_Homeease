@@ -44,7 +44,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(rate(http_requests_total{code=~\"4..\"}[5m])) by (job)", "legendFormat": "{{job}}" }]
+          "targets": [{ "expr": "(sum(rate(http_requests_total{code=~\"4..\"}[5m])) by (job)) or (up{job=~\"backend|admin-backend\"} * 0)", "legendFormat": "{{job}}" }]
         },
         {
           "id": 5, "title": "HTTP 5xx Errors (by service)", "type": "stat",
@@ -56,7 +56,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(rate(http_requests_total{code=~\"5..\"}[5m])) by (job)", "legendFormat": "{{job}}" }]
+          "targets": [{ "expr": "(sum(rate(http_requests_total{code=~\"5..\"}[5m])) by (job)) or (up{job=~\"backend|admin-backend\"} * 0)", "legendFormat": "{{job}}" }]
         },
         {
           "id": 6, "title": "Error Percentage (5xx / total)", "type": "gauge",
@@ -67,7 +67,7 @@ data:
               "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 5 }] }
             }
           },
-          "targets": [{ "expr": "100 * sum(rate(http_requests_total{code=~\"5..\"}[5m])) / clamp_min(sum(rate(http_requests_total[5m])), 1e-9)" }]
+          "targets": [{ "expr": "100 * (sum(rate(http_requests_total{code=~\"5..\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_requests_total[5m])), 1e-9)" }]
         },
         {
           "id": 8, "title": "P95 Latency (by service)", "type": "stat",
