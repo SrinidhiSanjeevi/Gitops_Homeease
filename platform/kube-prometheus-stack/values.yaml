@@ -109,10 +109,10 @@ grafana:
   resources:
     requests:
       cpu: 50m
-      memory: 128Mi
+      memory: 256Mi
     limits:
       cpu: 200m
-      memory: 256Mi
+      memory: 512Mi
 
   # Grafana 13 (distroless) moves its bundled plugins (Prometheus, Loki, …)
   # at startup. With a read-only root filesystem that move fails
