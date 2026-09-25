@@ -114,6 +114,16 @@ grafana:
       cpu: 200m
       memory: 256Mi
 
+  # Grafana 13 (distroless) moves its bundled plugins (Prometheus, Loki, …)
+  # at startup. With a read-only root filesystem that move fails
+  # ("unlinkat /usr/share/grafana/data/plugins-bundled/...: read-only file
+  # system") and Grafana ends up with NO Prometheus/Loki plugin — every
+  # dashboard panel then errors with "No data". Everything else in the
+  # chart's default security context (non-root, no privilege escalation,
+  # all capabilities dropped) stays in place.
+  containerSecurityContext:
+    readOnlyRootFilesystem: false
+
   # Declarative dashboards: the sidecar watches for ConfigMaps carrying
   # the label below (any namespace — this is a dev cluster, not multi-
   # tenant) and loads/updates/removes them from Grafana automatically.
