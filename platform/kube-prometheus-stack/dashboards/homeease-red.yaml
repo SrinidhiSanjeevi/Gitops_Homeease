@@ -68,7 +68,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(rate(http_requests_total{code=~\"4..\"}[5m]))" }]
+          "targets": [{ "expr": "sum(rate(http_requests_total{code=~\"4..\"}[5m])) or vector(0)" }]
         },
         {
           "id": 5, "title": "Total 5xx Error Rate", "type": "stat",
@@ -80,7 +80,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-          "targets": [{ "expr": "sum(rate(http_requests_total{code=~\"5..\"}[5m]))" }]
+          "targets": [{ "expr": "sum(rate(http_requests_total{code=~\"5..\"}[5m])) or vector(0)" }]
         },
         {
           "id": 6, "title": "5xx Errors (by service)", "type": "stat",
@@ -92,7 +92,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(rate(http_requests_total{code=~\"5..\"}[5m])) by (job)", "legendFormat": "{{job}}" }]
+          "targets": [{ "expr": "(sum(rate(http_requests_total{code=~\"5..\"}[5m])) by (job)) or (up{job=~\"backend|admin-backend|payment-service\"} * 0)", "legendFormat": "{{job}}" }]
         },
 
         {
