@@ -1,21 +1,24 @@
 # Picked up automatically — no extra wiring needed. The platform's
 # Prometheus already watches every PrometheusRule in every namespace
 # (ruleSelectorNilUsesHelmValues: false, ruleNamespaceSelector: {} in
-# ../values.yaml). Alertmanager routing/receivers are out of scope here
-# (see the "Slack routing" note in ../values.yaml) — until that's built,
-# every alert lands in the chart's default "null" receiver: it fires and
-# is visible in Prometheus/Alertmanager's UI, it just doesn't page anyone
-# yet.
+# ../values.yaml). Alertmanager routes these to the HomeEase Teams
+# channels (see ../values.yaml): a first-time alert goes to
+# monitoring-alerts (app) or infrastructure (cluster), and the
+# homeease.escalation group below re-fires anything still critical
+# after 10 minutes / 12 hours into the incidents channel + Outlook.
 #
-# 7 alerts total — each one gated to avoid firing on normal noise
+# 7 base alerts — each one gated to avoid firing on normal noise
 # (a single pod restart during a rollout, a brief latency blip):
 #   1. BackendPodUnavailable — zero available replicas
 #   2. HighHttp5xxRate — >5% 5xx rate sustained 5m
 #   3. HighHttpLatency — p95 > 1s sustained 5m
 #   4. PodCrashLooping — >3 restarts in 15m
-#   5. ServiceUnavailable — any scrape target down 2m
+#   5. ServiceUnavailable — no pod of a service scrapeable (or job gone) 2m
 #   6. PaymentFailureRateHigh — >5% payment failure rate sustained 5m
-#   7. BookingQueueSizeHigh — queue > 100 items sustained 3m
+#   7. BookingsAwaitingProfessional — >5 bookings with no professional 15m
+# Plus 2 escalation meta-alerts (homeease.escalation group, bottom of file):
+#   8. EscalationL1 — any critical alert still firing after 10m
+#   9. EscalationL2 — any critical alert still firing after 12h
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -44,9 +47,12 @@ spec:
 
         - alert: HighHttp5xxRate
           expr: >-
-            100 * sum(rate(http_requests_total{code=~"5.."}[5m])) by (job)
-            / clamp_min(sum(rate(http_requests_total[5m])) by (job), 1e-9)
-            > 5
+            (
+              100 * sum by (namespace, job) (rate(http_requests_total{code=~"5.."}[5m]))
+              / sum by (namespace, job) (rate(http_requests_total[5m]))
+              > 5
+            )
+            and sum by (namespace, job) (rate(http_requests_total[5m])) > 0.05
           for: 5m
           labels:
             severity: warning
@@ -56,11 +62,13 @@ spec:
               5xx error rate for {{ $labels.job }} has been above 5% for
               5 minutes ({{ $value | printf "%.1f" }}% now). Threshold is
               deliberately loose (5%, sustained) to avoid paging on a
-              single failed request or a brief deploy blip.
+              single failed request or a brief deploy blip. Only evaluated
+              above ~3 requests/minute, so one 5xx on an idle service
+              doesn't count as 100%.
 
         - alert: HighHttpLatency
           expr: >-
-            histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job))
+            histogram_quantile(0.95, sum by (le, namespace, job) (rate(http_request_duration_seconds_bucket[5m])))
             > 1
           for: 5m
           labels:
@@ -88,25 +96,30 @@ spec:
               this catches an actual crash loop.
 
         - alert: ServiceUnavailable
-          expr: up{job=~"backend|admin-backend|payment-service"} == 0
+          # Per service, not per pod: fires when no replica of the job can be
+          # scraped, or when the job has vanished from Prometheus entirely.
+          expr: >-
+            max by (namespace, job) (up{job=~"backend|admin-backend|payment-service"}) == 0
+            or absent(up{job="backend"})
+            or absent(up{job="admin-backend"})
+            or absent(up{job="payment-service"})
           for: 2m
           labels:
             severity: critical
           annotations:
-            summary: "{{ $labels.job }} scrape target is DOWN"
+            summary: "{{ $labels.job }} is DOWN"
             description: >-
-              Prometheus cannot scrape {{ $labels.job }} (instance
-              {{ $labels.instance }}) — the target has been down for 2
-              minutes. Check pod health: `kubectl -n homeease-dev get pods
-              -l app={{ $labels.job }}`.
+              Prometheus has been unable to scrape any {{ $labels.job }}
+              pod for 2 minutes. Check pod health: `kubectl -n homeease-dev
+              get pods -l app.kubernetes.io/name={{ $labels.job }}`.
 
         - alert: PaymentFailureRateHigh
           expr: >-
             100 * sum(rate(payment_verify_failed_total{job="payment-service"}[5m]))
-            / clamp_min(
+            / (
               sum(rate(payment_verify_success_total{job="payment-service"}[5m]))
-              + sum(rate(payment_verify_failed_total{job="payment-service"}[5m])),
-              1e-9
+              + sum(rate(payment_verify_failed_total{job="payment-service"}[5m]))
+              > 0
             ) > 5
           for: 5m
           labels:
@@ -120,15 +133,69 @@ spec:
               or a configuration problem (RAZORPAY_KEY_SECRET mismatch).
               Check payment-service logs.
 
-        - alert: BookingQueueSizeHigh
-          expr: sum(serviceexpress_queue_length) > 100
-          for: 3m
+        # Bookings in status "Assigned" are paid/placed but still have no
+        # professional (the scheduler retries them every minute). This is the
+        # real assignment queue — a DB count set by the backend's metrics
+        # collector. serviceexpress_queue_length only counts in-flight
+        # create-booking requests, so it can't show a backlog.
+        - alert: BookingsAwaitingProfessional
+          expr: max(serviceexpress_bookings_by_status{status="Assigned"}) > 5
+          for: 15m
           labels:
             severity: warning
           annotations:
-            summary: "Booking assignment queue has more than 100 items"
+            summary: "More than 5 bookings are waiting for a professional"
             description: >-
-              serviceexpress_queue_length has been above 100 for 3 minutes
-              (current: {{ $value | printf "%.0f" }}). This suggests
-              professional capacity is insufficient for demand. Consider
-              scaling or activating more professionals.
+              {{ $value | printf "%.0f" }} bookings have had no professional
+              assigned for 15 minutes. Professional capacity is short for
+              some category or area: set more professionals Available or
+              extend their service areas in the admin console.
+
+    # Escalation meta-alerts: re-fire on the ALERTS metric that every rule
+    # above already produces while it's active, rather than duplicating
+    # each rule's expr. `for: 10m` / `for: 12h` counts from when the
+    # ORIGINAL alert started firing (Prometheus tracks ALERTS continuously
+    # for the underlying series), so these trigger 10m / 12h after the
+    # real incident began, not 10m / 12h after Alertmanager first posted
+    # it. label_replace copies alertname -> original_alertname so the
+    # Teams card and the email both say which alert is escalating, and
+    # excludes Watchdog and the escalation alerts themselves so this
+    # doesn't loop on its own output.
+    - name: homeease.escalation
+      rules:
+        - alert: EscalationL1
+          expr: >-
+            label_replace(
+              ALERTS{alertstate="firing", severity="critical",
+                     alertname!~"EscalationL1|EscalationL2|Watchdog"},
+              "original_alertname", "$1", "alertname", "(.*)"
+            )
+          for: 10m
+          labels:
+            severity: critical
+            escalation: l1
+          annotations:
+            summary: "ESCALATION (10m): {{ $labels.original_alertname }} still firing in {{ $labels.namespace }}"
+            description: >-
+              {{ $labels.original_alertname }} has been firing for at
+              least 10 minutes with no resolution. Routed to #incidents
+              and the on-call inbox — see the original alert in
+              Alertmanager/Grafana for full detail.
+
+        - alert: EscalationL2
+          expr: >-
+            label_replace(
+              ALERTS{alertstate="firing", severity="critical",
+                     alertname!~"EscalationL1|EscalationL2|Watchdog"},
+              "original_alertname", "$1", "alertname", "(.*)"
+            )
+          for: 12h
+          labels:
+            severity: critical
+            escalation: l2
+          annotations:
+            summary: "ESCALATION (12h): {{ $labels.original_alertname }} unresolved in {{ $labels.namespace }}"
+            description: >-
+              {{ $labels.original_alertname }} has been firing, unresolved,
+              for at least 12 hours. Routed to #incidents and the
+              lead/manager inbox as a standing incident.
