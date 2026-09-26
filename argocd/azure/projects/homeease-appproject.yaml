@@ -28,10 +28,14 @@ spec:
       namespace: "homeease-dev"
 
   # Cluster-scoped resources are the highest blast-radius risk if a
-  # compromised or mis-templated Application tries to create them.
-  # HomeEase's services never need to — deny everything cluster-scoped by
-  # leaving this list empty rather than allowing "*".
-  clusterResourceWhitelist: []
+  # compromised or mis-templated Application tries to create them, so
+  # everything cluster-scoped is denied except Namespace. That one is
+  # required by syncOptions CreateNamespace=true on every Application
+  # here: without it a fresh cluster (no homeease-dev yet) never syncs —
+  # "resource :Namespace is not permitted in project homeease".
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
 
   # Namespace-scoped kinds the four services legitimately need. Notably
   # absent: ResourceQuota/LimitRange (namespace-owner concern, managed by
