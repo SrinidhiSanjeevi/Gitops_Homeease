@@ -2,19 +2,19 @@
 # full explanation of the workloadIdentity/secretProviderClass caveat
 # (same shared identity, same federation boundary applies here too).
 image:
-  repository: acrhomeeasedev.azurecr.io/homeease/admin-backend
+  repository: acrhomeeasedev01.azurecr.io/homeease/admin-backend
   tag: 5d4e71d3fcd2
 
 ingress:
-  host: admin-demo.4-224-88-104.nip.io
+  host: admin-demo.20-207-75-39.nip.io
 
 workloadIdentity:
   enabled: true
-  clientId: "89286efc-8fa8-4e09-9664-a3b86fdeff89"
+  clientId: "9850ab0c-1f03-4a65-8f77-c4ff988a1af4"
 
 keyVault:
-  name: kv-homeease-dev-hs01
-  tenantId: "71aa34ea-4bb1-42f9-8f28-80e46897411d"
+  name: kv-homeease-dev-hs02
+  tenantId: "268c9f5b-bb6f-44e8-b872-ea399b1998c2"
 
 secretProviderClass:
   enabled: true
@@ -24,4 +24,4 @@ extraLabels:
   homeease.io/cloud: azure
 
 env:
-  azureStorageAccountName: "sthomeeaseimggvz8nk"
+  azureStorageAccountName: "sthomeeaseimgayhiue"

@@ -4,16 +4,16 @@
 # charts/backend/values-demo.yaml for the workloadIdentity/
 # secretProviderClass federation caveat that applies here too.
 image:
-  repository: acrhomeeasedev.azurecr.io/homeease/payment-service
+  repository: acrhomeeasedev01.azurecr.io/homeease/payment-service
   tag: 8af8212190cc
 
 workloadIdentity:
   enabled: true
-  clientId: "8c163fcc-20af-4071-a7c1-6758d7902866"
+  clientId: "906080fd-636f-4c49-ab58-f7da81381014"
 
 keyVault:
-  name: kv-homeease-dev-hs01
-  tenantId: "71aa34ea-4bb1-42f9-8f28-80e46897411d"
+  name: kv-homeease-dev-hs02
+  tenantId: "268c9f5b-bb6f-44e8-b872-ea399b1998c2"
 
 secretProviderClass:
   enabled: true
