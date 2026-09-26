@@ -15,8 +15,7 @@ spec:
     # to this Helm chart — Phase 3 validation confirmed 33/33 rendered
     # resources identical across all 4 services, zero functional
     # differences, exact selector matches against the live cluster.
-    # Kustomize path kept in the repo (not deleted yet) until this
-    # cutover is verified live.
+    # The Kustomize tree has since been deleted (see root README.md).
     path: charts/payment-service
     helm:
       valueFiles:

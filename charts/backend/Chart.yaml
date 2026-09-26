@@ -1,6 +1,6 @@
 apiVersion: v2
 name: backend
-description: HomeEase backend API — Helm equivalent of apps/backend Kustomize base+overlay
+description: HomeEase backend API — the customer-facing Node.js/Express service
 type: application
 version: 0.1.0
 appVersion: "1.0.0"
