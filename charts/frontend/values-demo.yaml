@@ -5,11 +5,11 @@
 # ingress-nginx admission-webhook level (host+path must be globally
 # unique across the cluster, not just per-namespace).
 image:
-  repository: acrhomeeasedev.azurecr.io/homeease/frontend
+  repository: acrhomeeasedev01.azurecr.io/homeease/frontend
   tag: 5d4e71d3fcd2
 
 ingress:
-  host: app-demo.4-224-88-104.nip.io
+  host: app-demo.20-207-75-39.nip.io
   sslRedirect: false
   extraHostlessRule: false # avoid a second host-less rule fighting with the live one for the same bare IP
 

@@ -14,7 +14,7 @@
 # which runs only after DEV verification and a human approval on the
 # homeease-prod Azure DevOps environment. Never edited by a DEV run.
 image:
-  repository: acrhomeeasedev.azurecr.io/homeease/frontend
+  repository: acrhomeeasedev01.azurecr.io/homeease/frontend
   tag: not-yet-promoted
 # sslRedirect stays at the chart default (true) — unlike DEV's IP-based
 # presentation URL, prod must serve HTTPS, which needs cert-manager
