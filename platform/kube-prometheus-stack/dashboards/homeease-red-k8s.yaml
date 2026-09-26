@@ -74,13 +74,13 @@ data:
           "id": 9, "title": "Pod Restarts (1h, by pod)", "type": "stat",
           "gridPos": { "h": 6, "w": 8, "x": 0, "y": 5 },
           "fieldConfig": {
-            "defaults": {
+            "defaults": { "decimals": 0,
               "unit": "short",
               "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 3 }] }
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=\"homeease-dev\"}[1h])) by (pod)", "legendFormat": "{{pod}}" }]
+          "targets": [{ "expr": "round(sum(increase(kube_pod_container_status_restarts_total{namespace=\"homeease-dev\"}[1h])) by (pod))", "legendFormat": "{{pod}}" }]
         },
         {
           "id": 11, "title": "CPU Usage (cores, by pod)", "type": "stat",

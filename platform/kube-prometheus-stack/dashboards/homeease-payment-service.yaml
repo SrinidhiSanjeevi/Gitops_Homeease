@@ -6,7 +6,7 @@
 # (paymentOrderCreatedTotal, paymentVerifySuccessTotal,
 # paymentVerifyFailedTotal, paymentRefundTotal — all real call sites, not
 # dead code). Scrape config comes from
-# gitops_homeease/apps/payment-service/base/servicemonitor.yaml (port
+# gitops_homeease/charts/payment-service/templates/servicemonitor.yaml (port
 # "http", path /metrics) — job label = "payment-service".
 #
 # KEY FIX: KPI stat panels now use round(increase(counter[$__range])) to
@@ -48,7 +48,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-          "targets": [{ "expr": "up{job=\"payment-service\"}", "legendFormat": "" }]
+          "targets": [{ "expr": "min(up{job=\"payment-service\"})", "legendFormat": "" }]
         },
         {
           "id": 10,
@@ -149,7 +149,7 @@ data:
               }
             }
           },
-          "targets": [{ "expr": "100 * sum(rate(payment_verify_success_total{job=\"payment-service\"}[15m])) / clamp_min(sum(rate(payment_order_created_total{job=\"payment-service\"}[15m])), 1e-9)", "legendFormat": "" }]
+          "targets": [{ "expr": "100 * sum(rate(payment_verify_success_total{job=\"payment-service\"}[15m])) / ((sum(rate(payment_verify_success_total{job=\"payment-service\"}[15m])) + sum(rate(payment_verify_failed_total{job=\"payment-service\"}[15m]))) > 0)", "legendFormat": "" }]
         },
         {
           "id": 7,
@@ -168,7 +168,7 @@ data:
               }
             }
           },
-          "targets": [{ "expr": "100 * sum(rate(payment_verify_failed_total{job=\"payment-service\"}[15m])) / clamp_min(sum(rate(payment_order_created_total{job=\"payment-service\"}[15m])), 1e-9)", "legendFormat": "" }]
+          "targets": [{ "expr": "100 * sum(rate(payment_verify_failed_total{job=\"payment-service\"}[15m])) / ((sum(rate(payment_verify_success_total{job=\"payment-service\"}[15m])) + sum(rate(payment_verify_failed_total{job=\"payment-service\"}[15m]))) > 0)", "legendFormat": "" }]
         },
         {
           "id": 8,
@@ -264,7 +264,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(rate(http_requests_total{job=\"payment-service\", code=~\"4..\"}[5m]))", "legendFormat": "" }]
+          "targets": [{ "expr": "sum(rate(http_requests_total{job=\"payment-service\", code=~\"4..\"}[5m])) or vector(0)", "legendFormat": "" }]
         },
         {
           "id": 15,
@@ -280,7 +280,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-          "targets": [{ "expr": "sum(rate(http_requests_total{job=\"payment-service\", code=~\"5..\"}[5m]))", "legendFormat": "" }]
+          "targets": [{ "expr": "sum(rate(http_requests_total{job=\"payment-service\", code=~\"5..\"}[5m])) or vector(0)", "legendFormat": "" }]
         }
       ]
     }

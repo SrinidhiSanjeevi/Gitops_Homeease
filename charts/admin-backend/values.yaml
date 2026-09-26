@@ -31,6 +31,11 @@ pdb:
 ingress:
   enabled: true
   host: admin.dev.example.com
+  # Only the API and health routes are public. /metrics (business counts,
+  # revenue) stays cluster-internal — Prometheus scrapes it via the Service.
+  paths:
+    - /api
+    - /health
   tlsSecretName: admin-backend-tls
   clusterIssuer: letsencrypt-prod
 
@@ -62,3 +67,7 @@ extraLabels: {}
 
 env:
   azureStorageAccountName: ""
+
+# Scraped by the platform Prometheus (needs the monitoring.coreos.com CRDs).
+serviceMonitor:
+  enabled: true

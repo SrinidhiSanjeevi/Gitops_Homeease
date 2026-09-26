@@ -1,3 +1,4 @@
+{{- if .Values.serviceMonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -5,6 +6,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "admin-backend.labels" . | nindent 4 }}
+  annotations:
+    # The CRD comes from the monitoring app; on a fresh cluster this app can
+    # sync first. Skip the dry-run instead of failing the whole sync.
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   selector:
     matchLabels:
@@ -13,3 +18,4 @@ spec:
     - port: http
       path: /metrics
       interval: 15s
+{{- end }}
