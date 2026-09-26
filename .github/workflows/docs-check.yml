@@ -15,3 +15,13 @@ jobs:
           python-version: "3.x"
       - name: Check documented paths exist
         run: python3 .github/scripts/check_doc_paths.py
+
+  check-prod-placeholders:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Check no REPLACE_ME reaches a live Application
+        run: python3 .github/scripts/check_prod_placeholders.py
