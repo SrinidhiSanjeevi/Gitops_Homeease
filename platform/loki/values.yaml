@@ -58,7 +58,7 @@ singleBinary:
   replicas: 1
   resources:
     requests:
-      cpu: 100m
+      cpu: 50m # was 100m — DEV is one 2-vCPU node (Free Trial 4-vCPU cap)
       memory: 256Mi
     limits:
       cpu: 500m

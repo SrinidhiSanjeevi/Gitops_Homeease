@@ -18,3 +18,9 @@ extraLabels:
   homeease.io/cloud: azure
 env:
   azureStorageAccountName: "sthomeeaseimgayhiue"
+# Free Trial subscription: hard 4-vCPU cap, so DEV is one 2-vCPU node.
+# Only the CPU *request* is lowered so the whole stack schedules; limits
+# come from values.yaml unchanged, so the pod can still burst.
+resources:
+  requests:
+    cpu: 50m
