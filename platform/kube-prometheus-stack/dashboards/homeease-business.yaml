@@ -119,7 +119,7 @@ data:
         {
           "id": 6,
           "title": "Total Revenue (₹)",
-          "description": "Sum of totalPrice for Confirmed + Completed bookings (DB gauge)",
+          "description": "Money actually collected: totalPrice of Paid and cash-collected bookings plus late-cancellation fees (DB gauge, backend metricsCollector)",
           "type": "stat",
           "gridPos": { "h": 5, "w": 4, "x": 20, "y": 0 },
           "fieldConfig": {
@@ -232,7 +232,7 @@ data:
         },
         {
           "id": 13,
-          "title": "Booking Confirmation Rate (15m)",
+          "title": "Booking Confirmation Rate (all bookings)",
           "description": "% of booking requests that were confirmed in the last 15 minutes",
           "type": "gauge",
           "gridPos": { "h": 6, "w": 8, "x": 0, "y": 10 },
@@ -247,11 +247,11 @@ data:
               }
             }
           },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "100 * sum(rate(serviceexpress_bookings_confirmed_total[15m])) / clamp_min(sum(rate(serviceexpress_booking_requests_total[15m])), 1e-9)", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "100 * (max(serviceexpress_bookings_by_status{status=\"Confirmed\"}) + max(serviceexpress_bookings_by_status{status=\"Completed\"})) / (max(serviceexpress_total_bookings) > 0)", "legendFormat": "" }]
         },
         {
           "id": 14,
-          "title": "Booking Cancellation Rate (15m)",
+          "title": "Booking Cancellation Rate (all bookings)",
           "description": "% of booking requests that were cancelled in the last 15 minutes",
           "type": "gauge",
           "gridPos": { "h": 6, "w": 8, "x": 8, "y": 10 },
@@ -266,11 +266,11 @@ data:
               }
             }
           },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "100 * sum(rate(serviceexpress_bookings_cancelled_total[15m])) / clamp_min(sum(rate(serviceexpress_booking_requests_total[15m])), 1e-9)", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "100 * max(serviceexpress_bookings_by_status{status=\"Cancelled\"}) / (max(serviceexpress_total_bookings) > 0)", "legendFormat": "" }]
         },
         {
           "id": 15,
-          "title": "Booking Completion Rate (15m)",
+          "title": "Booking Completion Rate (confirmed bookings)",
           "description": "% of confirmed bookings that reached Completed in the last 15 minutes",
           "type": "gauge",
           "gridPos": { "h": 6, "w": 8, "x": 16, "y": 10 },
@@ -285,12 +285,12 @@ data:
               }
             }
           },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "100 * sum(rate(serviceexpress_bookings_completed_total[15m])) / clamp_min(sum(rate(serviceexpress_bookings_confirmed_total[15m])), 1e-9)", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "100 * max(serviceexpress_bookings_by_status{status=\"Completed\"}) / ((max(serviceexpress_bookings_by_status{status=\"Completed\"}) + max(serviceexpress_bookings_by_status{status=\"Confirmed\"})) > 0)", "legendFormat": "" }]
         },
         {
           "id": 16,
           "title": "Professional Assignment Latency (p95)",
-          "description": "95th percentile of time taken to assign a professional to a booking (seconds). Observed since pod start.",
+          "description": "95th percentile time from booking creation to a professional being assigned, over the selected time range. Empty when no assignment happened in the range.",
           "type": "stat",
           "gridPos": { "h": 6, "w": 6, "x": 0, "y": 16 },
           "fieldConfig": {
@@ -304,7 +304,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "histogram_quantile(0.95, sum(rate(serviceexpress_professional_assignment_time_seconds_bucket[15m])) by (le))", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "histogram_quantile(0.95, sum(increase(serviceexpress_professional_assignment_time_seconds_bucket[$__range])) by (le))", "legendFormat": "" }]
         },
         {
           "id": 17,
@@ -323,7 +323,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "histogram_quantile(0.95, sum(rate(serviceexpress_booking_latency_seconds_bucket[15m])) by (le))", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "histogram_quantile(0.95, sum(increase(serviceexpress_booking_latency_seconds_bucket[$__range])) by (le))", "legendFormat": "" }]
         },
         {
           "id": 18,
@@ -343,7 +343,7 @@ data:
         },
         {
           "id": 19,
-          "title": "Booking Queue Length",
+          "title": "Bookings Awaiting a Professional",
           "description": "Number of bookings currently waiting for professional assignment",
           "type": "stat",
           "gridPos": { "h": 6, "w": 6, "x": 18, "y": 16 },
@@ -358,7 +358,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(serviceexpress_queue_length)", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_bookings_by_status{status=\"Assigned\"})", "legendFormat": "" }]
         },
         {
           "id": 20,
@@ -375,7 +375,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "up{job=\"backend\"}", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "min(up{job=\"backend\"})", "legendFormat": "" }]
         },
         {
           "id": 21,
@@ -392,7 +392,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "up{job=\"admin-backend\"}", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "min(up{job=\"admin-backend\"})", "legendFormat": "" }]
         },
         {
           "id": 22,
@@ -409,7 +409,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "up{job=\"payment-service\"}", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "min(up{job=\"payment-service\"})", "legendFormat": "" }]
         },
         {
           "id": 23,
@@ -428,7 +428,7 @@ data:
               }
             }
           },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "(sum(up{job=~\"backend|admin-backend|payment-service\"}) / 3) * 100", "legendFormat": "" }]
+          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "100 * sum(max by (job) (up{job=~\"backend|admin-backend|payment-service\"})) / 3", "legendFormat": "" }]
         }
       ]
     }

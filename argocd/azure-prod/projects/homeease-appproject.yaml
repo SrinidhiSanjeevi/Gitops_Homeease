@@ -30,7 +30,11 @@ spec:
   # compromised or mis-templated Application tries to create them.
   # HomeEase's services never need to — deny everything cluster-scoped by
   # leaving this list empty rather than allowing "*".
-  clusterResourceWhitelist: []
+  # Namespace only — needed by syncOptions CreateNamespace=true on a fresh
+  # cluster (same fix as argocd/azure/projects/homeease-appproject.yaml).
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
 
   # Namespace-scoped kinds the four services legitimately need. Notably
   # absent: ResourceQuota/LimitRange (namespace-owner concern, managed by

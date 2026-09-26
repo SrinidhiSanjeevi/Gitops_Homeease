@@ -84,3 +84,7 @@ secretProviderClass:
       envKey: MONGO_URI
 
 extraLabels: {}
+
+# Scraped by the platform Prometheus (needs the monitoring.coreos.com CRDs).
+serviceMonitor:
+  enabled: true

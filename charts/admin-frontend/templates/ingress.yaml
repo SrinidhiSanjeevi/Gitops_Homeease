@@ -10,6 +10,9 @@ metadata:
     # No-op until platform/cert-manager is actually installed (still a
     # placeholder per platform/README.md) — harmless to set now.
     cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer }}
+    # Admin image uploads are capped at 5 MB by admin-backend; ingress-nginx's
+    # default request body limit is 1 MB.
+    nginx.ingress.kubernetes.io/proxy-body-size: "6m"
     {{- if not .Values.ingress.sslRedirect }}
     # Presentation URL: serves plain HTTP directly instead of
     # 308-redirecting to HTTPS, which has no valid certificate for an IP

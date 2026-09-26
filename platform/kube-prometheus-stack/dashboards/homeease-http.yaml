@@ -32,7 +32,7 @@ data:
           "gridPos": { "h": 5, "w": 8, "x": 0, "y": 0 },
           "fieldConfig": { "defaults": { "unit": "reqps" } },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(rate(http_requests_total[5m])) by (job)", "legendFormat": "{{job}}" }]
+          "targets": [{ "expr": "sum(rate(http_requests_total{job=~\"backend|admin-backend|payment-service\"}[5m])) by (job)", "legendFormat": "{{job}}" }]
         },
         {
           "id": 4, "title": "HTTP 4xx Errors (by service)", "type": "stat",
@@ -44,7 +44,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "(sum(rate(http_requests_total{code=~\"4..\"}[5m])) by (job)) or (up{job=~\"backend|admin-backend\"} * 0)", "legendFormat": "{{job}}" }]
+          "targets": [{ "expr": "(sum(rate(http_requests_total{job=~\"backend|admin-backend|payment-service\", code=~\"4..\"}[5m])) by (job)) or (max by (job) (up{job=~\"backend|admin-backend|payment-service\"}) * 0)", "legendFormat": "{{job}}" }]
         },
         {
           "id": 5, "title": "HTTP 5xx Errors (by service)", "type": "stat",
@@ -56,7 +56,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "(sum(rate(http_requests_total{code=~\"5..\"}[5m])) by (job)) or (up{job=~\"backend|admin-backend\"} * 0)", "legendFormat": "{{job}}" }]
+          "targets": [{ "expr": "(sum(rate(http_requests_total{job=~\"backend|admin-backend|payment-service\", code=~\"5..\"}[5m])) by (job)) or (max by (job) (up{job=~\"backend|admin-backend|payment-service\"}) * 0)", "legendFormat": "{{job}}" }]
         },
         {
           "id": 6, "title": "Error Percentage (5xx / total)", "type": "gauge",
@@ -101,7 +101,7 @@ data:
           "targets": [{ "expr": "sum(http_requests_in_flight) by (job)", "legendFormat": "{{job}}" }]
         },
         {
-          "id": 11, "title": "Backend Target UP", "type": "stat",
+          "id": 11, "title": "Target UP (by service)", "type": "stat",
           "gridPos": { "h": 5, "w": 8, "x": 8, "y": 11 },
           "fieldConfig": {
             "defaults": {
@@ -112,7 +112,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-          "targets": [{ "expr": "up{job=~\"backend|admin-backend\"}", "legendFormat": "{{job}}" }]
+          "targets": [{ "expr": "min by (job) (up{job=~\"backend|admin-backend|payment-service\"})", "legendFormat": "{{job}}" }]
         }
       ]
     }

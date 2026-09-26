@@ -28,7 +28,7 @@ data:
       "time": { "from": "now-1h", "to": "now" },
       "panels": [
         {
-          "id": 1, "title": "Total HTTP Requests", "type": "stat",
+          "id": 1, "title": "HTTP Request Rate (backend)", "type": "stat",
           "gridPos": { "h": 5, "w": 8, "x": 0, "y": 0 },
           "fieldConfig": { "defaults": { "unit": "reqps" } },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
@@ -37,48 +37,48 @@ data:
         {
           "id": 4, "title": "Active Bookings", "type": "stat",
           "gridPos": { "h": 5, "w": 8, "x": 8, "y": 0 },
-          "fieldConfig": { "defaults": { "unit": "short" } },
+          "fieldConfig": { "defaults": { "decimals": 0, "unit": "short" } },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
           "targets": [{ "expr": "sum(max by (status) (serviceexpress_bookings_by_status{status=~\"Created|Assigned|Confirmed\"}))" }]
         },
         {
-          "id": 6, "title": "Confirmed Bookings (rate)", "type": "stat",
+          "id": 6, "title": "Confirmed Bookings (in time range)", "type": "stat",
           "gridPos": { "h": 5, "w": 8, "x": 16, "y": 0 },
-          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "fieldConfig": { "defaults": { "decimals": 0, "unit": "short" } },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(rate(serviceexpress_bookings_confirmed_total[5m]))" }]
+          "targets": [{ "expr": "round(sum(increase(serviceexpress_bookings_confirmed_total[$__range])))" }]
         },
         {
-          "id": 7, "title": "Cancelled Bookings (rate)", "type": "stat",
+          "id": 7, "title": "Cancelled Bookings (in time range)", "type": "stat",
           "gridPos": { "h": 5, "w": 8, "x": 0, "y": 5 },
-          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "fieldConfig": { "defaults": { "decimals": 0, "unit": "short" } },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(rate(serviceexpress_bookings_cancelled_total[5m]))" }]
+          "targets": [{ "expr": "round(sum(increase(serviceexpress_bookings_cancelled_total[$__range])))" }]
         },
         {
-          "id": 8, "title": "Completed Bookings (rate)", "type": "stat",
+          "id": 8, "title": "Completed Bookings (in time range)", "type": "stat",
           "gridPos": { "h": 5, "w": 8, "x": 8, "y": 5 },
-          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "fieldConfig": { "defaults": { "decimals": 0, "unit": "short" } },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(rate(serviceexpress_bookings_completed_total[5m]))" }]
+          "targets": [{ "expr": "round(sum(increase(serviceexpress_bookings_completed_total[$__range])))" }]
         },
         {
           "id": 11, "title": "Running Pods", "type": "stat",
           "gridPos": { "h": 5, "w": 8, "x": 16, "y": 5 },
           "fieldConfig": {
-            "defaults": {
+            "defaults": { "decimals": 0,
               "unit": "short",
               "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "count(kube_pod_status_phase{namespace=\"homeease-dev\", phase=\"Running\"})" }]
+          "targets": [{ "expr": "sum(kube_pod_status_phase{namespace=\"homeease-dev\", phase=\"Running\"})" }]
         },
         {
           "id": 12, "title": "Available Replicas", "type": "stat",
           "gridPos": { "h": 5, "w": 8, "x": 0, "y": 10 },
           "fieldConfig": {
-            "defaults": {
+            "defaults": { "decimals": 0,
               "unit": "short",
               "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
             }
@@ -98,7 +98,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-          "targets": [{ "expr": "up{job=\"backend\"}" }]
+          "targets": [{ "expr": "min(up{job=\"backend\"})" }]
         },
         {
           "id": 13, "title": "Payment Service Health", "type": "stat",
@@ -112,7 +112,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-          "targets": [{ "expr": "up{job=\"payment-service\"}" }]
+          "targets": [{ "expr": "min(up{job=\"payment-service\"})" }]
         }
       ]
     }

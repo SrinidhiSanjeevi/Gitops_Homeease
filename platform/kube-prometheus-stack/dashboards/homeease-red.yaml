@@ -37,21 +37,21 @@ data:
           "gridPos": { "h": 5, "w": 8, "x": 0, "y": 1 },
           "fieldConfig": { "defaults": { "unit": "reqps" } },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(rate(http_requests_total[5m]))" }]
+          "targets": [{ "expr": "sum(rate(http_requests_total{job=~\"backend|admin-backend|payment-service\"}[5m]))" }]
         },
         {
           "id": 2, "title": "Request Rate (by service)", "type": "stat",
           "gridPos": { "h": 5, "w": 8, "x": 8, "y": 1 },
           "fieldConfig": { "defaults": { "unit": "reqps" } },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(rate(http_requests_total[5m])) by (job)", "legendFormat": "{{job}}" }]
+          "targets": [{ "expr": "sum(rate(http_requests_total{job=~\"backend|admin-backend|payment-service\"}[5m])) by (job)", "legendFormat": "{{job}}" }]
         },
         {
           "id": 3, "title": "Request Rate (top 8 routes)", "type": "stat",
           "gridPos": { "h": 5, "w": 8, "x": 16, "y": 1 },
           "fieldConfig": { "defaults": { "unit": "reqps" } },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "topk(8, sum(rate(http_requests_total[5m])) by (route))", "legendFormat": "{{route}}" }]
+          "targets": [{ "expr": "topk(8, sum(rate(http_requests_total{job=~\"backend|admin-backend|payment-service\"}[5m])) by (job, route))", "legendFormat": "{{route}}" }]
         },
 
         {
@@ -92,7 +92,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "(sum(rate(http_requests_total{code=~\"5..\"}[5m])) by (job)) or (up{job=~\"backend|admin-backend|payment-service\"} * 0)", "legendFormat": "{{job}}" }]
+          "targets": [{ "expr": "(sum(rate(http_requests_total{job=~\"backend|admin-backend|payment-service\", code=~\"5..\"}[5m])) by (job)) or (max by (job) (up{job=~\"backend|admin-backend|payment-service\"}) * 0)", "legendFormat": "{{job}}" }]
         },
 
         {
@@ -150,7 +150,7 @@ data:
             }
           },
           "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-          "targets": [{ "expr": "up{job=~\"backend|admin-backend|payment-service\"}", "legendFormat": "{{job}}" }]
+          "targets": [{ "expr": "min by (job) (up{job=~\"backend|admin-backend|payment-service\"})", "legendFormat": "{{job}}" }]
         },
         {
           "id": 11, "title": "Running Pod Count (by service)", "type": "stat",
