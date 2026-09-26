@@ -32,6 +32,10 @@ spec:
   # Platform genuinely needs these — that's the whole point of naming
   # them explicitly instead of allowing "*". Anything else stays denied.
   clusterResourceWhitelist:
+    # CreateNamespace=true on the monitoring Application needs this on a
+    # fresh cluster where the monitoring namespace does not exist yet.
+    - group: ""
+      kind: Namespace
     - group: "apiextensions.k8s.io"
       kind: CustomResourceDefinition
     - group: "rbac.authorization.k8s.io"
