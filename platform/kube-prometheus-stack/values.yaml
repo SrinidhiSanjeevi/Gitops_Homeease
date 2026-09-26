@@ -68,18 +68,33 @@ alertmanager:
           resources:
             requests:
               storage: 1Gi
-    # Secret alertmanager-slack is mounted only when created out-of-band.
-    # See docs/monitoring-secrets.md for manual creation instructions.
-    # Uncomment below once the secret exists in the monitoring namespace:
-    # secrets:
-    #   - alertmanager-slack
+    # Created out-of-band (docs/monitoring-secrets.md) and mounted at
+    # /etc/alertmanager/secrets/alertmanager-teams/. The mount is mandatory:
+    # if the Secret is missing, the Alertmanager pod sticks in Init.
+    #   alertmanager-teams: monitoring-url, infrastructure-url, incidents-url
+    #                       (Teams Workflows webhook URLs, one per channel)
+    # Teams-only for now (Option B) — no Outlook/SMTP secret required.
+    # To add email later without an SMTP mailbox: add a "Send an email
+    # (V2)" step to the #incidents Teams Workflow in Power Automate, after
+    # its "when a webhook is received" trigger. To add it via Alertmanager
+    # SMTP instead: add `alertmanager-smtp` here, restore `global.smtp_*`
+    # (see git history of this file) and add `email_configs` back to the
+    # incidents-l1/l2 receivers below.
+    secrets:
+      - alertmanager-teams
 
-  # Routing: default to null receiver until Slack secret is created.
-  # Once alertmanager-slack is created, set receiver to 'slack-default'
-  # and uncomment the slack_configs receiver below.
+  # Routing, mapped to the HomeEase Teams channels:
+  #   monitoring-alerts : every alert when it first fires (default route)
+  #   infrastructure    : cluster/platform alerts (nodes, disks, certs)
+  #   incidents         : escalations (Teams only — see the Option B note above)
+  #     L1 = critical still firing after 10 min  -> on-call
+  #     L2 = critical still firing after 12 h    -> lead/manager
+  # The escalation labels come from the homeease-escalation PrometheusRule,
+  # which re-fires on the ALERTS metric with `for: 10m` / `for: 12h`.
+  # Routes are first-match, so the escalation routes sit above the rest.
   config:
     route:
-      receiver: 'null'
+      receiver: teams-monitoring
       group_by: ['namespace', 'alertname']
       group_wait: 30s
       group_interval: 5m
@@ -88,14 +103,43 @@ alertmanager:
         - receiver: 'null'
           matchers:
             - alertname = "Watchdog"
+        - receiver: incidents-l2
+          matchers:
+            - escalation = "l2"
+          repeat_interval: 12h
+        - receiver: incidents-l1
+          matchers:
+            - escalation = "l1"
+          repeat_interval: 1h
+        - receiver: teams-infra
+          matchers:
+            - alertname =~ "KubeNode.*|KubePersistentVolume.*|NodeFilesystem.*|KubeletDown|KubeAPIDown|KubeQuotaExceeded|CertificateExpiring"
+    # Don't post the warning when the critical version of the same alert
+    # is already firing.
+    inhibit_rules:
+      - source_matchers:
+          - severity = "critical"
+        target_matchers:
+          - severity = "warning"
+        equal: ['namespace', 'alertname']
     receivers:
       - name: 'null'
-      # To enable Slack notifications after creating alertmanager-slack secret:
-      # - name: 'slack-default'
-      #   slack_configs:
-      #     - api_url_file: /etc/alertmanager/secrets/alertmanager-slack/webhook-url
-      #       channel: '#homeease-alerts'
-      #       send_resolved: true
+      - name: teams-monitoring
+        msteamsv2_configs:
+          - webhook_url_file: /etc/alertmanager/secrets/alertmanager-teams/monitoring-url
+            send_resolved: true
+      - name: teams-infra
+        msteamsv2_configs:
+          - webhook_url_file: /etc/alertmanager/secrets/alertmanager-teams/infrastructure-url
+            send_resolved: true
+      - name: incidents-l1
+        msteamsv2_configs:
+          - webhook_url_file: /etc/alertmanager/secrets/alertmanager-teams/incidents-url
+            send_resolved: true
+      - name: incidents-l2
+        msteamsv2_configs:
+          - webhook_url_file: /etc/alertmanager/secrets/alertmanager-teams/incidents-url
+            send_resolved: true
 
 grafana:
   # Use pre-existing / out-of-band secret instead of auto-generating a random
