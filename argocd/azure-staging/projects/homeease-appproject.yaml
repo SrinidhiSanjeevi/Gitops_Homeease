@@ -1,0 +1,74 @@
+# AppProject — scopes what Applications under this project are allowed to
+# do, independent of any single Application's own spec. Without this,
+# every Application uses the `default` AppProject, which permits ANY
+# source repo and ANY destination namespace/cluster — no boundary at all.
+#
+# STAGING copy (argocd/azure-staging). Phase 1: staging runs in its own
+# homeease-staging namespace on the SAME aks-homeease-dev cluster/ArgoCD
+# instance as argocd/azure/ (no second cluster — cost-constrained trial
+# subscription) — unlike argocd/azure-prod, which is a genuinely separate,
+# not-yet-applied cluster. This is a separate AppProject anyway so
+# staging Applications are restricted to the homeease-staging namespace
+# and cannot accidentally target homeease-dev.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: homeease-staging
+  namespace: argocd
+spec:
+  description: HomeEase application services on AKS STAGING (frontend, admin-frontend, backend, admin-backend, payment-service, notification-service) — same cluster as dev, homeease-staging namespace
+
+  # Only this repo may be a source. An Application in this project
+  # pointing at a different Git URL is rejected at admission, not just
+  # discouraged by convention.
+  sourceRepos:
+    - "https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git"
+
+  # STAGING namespace only, on the same cluster as homeease-dev/homeease
+  # projects. homeease-dev is deliberately NOT a destination here — a
+  # staging Application must never be able to touch dev's namespace.
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: "homeease-staging"
+
+  # Cluster-scoped resources are the highest blast-radius risk if a
+  # compromised or mis-templated Application tries to create them, so
+  # everything cluster-scoped is denied except Namespace. That one is
+  # required by syncOptions CreateNamespace=true on every Application
+  # here: without it homeease-staging (which does not exist yet) never
+  # gets created — "resource :Namespace is not permitted in project
+  # homeease-staging".
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+
+  # Same namespace-scoped kinds as argocd/azure/projects/homeease-appproject.yaml
+  # (dev) — identical service set, identical resource shapes.
+  namespaceResourceWhitelist:
+    - group: "apps"
+      kind: Deployment
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: ServiceAccount
+    - group: ""
+      kind: ConfigMap
+    - group: "autoscaling"
+      kind: HorizontalPodAutoscaler
+    - group: "policy"
+      kind: PodDisruptionBudget
+    - group: "networking.k8s.io"
+      kind: NetworkPolicy
+    - group: "networking.k8s.io"
+      kind: Ingress
+    - group: "secrets-store.csi.x-k8s.io"
+      kind: SecretProviderClass
+    - group: "monitoring.coreos.com"
+      kind: ServiceMonitor
+
+  roles:
+    - name: readonly
+      description: Read-only access for viewing sync status and history
+      policies:
+        - p, proj:homeease-staging:readonly, applications, get, homeease-staging/*, allow
+      groups: []

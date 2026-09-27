@@ -1,0 +1,42 @@
+# Azure STAGING overrides for notification-service.
+#
+# STATUS: identical situation to values-azure-dev.yaml — notification-
+# service has NO real Managed Identity/federated credential in ANY
+# environment yet (see Infrastructure_Homeease terraform/azure/
+# environments/dev/main.tf: only workload_identity_app and
+# workload_identity_payment exist, neither covers this service). This
+# file is NOT invented as a new, real staging identity — it deliberately
+# carries the same REPLACE_ME placeholder as dev's, consistent with the
+# fact that no infra exists for it yet in either namespace. Once
+# notification-service gets a real identity (presumably federated to
+# BOTH homeease-dev and homeease-staging ServiceAccounts, same pattern
+# as backend/admin-backend/payment-service), fill in the real clientId
+# here too — see values-azure-dev.yaml's STATUS note for the full list of
+# what's still missing.
+image:
+  repository: acrhomeeasedev01.azurecr.io/homeease/notification-service
+  # No image has ever been built/pushed for this service's staging tier —
+  # filled in by the first promotion once a real DEV image tag exists.
+  tag: "REPLACE_ME_notification_dev_image_tag"
+workloadIdentity:
+  enabled: true
+  # terraform output workload_identity_notification_client_id
+  # (id-homeease-notification-dev) — NOT YET PROVISIONED in any
+  # environment. Same placeholder as values-azure-dev.yaml; do not invent
+  # a real value here.
+  clientId: "REPLACE_ME_notification_dev_client_id"
+keyVault:
+  # Same dev Key Vault the other services already use in staging — see
+  # this chart's values-azure-dev.yaml for the full explanation.
+  name: kv-homeease-dev-hs02
+  tenantId: "268c9f5b-bb6f-44e8-b872-ea399b1998c2"
+secretProviderClass:
+  enabled: true
+extraLabels:
+  homeease.io/environment: staging
+  homeease.io/cloud: azure
+# Free Trial subscription: hard 4-vCPU cap shared with dev/demo on the
+# same cluster. Same lowered CPU request as dev.
+resources:
+  requests:
+    cpu: 50m
