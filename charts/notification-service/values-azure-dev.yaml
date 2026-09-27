@@ -18,7 +18,7 @@ image:
   repository: acrhomeeasedev01.azurecr.io/homeease/notification-service
   # No image has ever been built/pushed for this new service — filled in
   # by the first successful azure-pipelines.yml DEV build once one exists.
-  tag: "REPLACE_ME_notification_dev_image_tag"
+  tag: "cd84c709679f"
 workloadIdentity:
   enabled: true
   # terraform output workload_identity_notification_client_id
