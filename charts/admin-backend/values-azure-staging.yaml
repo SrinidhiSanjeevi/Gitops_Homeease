@@ -9,7 +9,7 @@
 # "admin-backend" ServiceAccount too.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/admin-backend
-  tag: fc121325733c
+  tag: 93917ef237a9
 ingress:
   host: admin-staging.20-207-75-39.nip.io
 workloadIdentity:

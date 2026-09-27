@@ -9,7 +9,7 @@
 # "payment-service" ServiceAccount too.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/payment-service
-  tag: fc121325733c
+  tag: 93917ef237a9
 workloadIdentity:
   enabled: true
   # Same identity as values-azure-dev.yaml (terraform output
