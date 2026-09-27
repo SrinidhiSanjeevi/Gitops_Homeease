@@ -8,7 +8,7 @@
 # modules/keyvault/SECRETS.md).
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/notification-service
-  tag: "fc121325733c"
+  tag: "93917ef237a9"
 workloadIdentity:
   enabled: true
   # terraform output workload_identity_notification_client_id
