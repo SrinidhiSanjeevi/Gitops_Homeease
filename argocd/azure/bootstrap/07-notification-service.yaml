@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: notification-service-dev
+  namespace: argocd
+  labels:
+    homeease.io/service: notification-service
+    homeease.io/environment: dev
+spec:
+  project: homeease
+  source:
+    repoURL: https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git
+    targetRevision: main
+    # New service (Stage 3 of the app-side microservices split — see the
+    # project plan). Unlike its siblings, there is no prior Kustomize
+    # overlay to have migrated from: notification-service was extracted
+    # straight to a Helm chart from day one, modeled on
+    # charts/payment-service.
+    path: charts/notification-service
+    helm:
+      valueFiles:
+        - values-azure-dev.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: homeease-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    # A fresh cluster has transient failures (project/CRD not there yet);
+    # without retry an automated sync stays failed until the next commit.
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m

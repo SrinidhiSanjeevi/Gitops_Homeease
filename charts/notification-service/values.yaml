@@ -1,0 +1,109 @@
+# Cloud/environment-neutral defaults. Azure-dev-specific values live in
+# values-azure-dev.yaml.
+#
+# notification-service mirrors payment-service's isolation posture: no
+# public Ingress, secrets pulled straight from the cloud's own secret
+# store, NetworkPolicy locked to "only backend may call this."
+
+image:
+  repository: homeease/notification-service
+  tag: placeholder
+  pullPolicy: IfNotPresent
+
+# No top-level `replicas` value on purpose — the HPA owns replica count.
+
+service:
+  port: 5003
+  targetPortName: http
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+# No CPU/memory-based scaling reasoning applies here the way it does for
+# backend/admin-backend/frontend — same rationale as payment-service.
+# Kept as a fixed floor/ceiling (1-2), not a real autoscaling policy.
+hpa:
+  minReplicas: 1
+  maxReplicas: 2
+  cpuTargetPercent: 70
+
+pdb:
+  maxUnavailable: 1
+
+# No ingress.enabled toggle at all — same as payment-service, this chart
+# has never had an Ingress template. It's reached only from backend,
+# in-cluster, on its ClusterIP Service. Do not add one here.
+
+networkPolicy:
+  enabled: true
+
+# This is NOT a values.yaml toggle. It's a hardcoded `false` directly in
+# templates/deployment.yaml (see that file) — Kubernetes auto-injects a
+# NOTIFICATION_SERVICE_PORT env var for every Service literally named
+# "notification-service" in this namespace (legacy Docker-links
+# compatibility, format tcp://<clusterIP>:<port>), which collides with
+# and silently overrides the app's own NOTIFICATION_SERVICE_PORT read in
+# server.js — the app tries to bind to that literal string instead of
+# 5003 and crash-loops on the startup probe. This is a required
+# correctness setting, not a preference, so it is never made configurable
+# here.
+
+# BOOKING_SERVICE_URL: notification-service now calls booking-service's
+# internal API for booking/user lookups (services/bookingServiceClient.js)
+# instead of reading Booking/User directly. "backend" is the same-namespace
+# Kubernetes Service short name for booking-service, so this value is
+# correct in any namespace backend is also deployed into; not something
+# that needs to vary per environment.
+env:
+  bookingServiceUrl: http://backend:5000
+
+# Its own ServiceAccount, its own Azure AD workload identity — NOT shared
+# with backend/admin-backend's id-homeease-app-dev, and NOT shared with
+# payment-service's id-homeease-payment-dev either. Disabled by default so
+# this chart isn't Azure-specific; azure-dev turns it on with the real,
+# notification-specific clientId (id-homeease-notification-dev) once that
+# identity is provisioned — see values-azure-dev.yaml for its current
+# NOT-YET-PROVISIONED status.
+workloadIdentity:
+  enabled: false
+  clientId: ""
+
+keyVault:
+  name: ""
+  tenantId: ""
+
+# notification-mongo-uri is a NEW Key Vault secret — notification-service
+# owns its own database (homeease_notification) and must not read
+# backend's/payment-service's "mongo-uri" object, which points at a
+# different database. email-user/email-pass/email-from are the SAME
+# objects backend's SecretProviderClass used to read before the SMTP
+# feature moved here (see charts/backend/values.yaml's history) — no new
+# provisioning needed for those three, only re-pointing which service's
+# SecretProviderClass reads them. internal-service-token is a NEW shared
+# secret, common to backend/admin-backend/payment-service/
+# notification-service alike (see each chart's own values.yaml).
+secretProviderClass:
+  enabled: false
+  secretName: notification-service-secrets
+  objects:
+    - keyVaultObject: notification-mongo-uri
+      envKey: MONGO_URI
+    - keyVaultObject: email-user
+      envKey: EMAIL_USER
+    - keyVaultObject: email-pass
+      envKey: EMAIL_PASS
+    - keyVaultObject: email-from
+      envKey: EMAIL_FROM
+    - keyVaultObject: internal-service-token
+      envKey: INTERNAL_SERVICE_TOKEN
+
+extraLabels: {}
+
+# Scraped by the platform Prometheus (needs the monitoring.coreos.com CRDs).
+serviceMonitor:
+  enabled: true

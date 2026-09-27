@@ -34,5 +34,6 @@ spec:
         - protocol: TCP
           port: 5002
   # No egress block: egress stays unrestricted (payment-service needs to
-  # reach Razorpay's API on the internet).
+  # reach Razorpay's API on the internet, plus booking-service's internal
+  # API in-cluster).
 {{- end }}

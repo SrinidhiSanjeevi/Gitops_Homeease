@@ -3,7 +3,7 @@
 # (same shared identity, same federation boundary applies here too).
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/admin-backend
-  tag: 5d4e71d3fcd2
+  tag: d72879629ea7
 
 ingress:
   host: admin-demo.20-207-75-39.nip.io

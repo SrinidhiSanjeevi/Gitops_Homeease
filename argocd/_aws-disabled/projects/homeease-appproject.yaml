@@ -8,7 +8,7 @@ metadata:
   name: homeease
   namespace: argocd
 spec:
-  description: HomeEase application services on EKS (frontend, backend, admin-backend, payment-service)
+  description: HomeEase application services on EKS (frontend, backend, admin-backend, payment-service, notification-service)
 
   sourceRepos:
     - "https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git"
