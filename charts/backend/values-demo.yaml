@@ -16,7 +16,7 @@
 # such rather than hidden.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/backend
-  tag: 5d4e71d3fcd2
+  tag: d72879629ea7
 
 ingress:
   host: api-demo.20-207-75-39.nip.io
@@ -35,3 +35,6 @@ secretProviderClass:
 extraLabels:
   homeease.io/environment: demo
   homeease.io/cloud: azure
+
+env:
+  azureStorageAccountName: "sthomeeaseimgayhiue"

@@ -54,18 +54,35 @@ keyVault:
   name: ""
   tenantId: ""
 
+# internal-service-token is NEW: admin-backend now calls booking-service's
+# internal admin API and sends this shared secret as the X-Internal-Token
+# header (requireInternalToken on the receiving side) — same object, same
+# value, read by all four services' SecretProviderClass.
 secretProviderClass:
   enabled: false
   secretName: admin-backend-secrets
   objects:
-    - keyVaultObject: mongo-uri
+    # Distinct from backend's/payment-service's own *-mongo-uri objects
+    # post-split — this one points at the homeease_admin database
+    # (admin-backend now owns only auditlogs).
+    - keyVaultObject: admin-mongo-uri
       envKey: MONGO_URI
     - keyVaultObject: jwt-secret
       envKey: JWT_SECRET
+    - keyVaultObject: internal-service-token
+      envKey: INTERNAL_SERVICE_TOKEN
 
 extraLabels: {}
 
+# bookingClient.js / bookingServiceClient.js (admin-backend/services/
+# bookingServiceClient.js) falls back to http://127.0.0.1:5000 — a
+# local-dev-only default — when this isn't set. "backend" is the
+# same-namespace Kubernetes Service short name for booking-service, so
+# this value is correct in any namespace backend is also deployed into;
+# not something that needs to vary per environment. This is new:
+# admin-backend didn't call anything over HTTP before this split.
 env:
+  bookingServiceUrl: http://backend:5000
   azureStorageAccountName: ""
 
 # Scraped by the platform Prometheus (needs the monitoring.coreos.com CRDs).

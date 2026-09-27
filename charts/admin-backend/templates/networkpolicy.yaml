@@ -38,5 +38,5 @@ spec:
         - protocol: TCP
           port: 5001
   # No egress block: egress stays unrestricted (admin-backend needs to
-  # reach MongoDB and other internal services).
+  # reach MongoDB and booking-service's internal admin API).
 {{- end }}

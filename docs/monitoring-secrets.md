@@ -9,24 +9,21 @@ This document describes how to create out-of-band Kubernetes Secrets for the Hom
 
 ## 1. Alertmanager Microsoft Teams Secret
 
-Alertmanager routes every alert to a Teams receiver (`msteamsv2_configs`) —
-`teams-monitoring` by default, plus `teams-infra` and the incidents
-L1/L2 escalation routes (see `platform/kube-prometheus-stack/values.yaml`
-for the full routing tree). Routing stays broken until this Secret
-exists: the mount is mandatory, so a missing Secret leaves the
-Alertmanager pod stuck in `Init`. The webhook URLs live only in the
-cluster, never in Git.
+Alertmanager routes every alert to a single Teams receiver
+(`msteamsv2_configs`) — `teams-monitoring` — with no escalation tiers
+and no separate infra channel, by design (see
+`platform/kube-prometheus-stack/values.yaml` for the routing tree).
+Routing stays broken until this Secret exists: the mount is mandatory,
+so a missing Secret leaves the Alertmanager pod stuck in `Init`. The
+webhook URL lives only in the cluster, never in Git.
 
 - **Secret name**: `alertmanager-teams` (namespace `monitoring`)
-- **Keys**: `monitoring-url`, `infrastructure-url`, `incidents-url` —
-  one Teams Workflow ("when a webhook is received") URL per channel,
-  created in Power Automate.
+- **Key**: `monitoring-url` — one Teams Workflow ("when a webhook is
+  received") URL, created in Power Automate.
 
 ```bash
 kubectl -n monitoring create secret generic alertmanager-teams \
-  --from-literal=monitoring-url='<MONITORING_TEAMS_WEBHOOK_URL>' \
-  --from-literal=infrastructure-url='<INFRASTRUCTURE_TEAMS_WEBHOOK_URL>' \
-  --from-literal=incidents-url='<INCIDENTS_TEAMS_WEBHOOK_URL>'
+  --from-literal=monitoring-url='<MONITORING_TEAMS_WEBHOOK_URL>'
 ```
 
 This Secret is already referenced by `alertmanagerSpec.secrets` and every

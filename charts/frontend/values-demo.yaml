@@ -6,7 +6,7 @@
 # unique across the cluster, not just per-namespace).
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/frontend
-  tag: 5d4e71d3fcd2
+  tag: d72879629ea7
 
 ingress:
   host: app-demo.20-207-75-39.nip.io

@@ -49,8 +49,14 @@ networkPolicy:
 # this isn't set. "payment-service" is a same-namespace Kubernetes Service
 # short name, so this value is correct in any namespace payment-service is
 # also deployed into; not something that needs to vary per environment.
+#
+# notificationClient.js (app_Homeease/backend/services/notification/
+# notificationClient.js) is the same story for notification-service —
+# falls back to http://127.0.0.1:5003 locally, "notification-service" is
+# the same-namespace Service short name in any real cluster.
 env:
   paymentServiceUrl: http://payment-service:5002
+  notificationServiceUrl: http://notification-service:5003
   azureStorageAccountName: ""
 
 # Azure AD Workload Identity — disabled by default so this chart is not
@@ -77,20 +83,32 @@ keyVault:
 # `objects` (what to fetch from Key Vault) and `secretObjects` (how to
 # project it into a native k8s Secret) — same two lists, expressed as
 # values instead of a hand-written array literal.
+#
+# email-user/email-pass/email-from moved OUT of here — the SMTP-sending
+# feature (backend/services/notification/*) was extracted to
+# notification-service, which now reads those same Key Vault objects
+# itself (see charts/notification-service/values.yaml). backend no
+# longer sends email directly, so it no longer needs them mounted.
+#
+# internal-service-token is NEW: backend's own internal API
+# (/api/internal/...) verifies this shared secret via
+# requireInternalToken against the X-Internal-Token header sent by
+# admin-backend/payment-service/notification-service — same object,
+# same value, read by all four services' SecretProviderClass.
 secretProviderClass:
   enabled: false
   secretName: backend-secrets
   objects:
-    - keyVaultObject: mongo-uri
+    # Distinct from admin-backend's/payment-service's own *-mongo-uri
+    # objects post-split — this one points at the homeease_booking
+    # database (backend owns users/bookings/professionals/services/
+    # emergencyrequests/slotreservations).
+    - keyVaultObject: booking-mongo-uri
       envKey: MONGO_URI
     - keyVaultObject: jwt-secret
       envKey: JWT_SECRET
-    - keyVaultObject: email-user
-      envKey: EMAIL_USER
-    - keyVaultObject: email-pass
-      envKey: EMAIL_PASS
-    - keyVaultObject: email-from
-      envKey: EMAIL_FROM
+    - keyVaultObject: internal-service-token
+      envKey: INTERNAL_SERVICE_TOKEN
 
 extraLabels: {}
 

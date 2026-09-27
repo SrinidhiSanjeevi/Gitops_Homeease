@@ -1,0 +1,39 @@
+{{- if .Values.networkPolicy.enabled }}
+# Default-deny, explicit-allow — same posture as payment-service. The
+# only caller of notification-service anywhere in the system is backend
+# (backend/services/notification/notificationClient.js dispatching via
+# simulationService). Not ingress-nginx, not admin-backend, not frontend,
+# not the internet.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: notification-service
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "notification-service.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "notification-service.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: backend
+      ports:
+        - protocol: TCP
+          port: 5003
+    # Prometheus (kube-prometheus-stack, namespace "monitoring") scraping
+    # /metrics.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 5003
+  # No egress block: egress stays unrestricted (notification-service needs
+  # to reach its SMTP provider and booking-service's internal API).
+{{- end }}

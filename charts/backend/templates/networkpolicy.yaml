@@ -23,7 +23,8 @@ spec:
         - protocol: TCP
           port: 5000
     # Other HomeEase services in this same namespace calling backend
-    # server-to-server (frontend, admin-backend).
+    # server-to-server (frontend, admin-backend, payment-service,
+    # notification-service — all now call booking-service's internal API).
     - from:
         - podSelector: {}
       ports:
@@ -39,5 +40,5 @@ spec:
         - protocol: TCP
           port: 5000
   # No egress block: egress stays unrestricted (backend needs to reach
-  # MongoDB, payment-service, and outbound notification providers).
+  # MongoDB, payment-service, and notification-service).
 {{- end }}

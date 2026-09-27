@@ -85,6 +85,12 @@ spec:
           env:
             - name: PAYMENT_SERVICE_URL
               value: {{ .Values.env.paymentServiceUrl }}
+            # NOTIFICATION_SERVICE_URL: same story as PAYMENT_SERVICE_URL
+            # above, for notificationClient.js — without this it falls
+            # back to http://127.0.0.1:5003 and every notification dispatch
+            # from simulationService fails.
+            - name: NOTIFICATION_SERVICE_URL
+              value: {{ .Values.env.notificationServiceUrl }}
             # Reported by /health/live so the pipeline's Verify DEV stage
             # can confirm which image is actually serving. Same value as
             # the image tag — changes only when the tag already changes,
@@ -98,8 +104,8 @@ spec:
           {{- if .Values.secretProviderClass.enabled }}
           # Populated by the Secrets Store CSI driver's secretObjects sync
           # (see templates/secretproviderclass.yaml) — the app reads
-          # MONGO_URI / JWT_SECRET / EMAIL_* from process.env exactly as
-          # it already does locally via .env.
+          # MONGO_URI / JWT_SECRET / INTERNAL_SERVICE_TOKEN from
+          # process.env exactly as it already does locally via .env.
           envFrom:
             - secretRef:
                 name: {{ .Values.secretProviderClass.secretName }}

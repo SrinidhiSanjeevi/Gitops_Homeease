@@ -167,7 +167,7 @@ from "image pushed" to "cluster running it".
 
 ## Known gaps
  
-- **Alertmanager Teams Alerts**: Alertmanager routes alerts to Microsoft Teams Workflows (`msteamsv2_configs`), not email or Slack. Routing stays broken until the `alertmanager-teams` Secret (three webhook URLs: `monitoring-url`, `infrastructure-url`, `incidents-url`) is created manually in the `monitoring` namespace (see `docs/monitoring-secrets.md`). Real webhook credentials are never committed to Git.
+- **Alertmanager Teams Alerts**: Alertmanager routes every alert to a single Microsoft Teams Workflow (`msteamsv2_configs`), not email or Slack, and with no escalation tiers or separate channels. Routing stays broken until the `alertmanager-teams` Secret (one webhook URL: `monitoring-url`) is created manually in the `monitoring` namespace (see `docs/monitoring-secrets.md`). Real webhook credentials are never committed to Git.
 - **Grafana Admin Credentials**: Grafana admin credentials use `grafana.admin.existingSecret` referencing an out-of-band secret (`grafana-admin-credentials`), preventing continuous GitOps drift in ArgoCD (see `docs/monitoring-secrets.md`).
 - **AKS Control Plane Monitoring**: On AKS, Kubernetes control plane components (`kube-controller-manager`, `kube-scheduler`, `etcd`, `kube-proxy`) are fully managed by Azure and not accessible from worker nodes. Their respective monitors and `kube-system` service creation are disabled in `platform/kube-prometheus-stack/values.yaml` to prevent invalid scraping targets and namespace permission violations in the `platform` AppProject.
 

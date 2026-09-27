@@ -1,0 +1,34 @@
+# Standalone demo values. No ingress.host override needed — this chart
+# has no Ingress template at all (internal-only by design, unchanged
+# here), same as payment-service.
+#
+# Unlike its siblings' values-demo.yaml, this one does not (yet) reuse a
+# real, already-provisioned dev clientId — see values-azure-dev.yaml's
+# header: notification-service has no Managed Identity in ANY environment
+# yet, so there is nothing real to copy here. Once
+# id-homeease-notification-dev exists, this file should be updated to
+# mirror it exactly, at which point the SAME federation caveat documented
+# in charts/backend/values-demo.yaml applies: the federated credential
+# would be scoped to system:serviceaccount:homeease-dev:notification-service,
+# not homeease-helm-demo, so the CSI secret mount would still fail in the
+# demo namespace. That's an Azure IAM federation boundary, not a chart or
+# Helm defect — expected and reported as such rather than hidden, exactly
+# like the other three services' demo files.
+image:
+  repository: acrhomeeasedev01.azurecr.io/homeease/notification-service
+  tag: "REPLACE_ME_notification_dev_image_tag"
+
+workloadIdentity:
+  enabled: true
+  clientId: "REPLACE_ME_notification_dev_client_id"
+
+keyVault:
+  name: kv-homeease-dev-hs02
+  tenantId: "268c9f5b-bb6f-44e8-b872-ea399b1998c2"
+
+secretProviderClass:
+  enabled: true
+
+extraLabels:
+  homeease.io/environment: demo
+  homeease.io/cloud: azure

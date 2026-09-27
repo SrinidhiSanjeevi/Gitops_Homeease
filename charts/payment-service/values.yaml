@@ -38,6 +38,16 @@ hpa:
 pdb:
   maxUnavailable: 1
 
+# bookingServiceClient.js (payment-service/services/bookingServiceClient.js)
+# falls back to http://127.0.0.1:5000 — a local-dev-only default — when
+# this isn't set. "backend" is the same-namespace Kubernetes Service short
+# name for booking-service, so this value is correct in any namespace
+# backend is also deployed into; not something that needs to vary per
+# environment. This is new: payment-service previously only ever received
+# calls from backend, never called it back.
+env:
+  bookingServiceUrl: http://backend:5000
+
 # No ingress.enabled toggle at all — payment-service has never had an
 # Ingress template in this chart. It's reached only from backend,
 # in-cluster, on its ClusterIP Service. Do not add one here.
@@ -72,6 +82,12 @@ keyVault:
 # in Key Vault, and Razorpay webhooks aren't configured yet
 # (config/validateEnv.js doesn't require RAZORPAY_WEBHOOK_SECRET). Add it
 # here once a real webhook secret exists and should be wired up.
+#
+# internal-service-token is NEW: payment-service now calls
+# booking-service's internal API (settling payment status, no longer
+# writing Booking directly) and sends this shared secret as the
+# X-Internal-Token header — same object, same value, read by all four
+# services' SecretProviderClass.
 secretProviderClass:
   enabled: false
   secretName: payment-service-razorpay
@@ -80,8 +96,13 @@ secretProviderClass:
       envKey: RAZORPAY_KEY_ID
     - keyVaultObject: razorpay-key-secret
       envKey: RAZORPAY_KEY_SECRET
-    - keyVaultObject: mongo-uri
+    # Distinct from backend's/admin-backend's own *-mongo-uri objects
+    # post-split — this one points at the homeease_payment database
+    # (payment-service owns only payments).
+    - keyVaultObject: payment-mongo-uri
       envKey: MONGO_URI
+    - keyVaultObject: internal-service-token
+      envKey: INTERNAL_SERVICE_TOKEN
 
 extraLabels: {}
 

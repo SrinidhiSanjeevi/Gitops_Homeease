@@ -1,39 +1,36 @@
-# payment-service gets more here than the other three services — it's
-# the one place a mistake has a real (simulated) financial consequence,
-# so its blast radius is deliberately smaller: no public Ingress, secrets
-# pulled straight from the cloud's own secret store, NetworkPolicy locked
-# to "only backend may call this" (see templates/networkpolicy.yaml).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: payment-service
+  name: notification-service
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "payment-service.labels" . | nindent 4 }}
+    {{- include "notification-service.labels" . | nindent 4 }}
 spec:
   # No replicas field here on purpose — the HPA (templates/hpa.yaml) owns
   # spec.replicas.
   selector:
     matchLabels:
-      {{- include "payment-service.selectorLabels" . | nindent 6 }}
+      {{- include "notification-service.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "payment-service.selectorLabels" . | nindent 8 }}
+        {{- include "notification-service.selectorLabels" . | nindent 8 }}
         {{- if .Values.workloadIdentity.enabled }}
         azure.workload.identity/use: "true"
         {{- end }}
     spec:
-      serviceAccountName: payment-service
+      serviceAccountName: notification-service
       # REQUIRED CORRECTNESS SETTING — not configurable, not a values
-      # toggle. Kubernetes auto-injects a PAYMENT_SERVICE_PORT env var for
-      # every Service named "payment-service" in this namespace (legacy
-      # Docker-links compatibility, format tcp://<clusterIP>:<port>) —
-      # this collides with and silently overrides the app's OWN
-      # PAYMENT_SERVICE_PORT read in server.js, so it tries to bind to the
-      # literal string "tcp://10.20.x.x:80" instead of 5002 and
+      # toggle. Kubernetes auto-injects a NOTIFICATION_SERVICE_PORT env var
+      # for every Service named "notification-service" in this namespace
+      # (legacy Docker-links compatibility, format tcp://<clusterIP>:<port>)
+      # — this collides with and silently overrides the app's OWN
+      # NOTIFICATION_SERVICE_PORT read in server.js, so it tries to bind to
+      # the literal string "tcp://10.20.x.x:80" instead of 5003 and
       # crash-loops on the startup probe. Disabling service-links avoids
       # the whole class of collision; nothing in this app relies on them.
+      # (Same issue and same fix as payment-service — see that chart's
+      # deployment.yaml.)
       enableServiceLinks: false
       terminationGracePeriodSeconds: 30
       securityContext:
@@ -49,9 +46,9 @@ spec:
           whenUnsatisfiable: ScheduleAnyway
           labelSelector:
             matchLabels:
-              {{- include "payment-service.selectorLabels" . | nindent 14 }}
+              {{- include "notification-service.selectorLabels" . | nindent 14 }}
       containers:
-        - name: payment-service
+        - name: notification-service
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
@@ -61,7 +58,7 @@ spec:
               drop: ["ALL"]
           ports:
             - name: http
-              containerPort: 5002
+              containerPort: 5003
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -87,23 +84,20 @@ spec:
             failureThreshold: 24
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          # BOOKING_SERVICE_URL: without this, bookingServiceClient.js falls
-          # back to http://127.0.0.1:5000 (local-dev-only default) and
-          # payment-service calls itself instead of booking-service — every
-          # settle-payment call fails. This is new: payment-service
-          # previously only ever received calls from backend, never called
-          # it back.
+          # BOOKING_SERVICE_URL: notification-service calls booking-service's
+          # internal API for booking/user lookups instead of reading
+          # Booking/User directly (see services/bookingServiceClient.js) —
+          # same "bare ClusterIP short name" convention as backend's
+          # PAYMENT_SERVICE_URL / payment-service's BOOKING_SERVICE_URL.
           env:
             - name: BOOKING_SERVICE_URL
               value: {{ .Values.env.bookingServiceUrl }}
           {{- if .Values.secretProviderClass.enabled }}
           # Populated by the Secrets Store CSI driver's secretObjects sync
           # (see templates/secretproviderclass.yaml) — the app reads
-          # MONGO_URI / RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET /
+          # MONGO_URI / EMAIL_USER / EMAIL_PASS / EMAIL_FROM /
           # INTERNAL_SERVICE_TOKEN from process.env exactly as it already
-          # does locally via .env. RAZORPAY_WEBHOOK_SECRET is intentionally
-          # not included — webhooks aren't configured yet and
-          # validateEnv.js doesn't require it.
+          # does locally via .env.
           envFrom:
             - secretRef:
                 name: {{ .Values.secretProviderClass.secretName }}
@@ -125,5 +119,5 @@ spec:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
-              secretProviderClass: payment-service
+              secretProviderClass: notification-service
         {{- end }}

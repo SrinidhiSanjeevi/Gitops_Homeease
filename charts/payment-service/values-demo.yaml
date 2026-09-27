@@ -5,7 +5,7 @@
 # secretProviderClass federation caveat that applies here too.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/payment-service
-  tag: 8af8212190cc
+  tag: d72879629ea7
 
 workloadIdentity:
   enabled: true
