@@ -8,6 +8,12 @@ metadata:
 spec:
   # No replicas field here on purpose — the HPA (templates/hpa.yaml) owns
   # spec.replicas.
+  strategy:
+    type: {{ .Values.updateStrategy.type }}
+    {{- if eq .Values.updateStrategy.type "RollingUpdate" }}
+    rollingUpdate:
+      {{- toYaml .Values.updateStrategy.rollingUpdate | nindent 6 }}
+    {{- end }}
   selector:
     matchLabels:
       {{- include "admin-backend.selectorLabels" . | nindent 6 }}

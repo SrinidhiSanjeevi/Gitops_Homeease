@@ -20,3 +20,12 @@ extraLabels:
 resources:
   requests:
     cpu: 50m
+
+# Same 4-vCPU cap above means there is no headroom for a RollingUpdate's
+# surge pod (old + new pod at once) — the autoscaler can't add a node to
+# cover it either (Azure subscription's regional core quota is maxed out).
+# Recreate terminates the old pod before starting the new one: a few
+# seconds of downtime per deploy on this single-replica dev environment,
+# traded for rollouts that don't get stuck Pending indefinitely.
+updateStrategy:
+  type: Recreate

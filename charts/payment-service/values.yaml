@@ -30,6 +30,16 @@ resources:
 # backend/admin-backend/frontend — a CPU target doesn't reflect actual
 # payment load. Kept as a fixed floor/ceiling (1-2), not a real
 # autoscaling policy.
+# Matches Kubernetes' own default for a low replica count (maxSurge rounds
+# up to 1, maxUnavailable rounds down to 0) — spelled out explicitly so
+# environments with less headroom (see values-azure-dev.yaml) can override
+# it to Recreate without guessing what the implicit default was.
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 0
+
 hpa:
   minReplicas: 1
   maxReplicas: 2
