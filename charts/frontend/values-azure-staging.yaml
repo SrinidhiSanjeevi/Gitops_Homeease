@@ -4,7 +4,7 @@
 # this static frontend, so nothing shared with dev to call out here.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/frontend
-  tag: fc121325733c
+  tag: 93917ef237a9
 ingress:
   host: home-staging.20-207-75-39.nip.io
   sslRedirect: false

@@ -17,7 +17,7 @@ image:
   repository: acrhomeeasedev01.azurecr.io/homeease/notification-service
   # No image has ever been built/pushed for this service's staging tier —
   # filled in by the first promotion once a real DEV image tag exists.
-  tag: "fc121325733c"
+  tag: "93917ef237a9"
 workloadIdentity:
   enabled: true
   # terraform output workload_identity_notification_client_id
