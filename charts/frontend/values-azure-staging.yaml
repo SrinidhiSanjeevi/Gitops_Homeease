@@ -1,0 +1,19 @@
+# Azure STAGING overrides — Phase 1: homeease-staging namespace on the
+# SAME aks-homeease-dev cluster (cost-constrained trial subscription, no
+# second cluster). No workload identity/Key Vault secrets involved for
+# this static frontend, so nothing shared with dev to call out here.
+image:
+  repository: acrhomeeasedev01.azurecr.io/homeease/frontend
+  tag: d72879629ea7
+ingress:
+  host: home-staging.20-207-75-39.nip.io
+  sslRedirect: false
+  extraHostlessRule: true
+extraLabels:
+  homeease.io/environment: staging
+  homeease.io/cloud: azure
+# Free Trial subscription: hard 4-vCPU cap shared with dev/demo on the
+# same cluster. Same lowered CPU request as dev.
+resources:
+  requests:
+    cpu: 25m

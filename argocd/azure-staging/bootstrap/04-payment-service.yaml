@@ -1,0 +1,37 @@
+# STAGING twin of argocd/azure/bootstrap/04-payment-service.yaml. Same
+# cluster as dev — see 01-frontend.yaml's header for the Phase 1
+# rationale.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: payment-service-staging
+  namespace: argocd
+  labels:
+    homeease.io/service: payment-service
+    homeease.io/environment: staging
+spec:
+  project: homeease-staging
+  source:
+    repoURL: https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git
+    targetRevision: main
+    path: charts/payment-service
+    helm:
+      valueFiles:
+        - values-azure-staging.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: homeease-staging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    # A fresh cluster has transient failures (project/CRD not there yet);
+    # without retry an automated sync stays failed until the next commit.
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
