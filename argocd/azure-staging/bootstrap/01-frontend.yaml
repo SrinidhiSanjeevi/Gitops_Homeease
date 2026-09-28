@@ -1,7 +1,4 @@
-# STAGING twin of argocd/azure/bootstrap/01-frontend.yaml. Same cluster
-# as dev (Phase 1: homeease-staging namespace on aks-homeease-dev, no
-# second cluster), so this is live/synced automatically like dev — unlike
-# argocd/azure-prod, which targets a not-yet-applied separate cluster.
+# STAGING twin of argocd/azure/bootstrap/01-frontend.yaml, same aks-homeease-dev cluster.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

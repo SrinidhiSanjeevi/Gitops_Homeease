@@ -1,7 +1,5 @@
 {{- if .Values.networkPolicy.enabled }}
-# Default-deny ingress, explicit allow only. Only enforced if the
-# cluster's CNI implements NetworkPolicy (AKS: Azure NPM/Calico, turned
-# on at cluster creation).
+# Default-deny ingress, explicit allow only.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -25,7 +23,5 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
-  # No egress block: admin-frontend proxies to admin-backend and backend's
-  # auth API through the same in-cluster Service DNS names a browser
-  # request resolves to, so egress stays unrestricted.
+  # No egress block: egress stays unrestricted for in-cluster proxying to admin-backend.
 {{- end }}

@@ -1,7 +1,5 @@
 {{- if .Values.networkPolicy.enabled }}
-# Default-deny ingress, explicit allow only. Only enforced if the
-# cluster's CNI implements NetworkPolicy (AKS: Azure NPM/Calico, turned
-# on at cluster creation).
+# Default-deny ingress, explicit allow only.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

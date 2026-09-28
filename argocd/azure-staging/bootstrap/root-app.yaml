@@ -1,32 +1,4 @@
-# ONE MANUAL STEP to make argocd/azure-staging/ live — the staging twin
-# of argocd/azure/bootstrap/root-app.yaml.
-#
-# UNLIKE argocd/azure-prod/bootstrap/root-app.yaml (NOT applied — its
-# cluster doesn't exist yet), this one targets the SAME aks-homeease-dev
-# cluster and the SAME already-running ArgoCD install as
-# argocd/azure/bootstrap/root-app.yaml. It is meant to be applied
-# immediately, once this PR merges to main — that is the whole point of
-# Phase 1.
-#
-# It still needs its OWN root Application, though: the existing
-# homeease-root Application (argocd/azure/bootstrap/root-app.yaml) only
-# scans argocd/azure/bootstrap, non-recursively (directory.recurse:
-# false) — it will NOT pick up a sibling argocd/azure-staging/ tree on
-# its own. Judgment call: rather than change the existing dev root-app's
-# path (risking a diff to something already live and working), this new
-# tree gets its own "app of apps" root Application, same pattern as
-# every other environment tree in this repo (dev, prod). The one-time
-# apply, on the SAME cluster ArgoCD is already running on:
-#
-#   kubectl config use-context aks-homeease-dev
-#   kubectl apply -f argocd/azure-staging/bootstrap/root-app.yaml
-#
-# No `helm install argocd` step here — ArgoCD is already installed on
-# this cluster (see argocd/azure/bootstrap/root-app.yaml's header for
-# that one-time step, already done for dev). From that point on, this
-# Application watches argocd/azure-staging/bootstrap itself (this file
-# plus its siblings) and Git is the only thing anyone needs to touch
-# again to manage staging.
+# Root app-of-apps for staging, on the same aks-homeease-dev cluster/ArgoCD; applied manually once, then watches argocd/azure-staging/bootstrap.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

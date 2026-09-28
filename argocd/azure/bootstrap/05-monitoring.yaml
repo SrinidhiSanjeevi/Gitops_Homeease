@@ -1,14 +1,4 @@
-# Consolidated Monitoring Stack Application
-#
-# Multi-source Argo CD Application combining:
-#   1. kube-prometheus-stack (Prometheus, Grafana, Alertmanager, node-exporter, kube-state-metrics)
-#   2. Loki (log aggregation)
-#   3. Alloy (log/metrics collection agent)
-#   4. Custom Grafana Dashboards and PrometheusRules
-#
-# All deployed into the `monitoring` namespace under the `platform` AppProject.
-# Exact Helm release names are explicitly preserved to maintain backwards
-# compatibility with existing in-cluster services and configuration endpoints.
+# Multi-source Application: kube-prometheus-stack, Loki, Alloy, and custom dashboards/rules.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

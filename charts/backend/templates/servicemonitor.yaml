@@ -1,7 +1,4 @@
-# Tells kube-prometheus-stack's Prometheus to scrape this service's
-# /metrics endpoint. Picked up automatically — the platform's Prometheus
-# watches every ServiceMonitor in every namespace (see
-# platform/kube-prometheus-stack/values.yaml, out of scope for this chart).
+# Tells kube-prometheus-stack's Prometheus to scrape this service's /metrics endpoint.
 {{- if .Values.serviceMonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor

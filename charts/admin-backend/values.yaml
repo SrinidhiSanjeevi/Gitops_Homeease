@@ -20,10 +20,7 @@ resources:
     cpu: 500m
     memory: 256Mi
 
-# Matches Kubernetes' own default for a low replica count (maxSurge rounds
-# up to 1, maxUnavailable rounds down to 0) — spelled out explicitly so
-# environments with less headroom (see values-azure-dev.yaml) can override
-# it to Recreate without guessing what the implicit default was.
+# Explicit RollingUpdate default; some environments override to Recreate.
 updateStrategy:
   type: RollingUpdate
   rollingUpdate:
@@ -52,10 +49,7 @@ ingress:
 networkPolicy:
   enabled: true
 
-# See charts/backend/values.yaml for the full explanation of this
-# section — same shared Azure AD workload identity as backend
-# (id-homeease-app-dev), disabled by default so this chart isn't
-# Azure-specific.
+# Shared Azure AD workload identity, same as backend; see charts/backend/values.yaml.
 workloadIdentity:
   enabled: false
   clientId: ""
@@ -64,17 +58,12 @@ keyVault:
   name: ""
   tenantId: ""
 
-# internal-service-token is NEW: admin-backend now calls booking-service's
-# internal admin API and sends this shared secret as the X-Internal-Token
-# header (requireInternalToken on the receiving side) — same object, same
-# value, read by all four services' SecretProviderClass.
+# internal-service-token authenticates admin-backend's calls to booking-service's internal admin API.
 secretProviderClass:
   enabled: false
   secretName: admin-backend-secrets
   objects:
-    # Distinct from backend's/payment-service's own *-mongo-uri objects
-    # post-split — this one points at the homeease_admin database
-    # (admin-backend now owns only auditlogs).
+    # Points at the homeease_admin database, distinct from other services' *-mongo-uri objects.
     - keyVaultObject: admin-mongo-uri
       envKey: MONGO_URI
     - keyVaultObject: jwt-secret
@@ -84,13 +73,7 @@ secretProviderClass:
 
 extraLabels: {}
 
-# bookingClient.js / bookingServiceClient.js (admin-backend/services/
-# bookingServiceClient.js) falls back to http://127.0.0.1:5000 — a
-# local-dev-only default — when this isn't set. "backend" is the
-# same-namespace Kubernetes Service short name for booking-service, so
-# this value is correct in any namespace backend is also deployed into;
-# not something that needs to vary per environment. This is new:
-# admin-backend didn't call anything over HTTP before this split.
+# "backend" is the same-namespace Service name for booking-service; correct in any namespace.
 env:
   bookingServiceUrl: http://backend:5000
   azureStorageAccountName: ""

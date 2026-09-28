@@ -9,9 +9,7 @@ ingress:
 extraLabels:
   homeease.io/environment: dev
   homeease.io/cloud: azure
-# Free Trial subscription: hard 4-vCPU cap, so DEV is one 2-vCPU node.
-# Only the CPU *request* is lowered so the whole stack schedules; limits
-# come from values.yaml unchanged, so the pod can still burst.
+# Free Trial subscription is capped at 4 vCPU, so lower the CPU request to fit.
 resources:
   requests:
     cpu: 25m

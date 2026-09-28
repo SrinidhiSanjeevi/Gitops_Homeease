@@ -11,11 +11,7 @@ spec:
   source:
     repoURL: https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git
     targetRevision: main
-    # Migrated from apps/backend/overlays/azure/dev (Kustomize) to this
-    # Helm chart — Phase 3 validation confirmed 33/33 rendered resources
-    # identical between the two, zero functional differences, exact
-    # selector matches against the live cluster. The Kustomize tree has
-    # since been deleted (see root README.md).
+    # Migrated from Kustomize to this Helm chart — see root README.md.
     path: charts/backend
     helm:
       valueFiles:

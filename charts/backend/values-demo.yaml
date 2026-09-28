@@ -1,19 +1,4 @@
-# Standalone demo values — proves this chart installs independently of
-# the live ArgoCD-managed homeease-dev release, in its own namespace.
-# Identical to values-azure-dev.yaml except for a unique Ingress
-# hostname (avoids the ingress-nginx admission-webhook host+path
-# uniqueness conflict with the live Ingress).
-#
-# NOTE: workloadIdentity/secretProviderClass are left enabled, with the
-# SAME real clientId, to preserve the chart's actual functionality
-# rather than silently stripping it for the demo. In practice this means
-# the CSI secret mount will fail here: the Azure AD federated credential
-# for this identity is scoped to the exact subject
-# system:serviceaccount:homeease-dev:backend, not
-# system:serviceaccount:homeease-helm-demo:backend — so this pod will
-# not reach Ready in the demo namespace. That's an Azure IAM federation
-# boundary, not a chart or Helm defect; it's expected and reported as
-# such rather than hidden.
+# Standalone demo values — same as values-azure-dev.yaml but with a unique Ingress hostname; CSI secret mount is expected to fail (identity scoped to dev's ServiceAccount).
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/backend
   tag: d72879629ea7

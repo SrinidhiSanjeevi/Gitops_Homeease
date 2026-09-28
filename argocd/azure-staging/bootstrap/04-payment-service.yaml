@@ -1,6 +1,4 @@
-# STAGING twin of argocd/azure/bootstrap/04-payment-service.yaml. Same
-# cluster as dev — see 01-frontend.yaml's header for the Phase 1
-# rationale.
+# STAGING twin of argocd/azure/bootstrap/04-payment-service.yaml, same aks-homeease-dev cluster.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

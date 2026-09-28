@@ -6,8 +6,7 @@ metadata:
   labels:
     {{- include "notification-service.labels" . | nindent 4 }}
 spec:
-  # No replicas field here on purpose — the HPA (templates/hpa.yaml) owns
-  # spec.replicas.
+  # No replicas field here — the HPA (templates/hpa.yaml) owns spec.replicas.
   strategy:
     type: {{ .Values.updateStrategy.type }}
     {{- if eq .Values.updateStrategy.type "RollingUpdate" }}
@@ -26,17 +25,7 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: notification-service
-      # REQUIRED CORRECTNESS SETTING — not configurable, not a values
-      # toggle. Kubernetes auto-injects a NOTIFICATION_SERVICE_PORT env var
-      # for every Service named "notification-service" in this namespace
-      # (legacy Docker-links compatibility, format tcp://<clusterIP>:<port>)
-      # — this collides with and silently overrides the app's OWN
-      # NOTIFICATION_SERVICE_PORT read in server.js, so it tries to bind to
-      # the literal string "tcp://10.20.x.x:80" instead of 5003 and
-      # crash-loops on the startup probe. Disabling service-links avoids
-      # the whole class of collision; nothing in this app relies on them.
-      # (Same issue and same fix as payment-service — see that chart's
-      # deployment.yaml.)
+      # Disabled: Kubernetes' auto-injected NOTIFICATION_SERVICE_PORT env var collides with the app's own.
       enableServiceLinks: false
       terminationGracePeriodSeconds: 30
       securityContext:
@@ -90,20 +79,12 @@ spec:
             failureThreshold: 24
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          # BOOKING_SERVICE_URL: notification-service calls booking-service's
-          # internal API for booking/user lookups instead of reading
-          # Booking/User directly (see services/bookingServiceClient.js) —
-          # same "bare ClusterIP short name" convention as backend's
-          # PAYMENT_SERVICE_URL / payment-service's BOOKING_SERVICE_URL.
+          # notification-service calls booking-service's internal API for booking/user lookups.
           env:
             - name: BOOKING_SERVICE_URL
               value: {{ .Values.env.bookingServiceUrl }}
           {{- if .Values.secretProviderClass.enabled }}
-          # Populated by the Secrets Store CSI driver's secretObjects sync
-          # (see templates/secretproviderclass.yaml) — the app reads
-          # MONGO_URI / EMAIL_USER / EMAIL_PASS / EMAIL_FROM /
-          # INTERNAL_SERVICE_TOKEN from process.env exactly as it already
-          # does locally via .env.
+          # Populated by the Secrets Store CSI driver's secretObjects sync (see templates/secretproviderclass.yaml).
           envFrom:
             - secretRef:
                 name: {{ .Values.secretProviderClass.secretName }}

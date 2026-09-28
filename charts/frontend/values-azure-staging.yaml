@@ -1,7 +1,4 @@
-# Azure STAGING overrides — Phase 1: homeease-staging namespace on the
-# SAME aks-homeease-dev cluster (cost-constrained trial subscription, no
-# second cluster). No workload identity/Key Vault secrets involved for
-# this static frontend, so nothing shared with dev to call out here.
+# Azure STAGING overrides — homeease-staging namespace on the same dev cluster.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/frontend
   tag: 93917ef237a9

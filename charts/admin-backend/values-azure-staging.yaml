@@ -1,12 +1,4 @@
-# Azure STAGING overrides — Phase 1: homeease-staging namespace on the
-# SAME aks-homeease-dev cluster (cost-constrained trial subscription, no
-# second cluster). Staging intentionally shares dev's MongoDB
-# databases/Key Vault secrets and workload-identity clientId for now —
-# not an oversight; full data isolation is a future improvement once
-# cost allows a second Key Vault/DB set. See
-# Infrastructure_Homeease terraform/azure/environments/dev/main.tf,
-# which federates this SAME identity to the homeease-staging namespace's
-# "admin-backend" ServiceAccount too.
+# Azure STAGING overrides — shares dev's cluster, MongoDB, and Key Vault (no second cluster yet).
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/admin-backend
   tag: 93917ef237a9
@@ -14,9 +6,7 @@ ingress:
   host: admin-staging.20-207-75-39.nip.io
 workloadIdentity:
   enabled: true
-  # Same identity as values-azure-dev.yaml (terraform output
-  # workload_identity_app_client_id, id-homeease-app-dev) — federated to
-  # BOTH homeease-dev and homeease-staging ServiceAccounts.
+  # Same identity as values-azure-dev.yaml, federated to both ServiceAccounts.
   clientId: "9850ab0c-1f03-4a65-8f77-c4ff988a1af4"
 keyVault:
   name: kv-homeease-dev-hs02

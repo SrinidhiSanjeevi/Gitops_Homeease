@@ -1,8 +1,5 @@
 {{- if .Values.networkPolicy.enabled }}
-# Default-deny, explicit-allow — tighter than the other three services on
-# purpose. The ONLY caller of payment-service anywhere in the system is
-# backend. Not ingress-nginx, not admin-backend, not frontend, not the
-# internet.
+# Default-deny, explicit-allow — the only caller of payment-service is backend.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -24,8 +21,7 @@ spec:
       ports:
         - protocol: TCP
           port: 5002
-    # Prometheus (kube-prometheus-stack, namespace "monitoring") scraping
-    # /metrics.
+    # Prometheus scraping /metrics.
     - from:
         - namespaceSelector:
             matchLabels:
@@ -33,7 +29,5 @@ spec:
       ports:
         - protocol: TCP
           port: 5002
-  # No egress block: egress stays unrestricted (payment-service needs to
-  # reach Razorpay's API on the internet, plus booking-service's internal
-  # API in-cluster).
+  # No egress block: egress stays unrestricted (needs Razorpay's API and booking-service in-cluster).
 {{- end }}

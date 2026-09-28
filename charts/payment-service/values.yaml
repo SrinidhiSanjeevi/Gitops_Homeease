@@ -1,11 +1,4 @@
-# Cloud/environment-neutral defaults. Azure-dev-specific values live in
-# values-azure-dev.yaml.
-#
-# payment-service gets more isolation than the other three services —
-# it's the one place a mistake has a real (simulated) financial
-# consequence: no public Ingress, secrets pulled straight from the
-# cloud's own secret store, NetworkPolicy locked to "only backend may
-# call this."
+# Cloud/environment-neutral defaults; Azure-dev-specific values live in values-azure-dev.yaml. Tighter isolation than other services.
 
 image:
   repository: homeease/payment-service
@@ -26,14 +19,7 @@ resources:
     cpu: 500m
     memory: 256Mi
 
-# No CPU/memory-based scaling reasoning applies here the way it does for
-# backend/admin-backend/frontend — a CPU target doesn't reflect actual
-# payment load. Kept as a fixed floor/ceiling (1-2), not a real
-# autoscaling policy.
-# Matches Kubernetes' own default for a low replica count (maxSurge rounds
-# up to 1, maxUnavailable rounds down to 0) — spelled out explicitly so
-# environments with less headroom (see values-azure-dev.yaml) can override
-# it to Recreate without guessing what the implicit default was.
+# Fixed floor/ceiling, not real autoscaling — CPU doesn't reflect payment load.
 updateStrategy:
   type: RollingUpdate
   rollingUpdate:
@@ -48,37 +34,18 @@ hpa:
 pdb:
   maxUnavailable: 1
 
-# bookingServiceClient.js (payment-service/services/bookingServiceClient.js)
-# falls back to http://127.0.0.1:5000 — a local-dev-only default — when
-# this isn't set. "backend" is the same-namespace Kubernetes Service short
-# name for booking-service, so this value is correct in any namespace
-# backend is also deployed into; not something that needs to vary per
-# environment. This is new: payment-service previously only ever received
-# calls from backend, never called it back.
+# "backend" is the same-namespace Service name for booking-service; correct in any environment, so it doesn't need to vary per environment.
 env:
   bookingServiceUrl: http://backend:5000
 
-# No ingress.enabled toggle at all — payment-service has never had an
-# Ingress template in this chart. It's reached only from backend,
-# in-cluster, on its ClusterIP Service. Do not add one here.
+# No ingress.enabled toggle — payment-service is reached only from backend, in-cluster. Do not add one here.
 
 networkPolicy:
   enabled: true
 
-# This is NOT a values.yaml toggle. It's a hardcoded `false` directly in
-# templates/deployment.yaml (see that file) — Kubernetes auto-injects a
-# PAYMENT_SERVICE_PORT env var for every Service literally named
-# "payment-service" in this namespace (legacy Docker-links compatibility,
-# format tcp://<clusterIP>:<port>), which collides with and silently
-# overrides the app's own PAYMENT_SERVICE_PORT read in server.js — the
-# app tries to bind to that literal string instead of 5002 and
-# crash-loops on the startup probe. This is a required correctness
-# setting, not a preference, so it is never made configurable here.
+# enableServiceLinks is hardcoded `false` in templates/deployment.yaml (required correctness setting, not a toggle here).
 
-# Its own ServiceAccount, its own Azure AD workload identity — NOT shared
-# with backend/admin-backend's id-homeease-app-dev. Disabled by default so
-# this chart isn't Azure-specific; azure-dev turns it on with the real,
-# payment-specific clientId (id-homeease-payment-dev).
+# Its own Azure AD workload identity, not shared with other services. Disabled by default; azure-dev turns it on with the real clientId.
 workloadIdentity:
   enabled: false
   clientId: ""
@@ -87,17 +54,7 @@ keyVault:
   name: ""
   tenantId: ""
 
-# razorpay-webhook-secret is deliberately NOT in this list — the CSI
-# driver fails the ENTIRE mount if any one requested object doesn't exist
-# in Key Vault, and Razorpay webhooks aren't configured yet
-# (config/validateEnv.js doesn't require RAZORPAY_WEBHOOK_SECRET). Add it
-# here once a real webhook secret exists and should be wired up.
-#
-# internal-service-token is NEW: payment-service now calls
-# booking-service's internal API (settling payment status, no longer
-# writing Booking directly) and sends this shared secret as the
-# X-Internal-Token header — same object, same value, read by all four
-# services' SecretProviderClass.
+# razorpay-webhook-secret intentionally excluded — CSI mount fails entirely if a requested object is missing from Key Vault, and webhooks aren't configured yet.
 secretProviderClass:
   enabled: false
   secretName: payment-service-razorpay
@@ -106,9 +63,7 @@ secretProviderClass:
       envKey: RAZORPAY_KEY_ID
     - keyVaultObject: razorpay-key-secret
       envKey: RAZORPAY_KEY_SECRET
-    # Distinct from backend's/admin-backend's own *-mongo-uri objects
-    # post-split — this one points at the homeease_payment database
-    # (payment-service owns only payments).
+    # Points at the homeease_payment database (payment-service owns only payments).
     - keyVaultObject: payment-mongo-uri
       envKey: MONGO_URI
     - keyVaultObject: internal-service-token

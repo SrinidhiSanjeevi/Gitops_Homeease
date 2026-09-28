@@ -6,9 +6,7 @@ metadata:
   labels:
     {{- include "admin-frontend.labels" . | nindent 4 }}
 spec:
-  # No replicas field here on purpose — the HPA (templates/hpa.yaml) owns
-  # spec.replicas. See charts/frontend/templates/deployment.yaml for the
-  # full reasoning.
+  # No replicas field: the HPA (templates/hpa.yaml) owns spec.replicas.
   selector:
     matchLabels:
       {{- include "admin-frontend.selectorLabels" . | nindent 6 }}
@@ -21,10 +19,7 @@ spec:
       terminationGracePeriodSeconds: 30
       securityContext:
         runAsNonRoot: true
-        # nginxinc/nginx-unprivileged's built-in `nginx` user is uid/gid
-        # 101, not the 1001 the Node services use — checked directly
-        # against the image. Getting this wrong means CrashLoopBackOff on
-        # a permission error that doesn't obviously point at securityContext.
+        # nginx-unprivileged image runs as uid/gid 101, not 1001 like the Node services.
         runAsUser: 101
         runAsGroup: 101
         fsGroup: 101
@@ -71,10 +66,7 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            # This image's nginx.conf already redirects every temp path
-            # (proxy/client_body/fastcgi/uwsgi/scgi) to /tmp, and
-            # access/error logs are symlinked to stdout/stderr — verified
-            # against the actual image, so this one emptyDir is enough.
+            # nginx.conf redirects all temp paths to /tmp and logs to stdout/stderr, so one emptyDir suffices.
             - name: tmp
               mountPath: /tmp
       volumes:

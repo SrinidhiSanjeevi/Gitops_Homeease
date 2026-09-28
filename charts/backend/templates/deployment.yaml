@@ -22,9 +22,7 @@ spec:
       labels:
         {{- include "backend.selectorLabels" . | nindent 8 }}
         {{- if .Values.workloadIdentity.enabled }}
-        # Required on the POD itself, not just the ServiceAccount — the
-        # workload identity mutating webhook checks this label here
-        # before it will inject the federated-token projected volume.
+        # Required on the pod itself for the workload identity webhook to inject the token volume.
         azure.workload.identity/use: "true"
         {{- end }}
     spec:
@@ -73,9 +71,7 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
-          # Mongo connection warm-up can outlast the readiness probe's
-          # initial delay on a cold start — this gives a new pod up to
-          # 2 minutes before liveness/readiness even start counting.
+          # Gives a new pod up to 2 minutes to warm up before liveness/readiness probes count failures.
           startupProbe:
             httpGet:
               path: /health/live
@@ -84,23 +80,14 @@ spec:
             failureThreshold: 24
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          # PAYMENT_SERVICE_URL: without this, paymentClient.js falls back
-          # to http://127.0.0.1:5002 (local-dev-only default) and backend
-          # calls itself instead of payment-service — every payment call
-          # fails. Preserved exactly as it exists in the current manifests.
+          # Required — without it paymentClient.js falls back to a local-dev default and payment calls fail.
           env:
             - name: PAYMENT_SERVICE_URL
               value: {{ .Values.env.paymentServiceUrl }}
-            # NOTIFICATION_SERVICE_URL: same story as PAYMENT_SERVICE_URL
-            # above, for notificationClient.js — without this it falls
-            # back to http://127.0.0.1:5003 and every notification dispatch
-            # from simulationService fails.
+            # Required — same as PAYMENT_SERVICE_URL, for notificationClient.js.
             - name: NOTIFICATION_SERVICE_URL
               value: {{ .Values.env.notificationServiceUrl }}
-            # Reported by /health/live so the pipeline's Verify DEV stage
-            # can confirm which image is actually serving. Same value as
-            # the image tag — changes only when the tag already changes,
-            # so it never causes an extra rollout.
+            # Reported by /health/live so the deploy pipeline can confirm which image is serving.
             - name: APP_VERSION
               value: {{ .Values.image.tag | quote }}
             {{- if .Values.env.azureStorageAccountName }}
@@ -108,18 +95,13 @@ spec:
               value: {{ .Values.env.azureStorageAccountName | quote }}
             {{- end }}
           {{- if .Values.secretProviderClass.enabled }}
-          # Populated by the Secrets Store CSI driver's secretObjects sync
-          # (see templates/secretproviderclass.yaml) — the app reads
-          # MONGO_URI / JWT_SECRET / INTERNAL_SERVICE_TOKEN from
-          # process.env exactly as it already does locally via .env.
+          # Populated by the Secrets Store CSI driver's secretObjects sync (templates/secretproviderclass.yaml).
           envFrom:
             - secretRef:
                 name: {{ .Values.secretProviderClass.secretName }}
           {{- end }}
           volumeMounts:
-            # readOnlyRootFilesystem is on above, but Node/npm write
-            # scratch files to /tmp unconditionally — this avoids every
-            # pod crashing on its first write to a read-only /tmp.
+            # readOnlyRootFilesystem is on; Node/npm still writes scratch files to /tmp unconditionally.
             - name: tmp
               mountPath: /tmp
             {{- if .Values.secretProviderClass.enabled }}

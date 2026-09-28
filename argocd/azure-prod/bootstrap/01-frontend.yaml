@@ -1,11 +1,4 @@
-# PROD twin of argocd/azure/bootstrap/*-frontend.yaml: same chart, but
-# values-azure-prod.yaml and namespace homeease-prod.
-#
-# Automated sync is correct here too. The approval gate sits BEFORE Git
-# (azure-pipelines.yml "Promote to PROD" waits on the homeease-prod
-# environment's approval), so whatever reaches this values file on main
-# is by definition the approved state — ArgoCD's job is only to make the
-# cluster match it, and selfHeal reverts any manual kubectl drift.
+# PROD twin of argocd/azure/bootstrap/01-frontend.yaml: same chart, values-azure-prod.yaml and namespace homeease-prod.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

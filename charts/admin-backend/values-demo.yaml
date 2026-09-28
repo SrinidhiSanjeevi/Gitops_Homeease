@@ -1,6 +1,4 @@
-# Standalone demo values — see charts/backend/values-demo.yaml for the
-# full explanation of the workloadIdentity/secretProviderClass caveat
-# (same shared identity, same federation boundary applies here too).
+# Standalone demo values; see charts/backend/values-demo.yaml for the shared-identity caveat.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/admin-backend
   tag: d72879629ea7

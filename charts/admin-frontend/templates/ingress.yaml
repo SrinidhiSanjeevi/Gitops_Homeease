@@ -14,9 +14,7 @@ metadata:
     # default request body limit is 1 MB.
     nginx.ingress.kubernetes.io/proxy-body-size: "6m"
     {{- if not .Values.ingress.sslRedirect }}
-    # Presentation URL: serves plain HTTP directly instead of
-    # 308-redirecting to HTTPS, which has no valid certificate for an IP
-    # address and would just reproduce a browser warning.
+    # IP-based presentation URL has no valid TLS cert, so skip the HTTPS redirect.
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     {{- end }}
 spec:
@@ -37,10 +35,7 @@ spec:
                 port:
                   name: http
     {{- if .Values.ingress.extraHostlessRule }}
-    # Host-less catch-all: requests with no matching Host header (e.g. a
-    # bare public IP) fall through to this rule instead of nginx's
-    # default-backend 404. The host-specific rule above, and every other
-    # service's own Ingress, are untouched.
+    # Host-less catch-all: requests with no matching Host header still reach this service.
     - http:
         paths:
           - path: /

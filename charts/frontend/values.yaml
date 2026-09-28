@@ -1,15 +1,11 @@
-# Cloud/environment-neutral defaults. Azure-dev-specific values (image
-# tag, ingress host, extra labels) live in values-azure-dev.yaml — see
-# that file for the direct equivalent of apps/frontend/overlays/azure/dev.
+# Cloud/environment-neutral defaults; per-env overrides live in values-azure-*.yaml.
 
 image:
   repository: homeease/frontend
   tag: placeholder
   pullPolicy: IfNotPresent
 
-# No top-level `replicas` value on purpose, and none of the templates in
-# this chart read one for spec.replicas — the HPA owns replica count.
-# See templates/deployment.yaml.
+# No top-level `replicas` value: the HPA owns replica count.
 
 service:
   port: 80
@@ -29,9 +25,7 @@ hpa:
   cpuTargetPercent: 70
 
 pdb:
-  # maxUnavailable (not minAvailable): works even at 1 running replica —
-  # minAvailable: 1 with a single replica would block 100% of voluntary
-  # node drains/evictions instead of making them safer.
+  # maxUnavailable (not minAvailable): still works at a single replica.
   maxUnavailable: 1
 
 ingress:
@@ -42,17 +36,11 @@ ingress:
   # ssl-redirect true is the ingress-nginx default; azure-dev turns this
   # off for the IP-based presentation URL (see values-azure-dev.yaml).
   sslRedirect: true
-  # When true, adds a second, host-less rule to the same Ingress object
-  # so requests with no matching Host header (e.g. a bare public IP)
-  # also reach frontend, without touching the host-specific rule above
-  # or any other service's Ingress. Off by default; azure-dev turns it on.
+  # Adds a second, host-less rule so requests with no matching Host header still reach frontend.
   extraHostlessRule: false
 
 networkPolicy:
   enabled: true
 
-# Merged into metadata.labels and pod-template labels only — never into
-# any selector field (Deployment.spec.selector, Service.spec.selector,
-# NetworkPolicy.spec.podSelector, HPA.scaleTargetRef). See
-# templates/_helpers.tpl: frontend.selectorLabels vs frontend.labels.
+# Merged into labels only, never into selector fields.
 extraLabels: {}

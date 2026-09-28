@@ -6,12 +6,7 @@ metadata:
   labels:
     {{- include "frontend.labels" . | nindent 4 }}
 spec:
-  # No replicas field here on purpose — the HPA (templates/hpa.yaml) owns
-  # spec.replicas. Committing a static value here creates two controllers
-  # fighting over the same field: HPA scales up under load, ArgoCD's
-  # selfHeal scales it back down to match Git on its next reconcile, and
-  # the service is least stable exactly when busiest. Kubernetes defaults
-  # to 1 replica on creation anyway, matching the HPA's own minReplicas.
+  # No replicas field: the HPA (templates/hpa.yaml) owns spec.replicas.
   selector:
     matchLabels:
       {{- include "frontend.selectorLabels" . | nindent 6 }}
@@ -24,10 +19,7 @@ spec:
       terminationGracePeriodSeconds: 30
       securityContext:
         runAsNonRoot: true
-        # nginxinc/nginx-unprivileged's built-in `nginx` user is uid/gid
-        # 101, not the 1001 the Node services use — checked directly
-        # against the image. Getting this wrong means CrashLoopBackOff on
-        # a permission error that doesn't obviously point at securityContext.
+        # nginxinc/nginx-unprivileged's built-in `nginx` user is uid/gid 101.
         runAsUser: 101
         runAsGroup: 101
         fsGroup: 101
@@ -74,10 +66,7 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            # This image's nginx.conf already redirects every temp path
-            # (proxy/client_body/fastcgi/uwsgi/scgi) to /tmp, and
-            # access/error logs are symlinked to stdout/stderr — verified
-            # against the actual image, so this one emptyDir is enough.
+            # nginx.conf redirects all temp paths to /tmp, so one emptyDir is enough.
             - name: tmp
               mountPath: /tmp
       volumes:

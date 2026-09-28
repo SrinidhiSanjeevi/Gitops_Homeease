@@ -1,16 +1,4 @@
-# Grafana dashboard provisioning via the chart's sidecar — see
-# grafana.sidecar.dashboards in ../values.yaml.
-#
-# Redesigned as a compact, all-Stat "at a glance" overview (no time-series
-# graphs) for demo/presentation use. Same underlying PromQL as the
-# previous version where the panel still exists here; HTTP error/latency
-# detail moved to homeease-http.yaml, booking-rate detail moved to
-# homeease-business.yaml, to avoid duplicate panels across dashboards.
-#
-# Metric names copy-checked against app_Homeease/backend/metrics.js —
-# nothing invented. "Payment Service Health" reads "No data" until
-# payment-service is actually deployed (its ServiceMonitor exists, but
-# there's no pod yet) — that's expected, not a dashboard bug.
+# Grafana dashboard provisioning via the chart's sidecar — see grafana.sidecar.dashboards in ../values.yaml.
 apiVersion: v1
 kind: ConfigMap
 metadata:

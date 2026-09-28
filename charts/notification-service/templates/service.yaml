@@ -10,8 +10,7 @@ spec:
   selector:
     {{- include "notification-service.selectorLabels" . | nindent 4 }}
   ports:
-    # Matches the container's port (5003) — backend's NOTIFICATION_SERVICE_URL
-    # (charts/backend/templates/deployment.yaml) depends on this.
+    # Matches the container's port (5003) — backend's NOTIFICATION_SERVICE_URL depends on this.
     - name: http
       port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPortName }}

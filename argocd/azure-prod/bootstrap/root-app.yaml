@@ -1,22 +1,4 @@
-# THE ONE MANUAL STEP for the Azure PROD cluster — the prod twin of
-# argocd/azure/bootstrap/root-app.yaml.
-#
-# STATUS: NOT APPLIED. aks-homeease-prod does not exist yet (Terraform
-# environments/prod has never been applied). Nothing in argocd/azure-prod/
-# is read by the DEV cluster's ArgoCD: its root app only scans
-# argocd/azure/bootstrap, non-recursively.
-#
-# Prod gets its own ArgoCD on its own cluster, same as each cloud already
-# does (see the dev root-app header). Once the cluster exists:
-#
-#   kubectl config use-context aks-homeease-prod
-#   kubectl create namespace argocd
-#   helm repo add argo https://argoproj.github.io/argo-helm
-#   helm install argocd argo/argo-cd -n argocd   # one-time, not GitOps-managed
-#   kubectl apply -f argocd/azure-prod/bootstrap/root-app.yaml
-#
-# Do that only after every REPLACE_ME in charts/*/values-azure-prod.yaml
-# is filled in and at least one approved promotion has set image.tag.
+# Root app-of-apps for the Azure prod cluster; not yet applied — aks-homeease-prod doesn't exist yet.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

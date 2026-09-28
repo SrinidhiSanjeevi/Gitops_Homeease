@@ -11,11 +11,7 @@ spec:
   source:
     repoURL: https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git
     targetRevision: main
-    # New service (Stage 3 of the app-side microservices split — see the
-    # project plan). Unlike its siblings, there is no prior Kustomize
-    # overlay to have migrated from: notification-service was extracted
-    # straight to a Helm chart from day one, modeled on
-    # charts/payment-service.
+    # New service, extracted straight to a Helm chart, modeled on charts/payment-service.
     path: charts/notification-service
     helm:
       valueFiles:

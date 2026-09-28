@@ -1,25 +1,6 @@
-# ============================================================
-# kube-prometheus-stack — Prometheus Operator + Prometheus +
-# Alertmanager + Grafana + node-exporter + kube-state-metrics.
-#
-# Sized for a 1-3 node Standard_D2s_v5 dev cluster (2 vCPU / 8GB per
-# node) on trial credit, not a production fleet. Bump requests/limits
-# when Grafana shows sustained throttling, not before — guessing high
-# "to be safe" is how a monitoring stack eats the budget it exists to
-# protect.
-# ============================================================
+# kube-prometheus-stack — Prometheus Operator + Prometheus + Alertmanager + Grafana + node-exporter + kube-state-metrics. Sized for a small dev cluster.
 
-# ------------------------------------------------------------
-# THE LINE THAT MATTERS MOST IN THIS FILE.
-#
-# By default this chart's Prometheus only watches ServiceMonitors
-# carrying ITS OWN Helm release label — meaning ServiceMonitors added
-# later by the four HomeEase app charts (a different Helm release
-# entirely) would silently never be scraped. Setting these to false
-# makes Prometheus watch every ServiceMonitor/PodMonitor/
-# PrometheusRule in the cluster, in any namespace, regardless of who
-# created it.
-# ------------------------------------------------------------
+# Watch ServiceMonitors/PodMonitors/PrometheusRules cluster-wide, not just this Helm release's own.
 prometheus:
   prometheusSpec:
     serviceMonitorSelectorNilUsesHelmValues: false
@@ -47,8 +28,7 @@ prometheus:
             requests:
               storage: 10Gi
 
-  # Single replica — this is a dev cluster, not an HA control plane.
-  # Revisit if this is ever pushed toward a real multi-node prod.
+  # Single replica — dev cluster, not an HA control plane.
   service:
     type: ClusterIP
 
@@ -68,18 +48,11 @@ alertmanager:
           resources:
             requests:
               storage: 1Gi
-    # Created out-of-band (docs/monitoring-secrets.md) and mounted at
-    # /etc/alertmanager/secrets/alertmanager-teams/. The mount is mandatory:
-    # if the Secret is missing, the Alertmanager pod sticks in Init.
-    #   alertmanager-teams: monitoring-url (single Teams Workflow webhook URL)
-    # Single-channel only, by design: every alert goes to this one Teams
-    # webhook, no escalation tiers, no separate infra channel.
+    # Out-of-band secret (docs/monitoring-secrets.md); mount is mandatory or the pod sticks in Init.
     secrets:
       - alertmanager-teams
 
-  # Single route: every alert (except the synthetic Watchdog heartbeat,
-  # silenced below so it doesn't spam the channel every group_interval)
-  # goes to the one Teams webhook.
+  # Single route: every alert (except the Watchdog heartbeat) goes to the one Teams webhook.
   config:
     route:
       receiver: teams-monitoring
@@ -107,9 +80,7 @@ alertmanager:
             send_resolved: true
 
 grafana:
-  # Use pre-existing / out-of-band secret instead of auto-generating a random
-  # password during every Helm render (which creates continuous drift in ArgoCD).
-  # See docs/monitoring-secrets.md for details.
+  # Pre-existing/out-of-band secret instead of an auto-generated password (see docs/monitoring-secrets.md).
   admin:
     existingSecret: grafana-admin-credentials
     userKey: admin-user
@@ -123,22 +94,11 @@ grafana:
       cpu: 200m
       memory: 512Mi
 
-  # Grafana 13 (distroless) moves its bundled plugins (Prometheus, Loki, …)
-  # at startup. With a read-only root filesystem that move fails
-  # ("unlinkat /usr/share/grafana/data/plugins-bundled/...: read-only file
-  # system") and Grafana ends up with NO Prometheus/Loki plugin — every
-  # dashboard panel then errors with "No data". Everything else in the
-  # chart's default security context (non-root, no privilege escalation,
-  # all capabilities dropped) stays in place.
+  # Read-only root filesystem breaks Grafana 13's bundled-plugin move at startup, so it's disabled here.
   containerSecurityContext:
     readOnlyRootFilesystem: false
 
-  # Declarative dashboards: the sidecar watches for ConfigMaps carrying
-  # the label below (any namespace — this is a dev cluster, not multi-
-  # tenant) and loads/updates/removes them from Grafana automatically.
-  # This is how platform/kube-prometheus-stack/dashboards/*.yaml reach
-  # Grafana — no manual "Import Dashboard" click, no dashboard drift
-  # from what's committed here.
+  # Sidecar auto-loads dashboards from ConfigMaps carrying the label below.
   sidecar:
     dashboards:
       enabled: true
@@ -146,30 +106,16 @@ grafana:
       labelValue: "1"
       searchNamespace: ALL
 
-  # Loki as a second datasource, alongside the Prometheus one this
-  # chart wires automatically — one Grafana, both signals, same
-  # label set (namespace, service) so a panel can pivot from a
-  # metric to its logs without leaving the UI.
+  # Loki as a second datasource alongside the auto-wired Prometheus one.
   additionalDataSources:
     - name: Loki
       type: loki
       url: http://loki.monitoring.svc.cluster.local:3100
       access: proxy
 
-  # No ingress yet — nothing in front of the cluster to attach a
-  # hostname to (see platform/README.md on ingress-nginx). Reach
-  # Grafana with:
-  #   kubectl port-forward -n monitoring svc/kube-prometheus-stack-grafana 3000:80
+  # No ingress yet — reach Grafana via kubectl port-forward (see platform/README.md).
 
-# ------------------------------------------------------------
-# AKS Control Plane Monitoring
-# Control plane components (controller-manager, scheduler, etcd, kube-proxy)
-# are managed by Azure and not accessible from worker nodes. Disabling them
-# avoids trying to scrape inaccessible endpoints and avoids creating headless
-# services in kube-system (which is restricted in the platform AppProject).
-# Full cluster & node observability is maintained via kubelet, apiserver,
-# kube-state-metrics, and node-exporter.
-# ------------------------------------------------------------
+# AKS control plane components are Azure-managed and not scrapeable — disabled here.
 kubeControllerManager:
   enabled: false
 kubeScheduler:
@@ -183,7 +129,5 @@ coreDns:
 kubeDns:
   enabled: false
 
-# node-exporter and kube-state-metrics keep their chart defaults —
-# both are already small (DaemonSet / single Deployment) and don't
-# need dev-specific tuning.
+# node-exporter and kube-state-metrics keep their chart defaults.
 

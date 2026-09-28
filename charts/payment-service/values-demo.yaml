@@ -1,8 +1,4 @@
-# Standalone demo values. No ingress.host override needed — this chart
-# has no Ingress template at all (internal-only by design, unchanged
-# here). Otherwise identical to values-azure-dev.yaml; see
-# charts/backend/values-demo.yaml for the workloadIdentity/
-# secretProviderClass federation caveat that applies here too.
+# Standalone demo values, otherwise identical to values-azure-dev.yaml. No Ingress template exists for this chart.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/payment-service
   tag: d72879629ea7

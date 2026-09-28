@@ -61,6 +61,16 @@ kubectl create secret generic grafana-admin-credentials \
   --from-literal=admin-password='<YOUR_SECURE_PASSWORD>'
 ```
 
+> [!IMPORTANT]
+> Always verify the password actually landed — a typo'd `--from-literal`
+> (e.g. a shell variable that expanded empty) creates the Secret
+> successfully with a **blank** `admin-password`, which looks configured
+> but locks everyone out. This happened on 2026-09-26. Check with:
+> ```bash
+> kubectl get secret -n monitoring grafana-admin-credentials -o jsonpath='{.data.admin-password}' | base64 -d | wc -c
+> ```
+> A result of `0` means the password is empty — recreate the Secret.
+
 To initialize `grafana-admin-credentials` with the existing live Grafana password:
 
 ```bash

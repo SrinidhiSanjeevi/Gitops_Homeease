@@ -1,17 +1,4 @@
-# PROD twin of argocd/azure/bootstrap/07-notification-service.yaml: same
-# chart, but values-azure-prod.yaml and namespace homeease-prod.
-#
-# Automated sync is correct here too. The approval gate sits BEFORE Git
-# (azure-pipelines.yml "Promote to PROD" waits on the homeease-prod
-# environment's approval), so whatever reaches this values file on main
-# is by definition the approved state — ArgoCD's job is only to make the
-# cluster match it, and selfHeal reverts any manual kubectl drift.
-#
-# STATUS: NOT DEPLOYED — same as its siblings, this whole directory is
-# only read by aks-homeease-prod's own ArgoCD, which doesn't exist yet.
-# On top of that, notification-service specifically has no PROD Managed
-# Identity/Key Vault access provisioned either — see
-# charts/notification-service/values-azure-prod.yaml's REPLACE_ME values.
+# PROD twin of argocd/azure/bootstrap/07-notification-service.yaml; not yet deployed (no PROD Managed Identity/Key Vault access provisioned).
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

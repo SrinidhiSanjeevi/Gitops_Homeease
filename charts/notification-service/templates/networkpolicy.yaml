@@ -1,9 +1,5 @@
 {{- if .Values.networkPolicy.enabled }}
-# Default-deny, explicit-allow — same posture as payment-service. The
-# only caller of notification-service anywhere in the system is backend
-# (backend/services/notification/notificationClient.js dispatching via
-# simulationService). Not ingress-nginx, not admin-backend, not frontend,
-# not the internet.
+# Default-deny, explicit-allow — the only caller of notification-service is backend.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
