@@ -1,5 +1,4 @@
-# Admin console, split out from the customer frontend into its own app
-# and its own deployment — see charts/admin-frontend.
+# Admin console, split out from the customer frontend — see charts/admin-frontend.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

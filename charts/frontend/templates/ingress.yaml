@@ -11,9 +11,7 @@ metadata:
     # placeholder per platform/README.md) — harmless to set now.
     cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer }}
     {{- if not .Values.ingress.sslRedirect }}
-    # Presentation URL: serves plain HTTP directly instead of
-    # 308-redirecting to HTTPS, which has no valid certificate for an IP
-    # address and would just reproduce a browser warning.
+    # Serves plain HTTP; no valid TLS cert for this address.
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     {{- end }}
 spec:
@@ -34,10 +32,7 @@ spec:
                 port:
                   name: http
     {{- if .Values.ingress.extraHostlessRule }}
-    # Host-less catch-all: requests with no matching Host header (e.g. a
-    # bare public IP) fall through to this rule instead of nginx's
-    # default-backend 404. The host-specific rule above, and every other
-    # service's own Ingress, are untouched.
+    # Host-less catch-all for requests with no matching Host header.
     - http:
         paths:
           - path: /

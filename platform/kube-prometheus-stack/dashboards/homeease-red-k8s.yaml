@@ -1,16 +1,3 @@
-# See homeease-business.yaml for how sidecar provisioning works.
-#
-# Kubernetes panels use kube-state-metrics + cAdvisor series that ship
-# enabled by default in kube-prometheus-stack (kubeStateMetrics.enabled
-# and kubelet.enabled are both chart defaults), scoped to
-# namespace=homeease-dev.
-#
-# Redesigned as a compact, all-Stat "Kubernetes" view (no time-series
-# graphs). The RED/HTTP panels that used to live here (Rate/Errors/
-# Duration by service) were dropped — they duplicated homeease-http.yaml
-# and homeease-red.yaml exactly. Title kept as-is for continuity; content
-# is now purely Kubernetes-health, matching the "KUBERNETES" section of
-# the requested layout.
 apiVersion: v1
 kind: ConfigMap
 metadata:

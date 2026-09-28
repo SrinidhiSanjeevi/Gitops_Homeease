@@ -22,9 +22,7 @@ spec:
       ports:
         - protocol: TCP
           port: 5000
-    # Other HomeEase services in this same namespace calling backend
-    # server-to-server (frontend, admin-backend, payment-service,
-    # notification-service — all now call booking-service's internal API).
+    # Other HomeEase services in this namespace calling backend server-to-server.
     - from:
         - podSelector: {}
       ports:

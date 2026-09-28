@@ -1,17 +1,4 @@
-# Grafana dashboard provisioning via the chart's sidecar — see
-# grafana.sidecar.dashboards in ../values.yaml.
-#
-# http_requests_total / http_request_duration_seconds are identical
-# (same names, same method/route/code labels) in backend, admin-backend,
-# and payment-service metrics.js files — confirmed by reading all three,
-# not assumed. Frontend is deliberately excluded: its nginx.conf has no
-# /metrics route (returns 403 on it) and it has no ServiceMonitor, so
-# there is no usable Prometheus series for it — including it would mean
-# inventing a metric that doesn't exist.
-#
-# Redesigned as all-Stat panels (no time-series graphs) — same PromQL as
-# before, row section headers kept for structure since they carry no
-# query/graph of their own.
+# Grafana dashboard provisioning via the chart's sidecar — see grafana.sidecar.dashboards in ../values.yaml. Frontend is excluded: no /metrics route.
 apiVersion: v1
 kind: ConfigMap
 metadata:

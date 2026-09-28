@@ -1,8 +1,4 @@
-# Child Application: syncs the AppProject definition from
-# argocd/azure/projects/. Kept as its own Application (rather than folding
-# the AppProject into root-app's own directory scan) so the project
-# boundary can be reviewed/synced independently of everything that depends
-# on it.
+# Child Application: syncs the AppProject definition from argocd/azure/projects/.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

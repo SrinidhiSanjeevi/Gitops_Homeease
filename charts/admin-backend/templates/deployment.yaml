@@ -78,12 +78,7 @@ spec:
             failureThreshold: 24
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          # BOOKING_SERVICE_URL: without this, bookingServiceClient.js falls
-          # back to http://127.0.0.1:5000 (local-dev-only default) and
-          # admin-backend calls itself instead of booking-service — every
-          # admin API call fails. This is new: admin-backend didn't call
-          # anything over HTTP before this split (it used to talk to Mongo
-          # directly).
+          # BOOKING_SERVICE_URL is required, or admin API calls fail.
           env:
             - name: BOOKING_SERVICE_URL
               value: {{ .Values.env.bookingServiceUrl }}
@@ -92,10 +87,7 @@ spec:
               value: {{ .Values.env.azureStorageAccountName | quote }}
             {{- end }}
           {{- if .Values.secretProviderClass.enabled }}
-          # Populated by the Secrets Store CSI driver's secretObjects sync
-          # (see templates/secretproviderclass.yaml) — the app reads
-          # MONGO_URI / JWT_SECRET / INTERNAL_SERVICE_TOKEN from
-          # process.env exactly as it already does locally via .env.
+          # Populated by the Secrets Store CSI driver (templates/secretproviderclass.yaml).
           envFrom:
             - secretRef:
                 name: {{ .Values.secretProviderClass.secretName }}

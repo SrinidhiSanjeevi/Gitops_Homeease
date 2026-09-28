@@ -1,9 +1,4 @@
-# One plain Application per service, not an ApplicationSet generator —
-# with 4 services and 1 environment today, 4 files you can read top to
-# bottom is simpler than a generator you have to mentally expand. If/when
-# staging and prod are added (service x environment starts multiplying),
-# revisit this in favour of an ApplicationSet — see the note in the repo
-# README.
+# One plain Application per service, not an ApplicationSet generator — see repo README.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -17,11 +12,7 @@ spec:
   source:
     repoURL: https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git
     targetRevision: main
-    # Migrated from apps/frontend/overlays/azure/dev (Kustomize) to this
-    # Helm chart — Phase 3 validation confirmed 33/33 rendered resources
-    # identical across all 4 services, zero functional differences, exact
-    # selector matches against the live cluster. The Kustomize tree has
-    # since been deleted (see root README.md).
+    # Migrated from Kustomize to this Helm chart — see root README.md.
     path: charts/frontend
     helm:
       valueFiles:

@@ -1,9 +1,4 @@
-# STAGING twin of argocd/azure/bootstrap/06-admin-frontend.yaml. Same
-# cluster as dev — see 01-frontend.yaml's header for the Phase 1
-# rationale. Numbered 05 (not 06) here since staging has no separate
-# monitoring Application (05-monitoring.yaml in dev is a platform-wide,
-# not per-environment, Application — it is not duplicated per
-# environment).
+# STAGING twin of argocd/azure/bootstrap/06-admin-frontend.yaml, same aks-homeease-dev cluster.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

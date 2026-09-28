@@ -1,5 +1,4 @@
-# Syncs the prod AppProject from argocd/azure-prod/projects/ — same
-# pattern as argocd/azure/bootstrap/00-project.yaml.
+# Child Application: syncs the prod AppProject from argocd/azure-prod/projects/.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

@@ -1,11 +1,4 @@
-# Azure DEV overrides for notification-service.
-#
-# Now a structural twin of charts/payment-service/values-azure-dev.yaml —
-# id-homeease-notification-dev (workload identity + federated credential +
-# Key Vault Secrets User role) exists in Infrastructure_Homeease terraform
-# state, and notification-mongo-uri/email-user/email-pass/email-from/
-# internal-service-token all exist in kv-homeease-dev-hs02 (see
-# modules/keyvault/SECRETS.md).
+# Azure DEV overrides for notification-service. See modules/keyvault/SECRETS.md for the Key Vault secrets.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/notification-service
   tag: "93917ef237a9"
@@ -21,19 +14,10 @@ secretProviderClass:
 extraLabels:
   homeease.io/environment: dev
   homeease.io/cloud: azure
-# Free Trial subscription: hard 4-vCPU cap, so DEV is one 2-vCPU node.
-# Only the CPU *request* is lowered so the whole stack schedules; limits
-# come from values.yaml unchanged, so the pod can still burst. Same
-# override every other service's dev file already applies.
+# Free Trial subscription: hard 4-vCPU cap, so DEV is one 2-vCPU node — only the CPU request is lowered.
 resources:
   requests:
     cpu: 50m
-# Same 4-vCPU cap above means there is no headroom for a RollingUpdate's
-# surge pod (old + new pod at once) — the autoscaler can't add a node to
-# cover it either (Azure subscription's regional core quota is maxed out).
-# Recreate terminates the old pod before starting the new one: a few
-# seconds of downtime per deploy on this single-replica dev environment,
-# traded for rollouts that don't get stuck Pending indefinitely. Same
-# override every other service's dev file already applies.
+# No headroom for a RollingUpdate surge pod, so Recreate is used instead (brief downtime per deploy).
 updateStrategy:
   type: Recreate

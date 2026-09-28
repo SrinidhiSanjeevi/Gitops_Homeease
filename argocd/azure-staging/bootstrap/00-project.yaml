@@ -1,7 +1,4 @@
-# Child Application: syncs the AppProject definition from
-# argocd/azure-staging/projects/ — same pattern as
-# argocd/azure/bootstrap/00-project.yaml (dev) and
-# argocd/azure-prod/bootstrap/00-project.yaml (prod).
+# Child Application: syncs the AppProject definition from argocd/azure-staging/projects/.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

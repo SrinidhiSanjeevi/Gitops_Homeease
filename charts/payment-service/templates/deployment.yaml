@@ -1,8 +1,4 @@
-# payment-service gets more here than the other three services — it's
-# the one place a mistake has a real (simulated) financial consequence,
-# so its blast radius is deliberately smaller: no public Ingress, secrets
-# pulled straight from the cloud's own secret store, NetworkPolicy locked
-# to "only backend may call this" (see templates/networkpolicy.yaml).
+# Tighter isolation than other services: no public Ingress, secrets from the cloud secret store, backend-only NetworkPolicy.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -11,8 +7,7 @@ metadata:
   labels:
     {{- include "payment-service.labels" . | nindent 4 }}
 spec:
-  # No replicas field here on purpose — the HPA (templates/hpa.yaml) owns
-  # spec.replicas.
+  # No replicas field — the HPA (templates/hpa.yaml) owns spec.replicas.
   strategy:
     type: {{ .Values.updateStrategy.type }}
     {{- if eq .Values.updateStrategy.type "RollingUpdate" }}
@@ -31,15 +26,7 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: payment-service
-      # REQUIRED CORRECTNESS SETTING — not configurable, not a values
-      # toggle. Kubernetes auto-injects a PAYMENT_SERVICE_PORT env var for
-      # every Service named "payment-service" in this namespace (legacy
-      # Docker-links compatibility, format tcp://<clusterIP>:<port>) —
-      # this collides with and silently overrides the app's OWN
-      # PAYMENT_SERVICE_PORT read in server.js, so it tries to bind to the
-      # literal string "tcp://10.20.x.x:80" instead of 5002 and
-      # crash-loops on the startup probe. Disabling service-links avoids
-      # the whole class of collision; nothing in this app relies on them.
+      # Required: Kubernetes' auto-injected PAYMENT_SERVICE_PORT env var collides with the app's own var of the same name and crash-loops it.
       enableServiceLinks: false
       terminationGracePeriodSeconds: 30
       securityContext:
@@ -93,23 +80,12 @@ spec:
             failureThreshold: 24
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          # BOOKING_SERVICE_URL: without this, bookingServiceClient.js falls
-          # back to http://127.0.0.1:5000 (local-dev-only default) and
-          # payment-service calls itself instead of booking-service — every
-          # settle-payment call fails. This is new: payment-service
-          # previously only ever received calls from backend, never called
-          # it back.
+          # Required: without it, bookingServiceClient.js falls back to a local-dev-only default and settle-payment calls fail.
           env:
             - name: BOOKING_SERVICE_URL
               value: {{ .Values.env.bookingServiceUrl }}
           {{- if .Values.secretProviderClass.enabled }}
-          # Populated by the Secrets Store CSI driver's secretObjects sync
-          # (see templates/secretproviderclass.yaml) — the app reads
-          # MONGO_URI / RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET /
-          # INTERNAL_SERVICE_TOKEN from process.env exactly as it already
-          # does locally via .env. RAZORPAY_WEBHOOK_SECRET is intentionally
-          # not included — webhooks aren't configured yet and
-          # validateEnv.js doesn't require it.
+          # Populated by the Secrets Store CSI driver's secretObjects sync (see secretproviderclass.yaml).
           envFrom:
             - secretRef:
                 name: {{ .Values.secretProviderClass.secretName }}

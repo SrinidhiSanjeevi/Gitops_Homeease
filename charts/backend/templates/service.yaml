@@ -10,9 +10,7 @@ spec:
   selector:
     {{- include "backend.selectorLabels" . | nindent 4 }}
   ports:
-    # Matches the container's port (5000), not 80 — frontend's nginx.conf
-    # upstream block hardcodes `server backend:5000;`, and Ingress
-    # references this port by name ("http"), not by number.
+    # Matches the container's port (5000), not 80 — frontend's nginx.conf hardcodes it.
     - name: http
       port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPortName }}

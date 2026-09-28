@@ -1,11 +1,4 @@
-# AppProject — scopes what Applications under this project are allowed to
-# do, independent of any single Application's own spec. Without this,
-# every Application uses the `default` AppProject, which permits ANY
-# source repo and ANY destination namespace/cluster — no boundary at all.
-#
-# One of these exists per cloud (see ../../aws/projects for the AWS
-# equivalent) because each cloud runs its own ArgoCD on its own cluster —
-# this is not a cross-cluster resource.
+# AppProject scoping what homeease Applications on this cluster are allowed to do.
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
@@ -14,34 +7,21 @@ metadata:
 spec:
   description: HomeEase application services on AKS (frontend, admin-frontend, backend, admin-backend, payment-service, notification-service)
 
-  # Only this repo may be a source. An Application in this project
-  # pointing at a different Git URL is rejected at admission, not just
-  # discouraged by convention.
+  # Only this repo may be a source.
   sourceRepos:
     - "https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git"
 
-  # DEV cluster only. PROD is a separate cluster with its own ArgoCD and
-  # its own copy of this project — see argocd/azure-prod/ — so
-  # homeease-prod is deliberately NOT a destination here.
+  # DEV cluster only; PROD has its own copy under argocd/azure-prod/.
   destinations:
     - server: https://kubernetes.default.svc
       namespace: "homeease-dev"
 
-  # Cluster-scoped resources are the highest blast-radius risk if a
-  # compromised or mis-templated Application tries to create them, so
-  # everything cluster-scoped is denied except Namespace. That one is
-  # required by syncOptions CreateNamespace=true on every Application
-  # here: without it a fresh cluster (no homeease-dev yet) never syncs —
-  # "resource :Namespace is not permitted in project homeease".
+  # Everything cluster-scoped is denied except Namespace (needed for CreateNamespace=true).
   clusterResourceWhitelist:
     - group: ""
       kind: Namespace
 
-  # Namespace-scoped kinds the four services legitimately need. Notably
-  # absent: ResourceQuota/LimitRange (namespace-owner concern, managed by
-  # platform/, not by an app team's Application) and anything RBAC-shaped
-  # (Role/RoleBinding) — a service Application should never be able to
-  # grant itself permissions.
+  # Namespace-scoped kinds the services legitimately need.
   namespaceResourceWhitelist:
     - group: "apps"
       kind: Deployment

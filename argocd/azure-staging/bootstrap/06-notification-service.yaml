@@ -1,11 +1,4 @@
-# STAGING twin of argocd/azure/bootstrap/07-notification-service.yaml.
-# Same cluster as dev — see 01-frontend.yaml's header for the Phase 1
-# rationale. NOTE: notification-service has no real workload identity in
-# ANY environment yet (values-azure-staging.yaml still carries the same
-# REPLACE_ME placeholders as values-azure-dev.yaml) — this Application
-# exists so the chart is wired up consistently with its 5 siblings, but
-# actually syncing it will only succeed once that placeholder is filled
-# in (same precondition as dev).
+# STAGING twin of argocd/azure/bootstrap/07-notification-service.yaml; needs its REPLACE_ME values filled in to sync.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

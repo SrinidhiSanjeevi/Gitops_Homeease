@@ -1,21 +1,4 @@
-# Grafana dashboard provisioning via the chart's sidecar (see
-# grafana.sidecar.dashboards in ../values.yaml) — this ConfigMap's label
-# is what the sidecar watches for, its `data` key is the dashboard JSON
-# exactly as Grafana's own export format expects it.
-#
-# All PromQL here uses ONLY metrics that actually exist in
-# app_Homeease/backend/metrics.js and are populated by metricsCollector.js
-# (DB-truth gauges) or by controller instrumentation (event counters).
-#
-# KEY FIX: Business KPI stats now use the DB-truth gauges
-# (serviceexpress_total_bookings, serviceexpress_bookings_by_status, etc.)
-# directly — not increase() on counters, which produced fractional values
-# due to Prometheus extrapolation. Gauges return exact integers.
-#
-# Row 1: Business KPIs (Authoritative DB-truth state, integer values only)
-# Row 2: Booking Lifecycle (event-rate panels — confirmation/cancellation rates)
-# Row 3: Performance (assignment latency, booking latency, throughput)
-# Row 4: Service Health (binary UP/DOWN for each service)
+# Grafana dashboard provisioning via the chart's sidecar (see grafana.sidecar.dashboards in ../values.yaml).
 apiVersion: v1
 kind: ConfigMap
 metadata:
