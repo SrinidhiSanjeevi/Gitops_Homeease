@@ -1,7 +1,3 @@
-# Same multi-source pattern as ../../azure/bootstrap/05-kube-prometheus-stack.yaml.
-# platform/kube-prometheus-stack/values.yaml is shared between both
-# clouds' copies of this Application — one values file, installed
-# independently on both clusters.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

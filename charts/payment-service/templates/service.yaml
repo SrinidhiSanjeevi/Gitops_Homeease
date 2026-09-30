@@ -10,8 +10,6 @@ spec:
   selector:
     {{- include "payment-service.selectorLabels" . | nindent 4 }}
   ports:
-    # Matches the container's port (5002) — backend's PAYMENT_SERVICE_URL
-    # (charts/backend/templates/deployment.yaml) depends on this.
     - name: http
       port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPortName }}

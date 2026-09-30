@@ -1,6 +1,3 @@
-# kube-prometheus-stack — Prometheus Operator + Prometheus + Alertmanager + Grafana + node-exporter + kube-state-metrics. Sized for a small dev cluster.
-
-# Watch ServiceMonitors/PodMonitors/PrometheusRules cluster-wide, not just this Helm release's own.
 prometheus:
   prometheusSpec:
     serviceMonitorSelectorNilUsesHelmValues: false
@@ -14,7 +11,7 @@ prometheus:
 
     resources:
       requests:
-        cpu: 100m # was 200m — DEV is one 2-vCPU node (Free Trial 4-vCPU cap)
+        cpu: 100m
         memory: 512Mi
       limits:
         cpu: 1000m
@@ -28,7 +25,6 @@ prometheus:
             requests:
               storage: 10Gi
 
-  # Single replica — dev cluster, not an HA control plane.
   service:
     type: ClusterIP
 
@@ -48,11 +44,9 @@ alertmanager:
           resources:
             requests:
               storage: 1Gi
-    # Out-of-band secret (docs/monitoring-secrets.md); mount is mandatory or the pod sticks in Init.
     secrets:
       - alertmanager-teams
 
-  # Single route: every alert (except the Watchdog heartbeat) goes to the one Teams webhook.
   config:
     route:
       receiver: teams-monitoring
@@ -64,8 +58,6 @@ alertmanager:
         - receiver: 'null'
           matchers:
             - alertname = "Watchdog"
-    # Don't post the warning when the critical version of the same alert
-    # is already firing.
     inhibit_rules:
       - source_matchers:
           - severity = "critical"
@@ -80,7 +72,6 @@ alertmanager:
             send_resolved: true
 
 grafana:
-  # Pre-existing/out-of-band secret instead of an auto-generated password (see docs/monitoring-secrets.md).
   admin:
     existingSecret: grafana-admin-credentials
     userKey: admin-user
@@ -94,11 +85,9 @@ grafana:
       cpu: 200m
       memory: 512Mi
 
-  # Read-only root filesystem breaks Grafana 13's bundled-plugin move at startup, so it's disabled here.
   containerSecurityContext:
     readOnlyRootFilesystem: false
 
-  # Sidecar auto-loads dashboards from ConfigMaps carrying the label below.
   sidecar:
     dashboards:
       enabled: true
@@ -106,16 +95,12 @@ grafana:
       labelValue: "1"
       searchNamespace: ALL
 
-  # Loki as a second datasource alongside the auto-wired Prometheus one.
   additionalDataSources:
     - name: Loki
       type: loki
       url: http://loki.monitoring.svc.cluster.local:3100
       access: proxy
 
-  # No ingress yet — reach Grafana via kubectl port-forward (see platform/README.md).
-
-# AKS control plane components are Azure-managed and not scrapeable — disabled here.
 kubeControllerManager:
   enabled: false
 kubeScheduler:
@@ -128,6 +113,3 @@ coreDns:
   enabled: false
 kubeDns:
   enabled: false
-
-# node-exporter and kube-state-metrics keep their chart defaults.
-

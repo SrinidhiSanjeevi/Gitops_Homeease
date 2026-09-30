@@ -1,10 +1,8 @@
-# Azure STAGING overrides — shares dev's cluster, Key Vault, and workload identity for now (cost-constrained trial subscription).
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/payment-service
   tag: 93917ef237a9
 workloadIdentity:
   enabled: true
-  # Same identity as values-azure-dev.yaml, federated to both ServiceAccounts.
   clientId: "906080fd-636f-4c49-ab58-f7da81381014"
 keyVault:
   name: kv-homeease-dev-hs02
@@ -14,8 +12,6 @@ secretProviderClass:
 extraLabels:
   homeease.io/environment: staging
   homeease.io/cloud: azure
-# Free Trial subscription: hard 4-vCPU cap shared with dev/demo on the
-# same cluster. Same lowered CPU request as dev.
 resources:
   requests:
     cpu: 50m

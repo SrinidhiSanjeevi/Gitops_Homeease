@@ -1,10 +1,8 @@
-# Direct Helm equivalent of apps/payment-service/overlays/azure/dev/{kustomization.yaml,secretproviderclass.yaml}.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/payment-service
   tag: 93917ef237a9
 workloadIdentity:
   enabled: true
-  # terraform output workload_identity_payment_client_id (id-homeease-payment-dev)
   clientId: "906080fd-636f-4c49-ab58-f7da81381014"
 keyVault:
   name: kv-homeease-dev-hs02
@@ -14,10 +12,8 @@ secretProviderClass:
 extraLabels:
   homeease.io/environment: dev
   homeease.io/cloud: azure
-# CPU request lowered so the whole stack schedules on the 4-vCPU trial subscription cap; limits unchanged.
 resources:
   requests:
     cpu: 50m
-# Recreate, not RollingUpdate: no headroom for a surge pod under the same vCPU cap; a few seconds of downtime beats rollouts stuck Pending.
 updateStrategy:
   type: Recreate

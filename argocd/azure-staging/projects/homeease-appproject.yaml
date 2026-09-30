@@ -1,4 +1,3 @@
-# AppProject scoping what homeease Applications are allowed to do (STAGING copy, same cluster as dev).
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
@@ -7,21 +6,17 @@ metadata:
 spec:
   description: HomeEase application services on AKS STAGING (frontend, admin-frontend, backend, admin-backend, payment-service, notification-service) — same cluster as dev, homeease-staging namespace
 
-  # Only this repo may be a source.
   sourceRepos:
     - "https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git"
 
-  # STAGING namespace only; homeease-dev is deliberately not a destination here.
   destinations:
     - server: https://kubernetes.default.svc
       namespace: "homeease-staging"
 
-  # Everything cluster-scoped is denied except Namespace (needed for CreateNamespace=true).
   clusterResourceWhitelist:
     - group: ""
       kind: Namespace
 
-  # Namespace-scoped kinds the services legitimately need.
   namespaceResourceWhitelist:
     - group: "apps"
       kind: Deployment

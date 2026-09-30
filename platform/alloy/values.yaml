@@ -1,5 +1,3 @@
-# Grafana Alloy — ships every pod's stdout/stderr to Loki (Promtail's successor).
-
 alloy:
   configMap:
     create: true
@@ -48,7 +46,5 @@ alloy:
       cpu: 200m
       memory: 256Mi
 
-# DaemonSet — one Alloy pod per node, tiny, no dev-specific sizing
-# needed beyond the resources above.
 controller:
   type: daemonset

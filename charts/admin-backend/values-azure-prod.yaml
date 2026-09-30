@@ -1,4 +1,3 @@
-# Azure PROD overrides. STATUS: NOT DEPLOYED — REPLACE_ME values are filled in once the prod cluster exists.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/admin-backend
   tag: not-yet-promoted
@@ -8,7 +7,6 @@ hpa:
   minReplicas: 2
 workloadIdentity:
   enabled: true
-  # terraform output workload_identity_app_client_id (id-homeease-app-prod)
   clientId: "REPLACE_ME_prod_app_client_id"
 keyVault:
   name: kv-homeease-prod-hs01

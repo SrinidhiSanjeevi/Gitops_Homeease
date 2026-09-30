@@ -1,4 +1,3 @@
-# CPU isn't a good proxy for payment load; kept as a fixed floor/ceiling (1-2), not real autoscaling.
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:

@@ -1,4 +1,3 @@
-# Tells kube-prometheus-stack's Prometheus to scrape this service's /metrics endpoint.
 {{- if .Values.serviceMonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -8,8 +7,6 @@ metadata:
   labels:
     {{- include "backend.labels" . | nindent 4 }}
   annotations:
-    # The CRD comes from the monitoring app; on a fresh cluster this app can
-    # sync first. Skip the dry-run instead of failing the whole sync.
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   selector:

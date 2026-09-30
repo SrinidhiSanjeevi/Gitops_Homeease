@@ -1,4 +1,3 @@
-# Azure STAGING overrides — homeease-staging namespace on the same dev cluster.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/frontend
   tag: 93917ef237a9
@@ -9,8 +8,6 @@ ingress:
 extraLabels:
   homeease.io/environment: staging
   homeease.io/cloud: azure
-# Free Trial subscription: hard 4-vCPU cap shared with dev/demo on the
-# same cluster. Same lowered CPU request as dev.
 resources:
   requests:
     cpu: 25m

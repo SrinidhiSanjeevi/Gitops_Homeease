@@ -1,6 +1,3 @@
-# Same multi-source pattern as ../../azure/bootstrap/07-alloy.yaml.
-# platform/alloy/values.yaml is shared between both clouds' copies of this
-# Application.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

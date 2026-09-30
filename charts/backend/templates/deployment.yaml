@@ -6,8 +6,6 @@ metadata:
   labels:
     {{- include "backend.labels" . | nindent 4 }}
 spec:
-  # No replicas field here on purpose — the HPA (templates/hpa.yaml) owns
-  # spec.replicas. See templates/hpa.yaml / values.yaml for why.
   strategy:
     type: {{ .Values.updateStrategy.type }}
     {{- if eq .Values.updateStrategy.type "RollingUpdate" }}
@@ -22,7 +20,6 @@ spec:
       labels:
         {{- include "backend.selectorLabels" . | nindent 8 }}
         {{- if .Values.workloadIdentity.enabled }}
-        # Required on the pod itself for the workload identity webhook to inject the token volume.
         azure.workload.identity/use: "true"
         {{- end }}
     spec:
@@ -71,7 +68,6 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
-          # Gives a new pod up to 2 minutes to warm up before liveness/readiness probes count failures.
           startupProbe:
             httpGet:
               path: /health/live
@@ -80,14 +76,11 @@ spec:
             failureThreshold: 24
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          # Required — without it paymentClient.js falls back to a local-dev default and payment calls fail.
           env:
             - name: PAYMENT_SERVICE_URL
               value: {{ .Values.env.paymentServiceUrl }}
-            # Required — same as PAYMENT_SERVICE_URL, for notificationClient.js.
             - name: NOTIFICATION_SERVICE_URL
               value: {{ .Values.env.notificationServiceUrl }}
-            # Reported by /health/live so the deploy pipeline can confirm which image is serving.
             - name: APP_VERSION
               value: {{ .Values.image.tag | quote }}
             {{- if .Values.env.azureStorageAccountName }}
@@ -95,13 +88,11 @@ spec:
               value: {{ .Values.env.azureStorageAccountName | quote }}
             {{- end }}
           {{- if .Values.secretProviderClass.enabled }}
-          # Populated by the Secrets Store CSI driver's secretObjects sync (templates/secretproviderclass.yaml).
           envFrom:
             - secretRef:
                 name: {{ .Values.secretProviderClass.secretName }}
           {{- end }}
           volumeMounts:
-            # readOnlyRootFilesystem is on; Node/npm still writes scratch files to /tmp unconditionally.
             - name: tmp
               mountPath: /tmp
             {{- if .Values.secretProviderClass.enabled }}
@@ -117,8 +108,6 @@ spec:
           csi:
             driver: secrets-store.csi.k8s.io
             readOnly: true
-            # Must match metadata.name of the SecretProviderClass
-            # (templates/secretproviderclass.yaml).
             volumeAttributes:
               secretProviderClass: backend
         {{- end }}

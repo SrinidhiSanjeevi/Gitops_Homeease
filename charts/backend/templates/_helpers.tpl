@@ -1,16 +1,9 @@
-{{/*
-Selector labels — used ONLY in immutable/selector fields:
-Deployment.spec.selector.matchLabels, Service.spec.selector,
-NetworkPolicy.spec.podSelector.matchLabels, ServiceMonitor.spec.selector,
-HPA.spec.scaleTargetRef. Never add extraLabels here.
-*/}}
+{{/* Selector labels (immutable fields only) */}}
 {{- define "backend.selectorLabels" -}}
 app.kubernetes.io/name: backend
 {{- end }}
 
-{{/*
-Common labels — metadata.labels and pod-template labels only.
-*/}}
+{{/* Common labels */}}
 {{- define "backend.labels" -}}
 app.kubernetes.io/name: backend
 app.kubernetes.io/part-of: homeease

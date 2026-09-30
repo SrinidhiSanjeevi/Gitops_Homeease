@@ -19,18 +19,15 @@ PATH_TOKEN_RE = re.compile(r"\.?/?(?:[A-Za-z0-9_.\-<>]+/)+[A-Za-z0-9_.\-<>*]+")
 INLINE_CODE_RE = re.compile(r"`([^`]+)`")
 PLACEHOLDER_RE = re.compile(r"<[^>]+>|\b[0-9]*N\b")
 
-
 def candidate_paths_in_text(text):
     for m in INLINE_CODE_RE.finditer(text):
         span = m.group(1)
         for tok in PATH_TOKEN_RE.finditer(span):
             yield tok.group(0)
 
-
 def to_glob_pattern(raw):
     raw = raw.lstrip("./")
     return PLACEHOLDER_RE.sub("*", raw)
-
 
 def check_file(path):
     failures = []
@@ -64,7 +61,6 @@ def check_file(path):
                 failures.append((path, lineno, raw))
     return failures
 
-
 def main():
     all_failures = []
     for rel in TARGET_FILES:
@@ -84,7 +80,6 @@ def main():
 
     print("docs-check OK — every checked path reference resolves.")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

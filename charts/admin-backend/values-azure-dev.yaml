@@ -1,4 +1,3 @@
-# Direct Helm equivalent of apps/admin-backend/overlays/azure/dev/{kustomization.yaml,secretproviderclass.yaml}.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/admin-backend
   tag: 93917ef237a9
@@ -6,7 +5,6 @@ ingress:
   host: admin.20-207-75-39.nip.io
 workloadIdentity:
   enabled: true
-  # terraform output workload_identity_app_client_id (id-homeease-app-dev)
   clientId: "9850ab0c-1f03-4a65-8f77-c4ff988a1af4"
 keyVault:
   name: kv-homeease-dev-hs02
@@ -18,10 +16,8 @@ extraLabels:
   homeease.io/cloud: azure
 env:
   azureStorageAccountName: "sthomeeaseimgayhiue"
-# Free Trial subscription: hard 4-vCPU cap, so CPU request is lowered to fit.
 resources:
   requests:
     cpu: 50m
-# No headroom for a RollingUpdate surge pod under the 4-vCPU cap; Recreate avoids stuck rollouts.
 updateStrategy:
   type: Recreate

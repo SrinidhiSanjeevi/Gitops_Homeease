@@ -6,8 +6,6 @@ metadata:
   labels:
     {{- include "admin-backend.labels" . | nindent 4 }}
 spec:
-  # No replicas field here on purpose — the HPA (templates/hpa.yaml) owns
-  # spec.replicas.
   strategy:
     type: {{ .Values.updateStrategy.type }}
     {{- if eq .Values.updateStrategy.type "RollingUpdate" }}
@@ -78,7 +76,6 @@ spec:
             failureThreshold: 24
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          # BOOKING_SERVICE_URL is required, or admin API calls fail.
           env:
             - name: BOOKING_SERVICE_URL
               value: {{ .Values.env.bookingServiceUrl }}
@@ -87,7 +84,6 @@ spec:
               value: {{ .Values.env.azureStorageAccountName | quote }}
             {{- end }}
           {{- if .Values.secretProviderClass.enabled }}
-          # Populated by the Secrets Store CSI driver (templates/secretproviderclass.yaml).
           envFrom:
             - secretRef:
                 name: {{ .Values.secretProviderClass.secretName }}

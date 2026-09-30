@@ -1,8 +1,6 @@
-# Azure PROD overrides — NOT DEPLOYED yet; REPLACE_ME values come from prod Terraform outputs.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/frontend
   tag: not-yet-promoted
-# image.tag is set only by the "Promote to PROD" pipeline stage.
 ingress:
   host: REPLACE_ME_prod_frontend_host
 hpa:

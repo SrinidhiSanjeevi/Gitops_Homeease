@@ -1,12 +1,7 @@
-# Cloud/environment-neutral defaults; Azure-dev-specific values live in values-azure-dev.yaml.
-
 image:
   repository: homeease/backend
   tag: placeholder
   pullPolicy: IfNotPresent
-
-# No top-level `replicas` value on purpose — the HPA owns replica count.
-# See templates/deployment.yaml.
 
 service:
   port: 5000
@@ -20,7 +15,6 @@ resources:
     cpu: 500m
     memory: 256Mi
 
-# Spelled out explicitly (matches Kubernetes' own default) so it can be overridden to Recreate.
 updateStrategy:
   type: RollingUpdate
   rollingUpdate:
@@ -38,8 +32,6 @@ pdb:
 ingress:
   enabled: true
   host: api.dev.example.com
-  # Only the API and health routes are public. /metrics (business counts,
-  # revenue) stays cluster-internal — Prometheus scrapes it via the Service.
   paths:
     - /api
     - /health
@@ -49,28 +41,23 @@ ingress:
 networkPolicy:
   enabled: true
 
-# Same-namespace Service short names — correct in any namespace these services are deployed into.
 env:
   paymentServiceUrl: http://payment-service:5002
   notificationServiceUrl: http://notification-service:5003
   azureStorageAccountName: ""
 
-# Azure AD Workload Identity — disabled by default so this chart is not Azure-specific.
 workloadIdentity:
   enabled: false
   clientId: ""
 
-# Non-secret identifiers only — secret contents stay in Key Vault, synced at runtime.
 keyVault:
   name: ""
   tenantId: ""
 
-# Key Vault objects to fetch and how to project them into a native k8s Secret.
 secretProviderClass:
   enabled: false
   secretName: backend-secrets
   objects:
-    # Points at the homeease_booking database, distinct from other services' *-mongo-uri objects.
     - keyVaultObject: booking-mongo-uri
       envKey: MONGO_URI
     - keyVaultObject: jwt-secret
@@ -80,6 +67,5 @@ secretProviderClass:
 
 extraLabels: {}
 
-# Scraped by the platform Prometheus (needs the monitoring.coreos.com CRDs).
 serviceMonitor:
   enabled: true

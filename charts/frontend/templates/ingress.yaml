@@ -7,11 +7,8 @@ metadata:
   labels:
     {{- include "frontend.labels" . | nindent 4 }}
   annotations:
-    # No-op until platform/cert-manager is actually installed (still a
-    # placeholder per platform/README.md) — harmless to set now.
     cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer }}
     {{- if not .Values.ingress.sslRedirect }}
-    # Serves plain HTTP; no valid TLS cert for this address.
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     {{- end }}
 spec:
@@ -32,7 +29,6 @@ spec:
                 port:
                   name: http
     {{- if .Values.ingress.extraHostlessRule }}
-    # Host-less catch-all for requests with no matching Host header.
     - http:
         paths:
           - path: /

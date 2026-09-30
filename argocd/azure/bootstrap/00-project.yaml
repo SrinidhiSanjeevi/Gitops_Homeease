@@ -1,11 +1,9 @@
-# Child Application: syncs the AppProject definition from argocd/azure/projects/.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: homeease-project
   namespace: argocd
   annotations:
-    # AppProjects / monitoring CRDs first, then the apps that need them.
     argocd.argoproj.io/sync-wave: "-1"
 spec:
   project: default
@@ -20,8 +18,6 @@ spec:
     automated:
       prune: true
       selfHeal: true
-    # A fresh cluster has transient failures (project/CRD not there yet);
-    # without retry an automated sync stays failed until the next commit.
     retry:
       limit: 5
       backoff:

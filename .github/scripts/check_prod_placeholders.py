@@ -22,15 +22,7 @@ VALUEFILES_BLOCK_RE = re.compile(r"valueFiles:\s*\n((?:\s*-\s*\S+\s*\n?)+)")
 VALUEFILE_ITEM_RE = re.compile(r"-\s*(\S+)")
 PLACEHOLDER = "REPLACE_ME"
 
-
 def referenced_values_files(app_yaml_text):
-    # Multi-source Applications (spec.sources:, e.g. 05-monitoring.yaml)
-    # have a different shape — several path/valueFiles pairs, one per
-    # source, with $values refs. This script only understands the
-    # single-source spec.source: shape every per-service Application
-    # uses. Multi-source Applications are skipped rather than misparsed;
-    # today none of their values files contain REPLACE_ME (they're
-    # platform/ reference data, not per-environment overrides).
     if re.search(r"^\s*sources:\s*$", app_yaml_text, re.MULTILINE):
         return []
     path_match = PATH_RE.search(app_yaml_text)
@@ -42,7 +34,6 @@ def referenced_values_files(app_yaml_text):
         f"{chart_path}/{m.group(1)}"
         for m in VALUEFILE_ITEM_RE.finditer(block_match.group(1))
     ]
-
 
 def main():
     failures = []
@@ -74,7 +65,6 @@ def main():
     for c in checked:
         print(f"  checked: {c}")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,16 +1,3 @@
-# See homeease-business.yaml for how sidecar provisioning works.
-#
-# http_requests_total / http_request_duration_seconds / http_requests_in_flight
-# are defined identically (same names, same label set: method, route, code)
-# in backend/metrics.js, admin-backend/metrics.js and payment-service/metrics.js
-# — confirmed by reading all three files, not assumed. This dashboard
-# aggregates across all three via the `job` label the ServiceMonitors give
-# each one (backend / admin-backend / payment-service).
-#
-# Redesigned as a compact, all-Stat/Gauge "Application Health" view (no
-# time-series graphs) — same PromQL as before, just reduced to current
-# values per service instead of trend lines. Route-level and P50 detail
-# dropped here to avoid duplicating homeease-red.yaml.
 apiVersion: v1
 kind: ConfigMap
 metadata:

@@ -1,4 +1,3 @@
-# Standalone demo values — like values-azure-dev.yaml but with a unique Ingress hostname.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/frontend
   tag: d72879629ea7
@@ -6,7 +5,7 @@ image:
 ingress:
   host: app-demo.20-207-75-39.nip.io
   sslRedirect: false
-  extraHostlessRule: false # avoid a second host-less rule fighting with the live one for the same bare IP
+  extraHostlessRule: false
 
 extraLabels:
   homeease.io/environment: demo

@@ -1,4 +1,3 @@
-# Azure PROD overrides — NOT DEPLOYED yet; REPLACE_ME values are filled once the prod cluster exists.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/admin-frontend
   tag: not-yet-promoted

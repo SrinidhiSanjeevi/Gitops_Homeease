@@ -1,4 +1,3 @@
-# Fixed floor/ceiling (1-2), not a real autoscaling policy — notification load is I/O-bound, not CPU-bound.
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:

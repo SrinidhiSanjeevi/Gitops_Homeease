@@ -1,4 +1,3 @@
-# Standalone demo values; see charts/backend/values-demo.yaml for the shared-identity caveat.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/admin-backend
   tag: d72879629ea7

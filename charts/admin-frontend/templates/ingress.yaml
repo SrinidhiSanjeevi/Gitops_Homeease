@@ -7,14 +7,9 @@ metadata:
   labels:
     {{- include "admin-frontend.labels" . | nindent 4 }}
   annotations:
-    # No-op until platform/cert-manager is actually installed (still a
-    # placeholder per platform/README.md) — harmless to set now.
     cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer }}
-    # Admin image uploads are capped at 5 MB by admin-backend; ingress-nginx's
-    # default request body limit is 1 MB.
     nginx.ingress.kubernetes.io/proxy-body-size: "6m"
     {{- if not .Values.ingress.sslRedirect }}
-    # IP-based presentation URL has no valid TLS cert, so skip the HTTPS redirect.
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     {{- end }}
 spec:
@@ -35,7 +30,6 @@ spec:
                 port:
                   name: http
     {{- if .Values.ingress.extraHostlessRule }}
-    # Host-less catch-all: requests with no matching Host header still reach this service.
     - http:
         paths:
           - path: /

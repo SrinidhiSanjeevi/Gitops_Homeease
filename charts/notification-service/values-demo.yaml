@@ -1,4 +1,3 @@
-# Standalone demo values. No ingress.host override needed — this chart has no Ingress template.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/notification-service
   tag: "REPLACE_ME_notification_dev_image_tag"
