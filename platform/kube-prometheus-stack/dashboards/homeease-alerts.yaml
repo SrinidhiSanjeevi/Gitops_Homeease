@@ -1,36 +1,8 @@
-# Picked up automatically — no extra wiring needed. The platform's
-# Prometheus already watches every PrometheusRule in every namespace
-# (ruleSelectorNilUsesHelmValues: false, ruleNamespaceSelector: {} in
-# ../values.yaml). Alertmanager routes every one of these to the single
-# HomeEase Teams webhook (see ../values.yaml) — no escalation tiers, no
-# separate infra channel, by design.
-#
-# 9 base alerts — each one gated to avoid firing on normal noise
-# (a single pod restart during a rollout, a brief latency blip):
-#   1. BackendPodUnavailable — zero available replicas
-#   2. HighHttp5xxRate — >5% 5xx rate sustained 5m
-#   3. HighHttpLatency — p95 > 1s sustained 5m
-#   4. PodCrashLooping — >3 restarts in 15m
-#   5. ServiceUnavailable — no pod of a service scrapeable (or job gone) 2m
-#   6. PaymentFailureRateHigh — >5% payment failure rate sustained 5m
-#   7. BookingsAwaitingProfessional — >5 bookings with no professional 15m
-#   8. PodPendingTooLong — a pod stuck Pending (unschedulable) 5m+
-#   9. ClusterCPURequestsNearCapacity — node CPU requests > 90% for 10m,
-#      the leading indicator for #8. Added after a 2026-09-26 incident
-#      where the single dev node filled up on CPU requests and
-#      cluster-autoscaler could not add a node because the Azure
-#      subscription's regional core quota was maxed out — the pending
-#      pod only surfaced as a CI pipeline timeout, ~15 minutes later,
-#      with no alert in between.
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: homeease-alerts
   labels:
-    # kube-prometheus-stack's own convention for rules it should load —
-    # harmless/ignored if the release label differs, since
-    # ruleSelectorNilUsesHelmValues: false already makes selection
-    # unconditional.
     release: kube-prometheus-stack
 spec:
   groups:
@@ -99,8 +71,6 @@ spec:
               this catches an actual crash loop.
 
         - alert: ServiceUnavailable
-          # Per service, not per pod: fires when no replica of the job can be
-          # scraped, or when the job has vanished from Prometheus entirely.
           expr: >-
             max by (namespace, job) (up{job=~"backend|admin-backend|payment-service"}) == 0
             or absent(up{job="backend"})
@@ -136,11 +106,6 @@ spec:
               or a configuration problem (RAZORPAY_KEY_SECRET mismatch).
               Check payment-service logs.
 
-        # Bookings in status "Assigned" are paid/placed but still have no
-        # professional (the scheduler retries them every minute). This is the
-        # real assignment queue — a DB count set by the backend's metrics
-        # collector. serviceexpress_queue_length only counts in-flight
-        # create-booking requests, so it can't show a backlog.
         - alert: BookingsAwaitingProfessional
           expr: max(serviceexpress_bookings_by_status{status="Assigned"}) > 5
           for: 15m

@@ -6,7 +6,6 @@ metadata:
   labels:
     {{- include "frontend.labels" . | nindent 4 }}
 spec:
-  # No replicas field: the HPA (templates/hpa.yaml) owns spec.replicas.
   selector:
     matchLabels:
       {{- include "frontend.selectorLabels" . | nindent 6 }}
@@ -19,7 +18,6 @@ spec:
       terminationGracePeriodSeconds: 30
       securityContext:
         runAsNonRoot: true
-        # nginxinc/nginx-unprivileged's built-in `nginx` user is uid/gid 101.
         runAsUser: 101
         runAsGroup: 101
         fsGroup: 101
@@ -61,12 +59,9 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
-          # No startupProbe: static content baked into the image at build
-          # time, nothing to warm up.
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            # nginx.conf redirects all temp paths to /tmp, so one emptyDir is enough.
             - name: tmp
               mountPath: /tmp
       volumes:

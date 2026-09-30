@@ -1,4 +1,3 @@
-# Standalone demo values — own namespace, with a unique Ingress hostname to avoid collisions.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/admin-frontend
   tag: d72879629ea7

@@ -1,11 +1,7 @@
-# Cloud/environment-neutral defaults. Azure-dev-specific values live in values-azure-dev.yaml.
-
 image:
   repository: homeease/notification-service
   tag: placeholder
   pullPolicy: IfNotPresent
-
-# No top-level `replicas` value on purpose — the HPA owns replica count.
 
 service:
   port: 5003
@@ -19,7 +15,6 @@ resources:
     cpu: 500m
     memory: 256Mi
 
-# Fixed floor/ceiling (1-2), not a real autoscaling policy — matches Kubernetes' own default.
 updateStrategy:
   type: RollingUpdate
   rollingUpdate:
@@ -34,18 +29,12 @@ hpa:
 pdb:
   maxUnavailable: 1
 
-# No ingress.enabled toggle — reached only from backend, in-cluster, on its ClusterIP Service.
-
 networkPolicy:
   enabled: true
 
-# enableServiceLinks: false is hardcoded in templates/deployment.yaml, not a values toggle — see that file.
-
-# "backend" is the same-namespace Kubernetes Service short name for booking-service.
 env:
   bookingServiceUrl: http://backend:5000
 
-# Its own ServiceAccount and Azure AD workload identity, not shared with other services — disabled by default.
 workloadIdentity:
   enabled: false
   clientId: ""
@@ -54,7 +43,6 @@ keyVault:
   name: ""
   tenantId: ""
 
-# notification-mongo-uri is its own Key Vault secret; internal-service-token is shared across services.
 secretProviderClass:
   enabled: false
   secretName: notification-service-secrets
@@ -72,6 +60,5 @@ secretProviderClass:
 
 extraLabels: {}
 
-# Scraped by the platform Prometheus (needs the monitoring.coreos.com CRDs).
 serviceMonitor:
   enabled: true

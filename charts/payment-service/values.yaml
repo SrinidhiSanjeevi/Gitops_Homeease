@@ -1,11 +1,7 @@
-# Cloud/environment-neutral defaults; Azure-dev-specific values live in values-azure-dev.yaml. Tighter isolation than other services.
-
 image:
   repository: homeease/payment-service
   tag: placeholder
   pullPolicy: IfNotPresent
-
-# No top-level `replicas` value on purpose — the HPA owns replica count.
 
 service:
   port: 5002
@@ -19,7 +15,6 @@ resources:
     cpu: 500m
     memory: 256Mi
 
-# Fixed floor/ceiling, not real autoscaling — CPU doesn't reflect payment load.
 updateStrategy:
   type: RollingUpdate
   rollingUpdate:
@@ -34,18 +29,12 @@ hpa:
 pdb:
   maxUnavailable: 1
 
-# "backend" is the same-namespace Service name for booking-service; correct in any environment, so it doesn't need to vary per environment.
 env:
   bookingServiceUrl: http://backend:5000
-
-# No ingress.enabled toggle — payment-service is reached only from backend, in-cluster. Do not add one here.
 
 networkPolicy:
   enabled: true
 
-# enableServiceLinks is hardcoded `false` in templates/deployment.yaml (required correctness setting, not a toggle here).
-
-# Its own Azure AD workload identity, not shared with other services. Disabled by default; azure-dev turns it on with the real clientId.
 workloadIdentity:
   enabled: false
   clientId: ""
@@ -54,7 +43,6 @@ keyVault:
   name: ""
   tenantId: ""
 
-# razorpay-webhook-secret intentionally excluded — CSI mount fails entirely if a requested object is missing from Key Vault, and webhooks aren't configured yet.
 secretProviderClass:
   enabled: false
   secretName: payment-service-razorpay
@@ -63,7 +51,6 @@ secretProviderClass:
       envKey: RAZORPAY_KEY_ID
     - keyVaultObject: razorpay-key-secret
       envKey: RAZORPAY_KEY_SECRET
-    # Points at the homeease_payment database (payment-service owns only payments).
     - keyVaultObject: payment-mongo-uri
       envKey: MONGO_URI
     - keyVaultObject: internal-service-token
@@ -71,6 +58,5 @@ secretProviderClass:
 
 extraLabels: {}
 
-# Scraped by the platform Prometheus (needs the monitoring.coreos.com CRDs).
 serviceMonitor:
   enabled: true

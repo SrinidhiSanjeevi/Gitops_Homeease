@@ -1,4 +1,3 @@
-# Standalone demo values, otherwise identical to values-azure-dev.yaml. No Ingress template exists for this chart.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/payment-service
   tag: d72879629ea7

@@ -1,7 +1,3 @@
-# AppProject for the AWS (EKS) cluster's ArgoCD — see
-# ../../azure/projects/homeease-appproject.yaml for the full explanation.
-# Kept as a separate file (not shared) because each cloud runs its own
-# ArgoCD on its own cluster.
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
@@ -13,9 +9,6 @@ spec:
   sourceRepos:
     - "https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git"
 
-  # Add homeease-staging / homeease-prod here once those environments
-  # exist (see apps/<service>/overlays/aws/ for how to add the matching
-  # overlay).
   destinations:
     - server: https://kubernetes.default.svc
       namespace: "homeease-dev"

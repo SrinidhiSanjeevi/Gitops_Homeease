@@ -1,10 +1,8 @@
-# Azure DEV overrides for notification-service. See modules/keyvault/SECRETS.md for the Key Vault secrets.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/notification-service
   tag: "93917ef237a9"
 workloadIdentity:
   enabled: true
-  # terraform output workload_identity_notification_client_id
   clientId: "9f37b327-d33b-48e2-bd86-bf2848e7b671"
 keyVault:
   name: kv-homeease-dev-hs02
@@ -14,10 +12,8 @@ secretProviderClass:
 extraLabels:
   homeease.io/environment: dev
   homeease.io/cloud: azure
-# Free Trial subscription: hard 4-vCPU cap, so DEV is one 2-vCPU node — only the CPU request is lowered.
 resources:
   requests:
     cpu: 50m
-# No headroom for a RollingUpdate surge pod, so Recreate is used instead (brief downtime per deploy).
 updateStrategy:
   type: Recreate

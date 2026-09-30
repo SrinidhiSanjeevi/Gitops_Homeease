@@ -1,4 +1,3 @@
-# Azure dev overrides — same pattern as charts/frontend/values-azure-dev.yaml.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/admin-frontend
   tag: 93917ef237a9
@@ -9,7 +8,6 @@ ingress:
 extraLabels:
   homeease.io/environment: dev
   homeease.io/cloud: azure
-# Free Trial subscription is capped at 4 vCPU, so lower the CPU request to fit.
 resources:
   requests:
     cpu: 25m

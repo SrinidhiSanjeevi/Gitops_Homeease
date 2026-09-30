@@ -13,7 +13,6 @@ spec:
   policyTypes:
     - Ingress
   ingress:
-    # Admin UI/API traffic, arrives via the ingress-nginx controller.
     - from:
         - namespaceSelector:
             matchLabels:
@@ -21,15 +20,11 @@ spec:
       ports:
         - protocol: TCP
           port: 5001
-    # Other HomeEase services in this same namespace calling admin-backend
-    # server-to-server.
     - from:
         - podSelector: {}
       ports:
         - protocol: TCP
           port: 5001
-    # Prometheus (kube-prometheus-stack, namespace "monitoring") scraping
-    # /metrics.
     - from:
         - namespaceSelector:
             matchLabels:
@@ -37,6 +32,4 @@ spec:
       ports:
         - protocol: TCP
           port: 5001
-  # No egress block: egress stays unrestricted (admin-backend needs to
-  # reach MongoDB and booking-service's internal admin API).
 {{- end }}

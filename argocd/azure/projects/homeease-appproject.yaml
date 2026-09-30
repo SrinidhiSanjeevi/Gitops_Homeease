@@ -1,4 +1,3 @@
-# AppProject scoping what homeease Applications on this cluster are allowed to do.
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
@@ -7,21 +6,17 @@ metadata:
 spec:
   description: HomeEase application services on AKS (frontend, admin-frontend, backend, admin-backend, payment-service, notification-service)
 
-  # Only this repo may be a source.
   sourceRepos:
     - "https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git"
 
-  # DEV cluster only; PROD has its own copy under argocd/azure-prod/.
   destinations:
     - server: https://kubernetes.default.svc
       namespace: "homeease-dev"
 
-  # Everything cluster-scoped is denied except Namespace (needed for CreateNamespace=true).
   clusterResourceWhitelist:
     - group: ""
       kind: Namespace
 
-  # Namespace-scoped kinds the services legitimately need.
   namespaceResourceWhitelist:
     - group: "apps"
       kind: Deployment

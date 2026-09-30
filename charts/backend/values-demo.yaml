@@ -1,4 +1,3 @@
-# Standalone demo values — same as values-azure-dev.yaml but with a unique Ingress hostname; CSI secret mount is expected to fail (identity scoped to dev's ServiceAccount).
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/backend
   tag: d72879629ea7

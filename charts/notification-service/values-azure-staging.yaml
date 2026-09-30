@@ -1,13 +1,10 @@
-# Azure STAGING overrides — no real Managed Identity in any environment yet, so this carries the dev placeholder.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/notification-service
   tag: "93917ef237a9"
 workloadIdentity:
   enabled: true
-  # terraform output workload_identity_notification_client_id — NOT YET PROVISIONED.
   clientId: "REPLACE_ME_notification_dev_client_id"
 keyVault:
-  # Same dev Key Vault the other services already use in staging.
   name: kv-homeease-dev-hs02
   tenantId: "268c9f5b-bb6f-44e8-b872-ea399b1998c2"
 secretProviderClass:
@@ -15,7 +12,6 @@ secretProviderClass:
 extraLabels:
   homeease.io/environment: staging
   homeease.io/cloud: azure
-# Free Trial subscription: hard 4-vCPU cap shared with dev/demo — same lowered CPU request as dev.
 resources:
   requests:
     cpu: 50m

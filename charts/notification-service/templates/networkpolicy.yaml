@@ -1,5 +1,4 @@
 {{- if .Values.networkPolicy.enabled }}
-# Default-deny, explicit-allow — the only caller of notification-service is backend.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -21,8 +20,6 @@ spec:
       ports:
         - protocol: TCP
           port: 5003
-    # Prometheus (kube-prometheus-stack, namespace "monitoring") scraping
-    # /metrics.
     - from:
         - namespaceSelector:
             matchLabels:
@@ -30,6 +27,4 @@ spec:
       ports:
         - protocol: TCP
           port: 5003
-  # No egress block: egress stays unrestricted (notification-service needs
-  # to reach its SMTP provider and booking-service's internal API).
 {{- end }}

@@ -1,4 +1,3 @@
-# Azure STAGING overrides — shares dev's cluster, MongoDB, and Key Vault (no second cluster yet).
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/admin-backend
   tag: 93917ef237a9
@@ -6,7 +5,6 @@ ingress:
   host: admin-staging.20-207-75-39.nip.io
 workloadIdentity:
   enabled: true
-  # Same identity as values-azure-dev.yaml, federated to both ServiceAccounts.
   clientId: "9850ab0c-1f03-4a65-8f77-c4ff988a1af4"
 keyVault:
   name: kv-homeease-dev-hs02
@@ -18,8 +16,6 @@ extraLabels:
   homeease.io/cloud: azure
 env:
   azureStorageAccountName: "sthomeeaseimgayhiue"
-# Free Trial subscription: hard 4-vCPU cap shared with dev/demo on the
-# same cluster. Same lowered CPU request as dev.
 resources:
   requests:
     cpu: 50m

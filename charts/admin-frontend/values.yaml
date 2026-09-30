@@ -1,12 +1,7 @@
-# Cloud/environment-neutral defaults. Azure-dev-specific values (image
-# tag, ingress host, extra labels) live in values-azure-dev.yaml.
-
 image:
   repository: homeease/admin-frontend
   tag: placeholder
   pullPolicy: IfNotPresent
-
-# No top-level `replicas` value: the HPA owns replica count (see templates/deployment.yaml).
 
 service:
   port: 80
@@ -26,23 +21,17 @@ hpa:
   cpuTargetPercent: 70
 
 pdb:
-  # maxUnavailable (not minAvailable): still allows voluntary drains at 1 replica.
   maxUnavailable: 1
 
 ingress:
   enabled: true
-  # Distinct from admin-backend's own ingress host — this one serves the admin console UI.
   host: admin-console.dev.example.com
   tlsSecretName: admin-frontend-tls
   clusterIssuer: letsencrypt-prod
-  # ssl-redirect true is the ingress-nginx default; azure-dev turns this
-  # off for the IP-based presentation URL (see values-azure-dev.yaml).
   sslRedirect: true
-  # When true, adds a second, host-less rule so requests with no matching Host header still reach admin-frontend.
   extraHostlessRule: false
 
 networkPolicy:
   enabled: true
 
-# Merged into metadata/pod-template labels only, never into any selector field.
 extraLabels: {}

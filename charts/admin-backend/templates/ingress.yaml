@@ -8,8 +8,6 @@ metadata:
     {{- include "admin-backend.labels" . | nindent 4 }}
   annotations:
     cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer }}
-    # Admin image uploads are capped at 5 MB by the app (uploadController.js);
-    # ingress-nginx's default request body limit is 1 MB.
     nginx.ingress.kubernetes.io/proxy-body-size: "6m"
 spec:
   ingressClassName: nginx

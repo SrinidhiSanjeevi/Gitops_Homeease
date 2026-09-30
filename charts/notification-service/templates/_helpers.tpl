@@ -1,14 +1,9 @@
-{{/*
-Selector labels — used ONLY in immutable/selector fields. Never add
-extraLabels here.
-*/}}
+{{/* Selector labels (immutable fields only) */}}
 {{- define "notification-service.selectorLabels" -}}
 app.kubernetes.io/name: notification-service
 {{- end }}
 
-{{/*
-Common labels — metadata.labels and pod-template labels only.
-*/}}
+{{/* Common labels */}}
 {{- define "notification-service.labels" -}}
 app.kubernetes.io/name: notification-service
 app.kubernetes.io/part-of: homeease

@@ -1,13 +1,10 @@
-# Azure PROD overrides — NOT DEPLOYED yet; REPLACE_ME values come from prod Terraform once applied.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/notification-service
   tag: not-yet-promoted
-# maxReplicas is 2 in this chart's values.yaml, so min 2 = fixed at 2.
 hpa:
   minReplicas: 2
 workloadIdentity:
   enabled: true
-  # terraform output workload_identity_notification_client_id — NOT YET PROVISIONED.
   clientId: "REPLACE_ME_prod_notification_client_id"
 keyVault:
   name: kv-homeease-prod-hs01

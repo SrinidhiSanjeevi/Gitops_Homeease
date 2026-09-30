@@ -1,25 +1,20 @@
-# Azure PROD overrides — the prod twin of values-azure-dev.yaml. STATUS: NOT DEPLOYED; REPLACE_ME values come from prod Terraform outputs.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/backend
   tag: not-yet-promoted
 ingress:
   host: REPLACE_ME_prod_api_host
-# 2, not 1: one pod or node can fail (or be drained) and the service keeps serving.
 hpa:
   minReplicas: 2
 workloadIdentity:
   enabled: true
-  # terraform output workload_identity_app_client_id (id-homeease-app-prod)
   clientId: "REPLACE_ME_prod_app_client_id"
 keyVault:
-  name: kv-homeease-prod-hs01 # naming from environments/prod/main.tf; confirm with terraform output key_vault_name
-  tenantId: "REPLACE_ME_tenant_id" # az account show --query tenantId
+  name: kv-homeease-prod-hs01
+  tenantId: "REPLACE_ME_tenant_id"
 secretProviderClass:
   enabled: true
 extraLabels:
   homeease.io/environment: prod
   homeease.io/cloud: azure
 env:
-  # No storage account is managed by Terraform (the dev one was created
-  # outside it) — a prod one has to be created before this can be set.
   azureStorageAccountName: "REPLACE_ME_prod_storage_account"

@@ -1,4 +1,3 @@
-# Direct Helm equivalent of apps/frontend/overlays/azure/dev/kustomization.yaml.
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/frontend
   tag: 93917ef237a9
@@ -9,7 +8,6 @@ ingress:
 extraLabels:
   homeease.io/environment: dev
   homeease.io/cloud: azure
-# Free Trial subscription: CPU request lowered so the whole stack schedules on one node.
 resources:
   requests:
     cpu: 25m

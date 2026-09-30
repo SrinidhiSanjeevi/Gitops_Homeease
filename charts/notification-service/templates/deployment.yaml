@@ -6,7 +6,6 @@ metadata:
   labels:
     {{- include "notification-service.labels" . | nindent 4 }}
 spec:
-  # No replicas field here — the HPA (templates/hpa.yaml) owns spec.replicas.
   strategy:
     type: {{ .Values.updateStrategy.type }}
     {{- if eq .Values.updateStrategy.type "RollingUpdate" }}
@@ -25,7 +24,6 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: notification-service
-      # Disabled: Kubernetes' auto-injected NOTIFICATION_SERVICE_PORT env var collides with the app's own.
       enableServiceLinks: false
       terminationGracePeriodSeconds: 30
       securityContext:
@@ -79,12 +77,10 @@ spec:
             failureThreshold: 24
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          # notification-service calls booking-service's internal API for booking/user lookups.
           env:
             - name: BOOKING_SERVICE_URL
               value: {{ .Values.env.bookingServiceUrl }}
           {{- if .Values.secretProviderClass.enabled }}
-          # Populated by the Secrets Store CSI driver's secretObjects sync (see templates/secretproviderclass.yaml).
           envFrom:
             - secretRef:
                 name: {{ .Values.secretProviderClass.secretName }}

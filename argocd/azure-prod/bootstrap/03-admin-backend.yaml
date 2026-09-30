@@ -1,4 +1,3 @@
-# PROD twin of argocd/azure/bootstrap/03-admin-backend.yaml: same chart, values-azure-prod.yaml and namespace homeease-prod.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -25,8 +24,6 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-    # A fresh cluster has transient failures (project/CRD not there yet);
-    # without retry an automated sync stays failed until the next commit.
     retry:
       limit: 5
       backoff:
