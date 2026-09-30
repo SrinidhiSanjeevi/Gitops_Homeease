@@ -1,6 +1,6 @@
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/notification-service
-  tag: "93917ef237a9"
+  tag: "e3b3835974ec"
 workloadIdentity:
   enabled: true
   clientId: "9f37b327-d33b-48e2-bd86-bf2848e7b671"
