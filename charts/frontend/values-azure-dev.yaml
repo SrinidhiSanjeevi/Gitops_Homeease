@@ -1,6 +1,6 @@
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/frontend
-  tag: e3b3835974ec
+  tag: ca95eee2a586
 ingress:
   host: home.20-207-75-39.nip.io
   sslRedirect: false
