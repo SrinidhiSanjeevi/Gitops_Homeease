@@ -1,6 +1,6 @@
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/payment-service
-  tag: ca95eee2a586
+  tag: fce17432f203
 workloadIdentity:
   enabled: true
   clientId: "906080fd-636f-4c49-ab58-f7da81381014"
