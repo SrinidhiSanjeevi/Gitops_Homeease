@@ -2,7 +2,7 @@ image:
   repository: acrhomeeasedev01.azurecr.io/homeease/admin-backend
   tag: 93917ef237a9
 ingress:
-  host: admin-staging.20-207-75-39.nip.io
+  host: admin-staging.52-140-83-144.nip.io
 workloadIdentity:
   enabled: true
   clientId: "9850ab0c-1f03-4a65-8f77-c4ff988a1af4"
