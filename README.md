@@ -100,6 +100,9 @@ edit in `charts/` when that happens.
 
 ## How to bootstrap the cluster (once, by a human)
 
+**Shortcut:** `scripts/bootstrap-cluster.sh` does all of the steps below (Argo CD, ingress-nginx, the two
+out-of-band monitoring secrets, the root Application) and is safe to re-run after a cluster rebuild.
+
 ```bash
 kubectl config use-context aks-homeease-dev
 kubectl create namespace argocd
