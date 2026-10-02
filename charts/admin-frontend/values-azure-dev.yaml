@@ -2,7 +2,7 @@ image:
   repository: acrhomeeasedev01.azurecr.io/homeease/admin-frontend
   tag: fce17432f203
 ingress:
-  host: admin-console.20-207-75-39.nip.io
+  host: admin-console.52-140-83-144.nip.io
   sslRedirect: false
   extraHostlessRule: false
 extraLabels:
