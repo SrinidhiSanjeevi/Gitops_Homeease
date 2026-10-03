@@ -17,3 +17,7 @@ resources:
     cpu: 50m
 updateStrategy:
   type: Recreate
+
+# Dev: every email is also copied to the admin mailbox so the whole flow can be checked from one inbox.
+env:
+  notificationBcc: "adminuserproduct01@gmail.com"

@@ -80,6 +80,10 @@ spec:
           env:
             - name: BOOKING_SERVICE_URL
               value: {{ .Values.env.bookingServiceUrl }}
+            {{- if .Values.env.notificationBcc }}
+            - name: NOTIFICATION_BCC
+              value: {{ .Values.env.notificationBcc | quote }}
+            {{- end }}
           {{- if .Values.secretProviderClass.enabled }}
           envFrom:
             - secretRef:

@@ -34,6 +34,8 @@ networkPolicy:
 
 env:
   bookingServiceUrl: http://backend:5000
+  # Optional: comma-separated addresses that receive a copy (BCC) of every email, e.g. an admin/ops mailbox.
+  notificationBcc: ""
 
 workloadIdentity:
   enabled: false
