@@ -15,7 +15,7 @@ spec:
       labels:
         app.kubernetes.io/name: dora-exporter
       annotations:
-        checksum/script: 82d8286f7d06f67e
+        checksum/script: 9a9c4f2cf8153862
     spec:
       securityContext:
         runAsNonRoot: true

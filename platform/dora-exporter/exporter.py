@@ -106,8 +106,16 @@ def render(results, errors, refreshed):
 
 def http_json(url, headers):
     req = urllib.request.Request(url, headers={"User-Agent": "homeease-dora-exporter", **headers})
-    with urllib.request.urlopen(req, timeout=20) as resp:
-        return json.load(resp)
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            raw = resp.read()
+    except urllib.error.HTTPError as exc:
+        raise RuntimeError(f"HTTP {exc.code} from {urllib.parse.urlparse(url).netloc} (check the token and its scope)") from exc
+    try:
+        return json.loads(raw)
+    except ValueError as exc:
+        # Azure DevOps answers an invalid/expired PAT with an HTML sign-in page and HTTP 200.
+        raise RuntimeError(f"{urllib.parse.urlparse(url).netloc} did not return JSON - the token is probably invalid or expired") from exc
 
 
 def fetch_ado(org, project, pat, window_days, now):

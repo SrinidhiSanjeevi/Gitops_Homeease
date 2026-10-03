@@ -1,5 +1,8 @@
 import unittest
-from exporter import compute_dora, render
+import urllib.request
+from unittest import mock
+
+from exporter import compute_dora, http_json, render
 
 DAY = 86400
 NOW = 100 * DAY
@@ -38,6 +41,17 @@ class DoraTests(unittest.TestCase):
         self.assertIn('dora_deployments_window{pipeline="azure-devops/app",result="success"} 1', text)
         self.assertIn("# TYPE dora_lead_time_seconds gauge", text)
         self.assertNotIn("dora_mttr_seconds{", text)  # no incident -> series omitted, not fake zero
+
+
+class HttpTests(unittest.TestCase):
+    def test_html_sign_in_page_gives_a_clear_error(self):
+        class Resp:
+            def __enter__(self): return self
+            def __exit__(self, *a): return False
+            def read(self): return b"\n<html>sign in</html>"
+        with mock.patch.object(urllib.request, "urlopen", return_value=Resp()):
+            with self.assertRaisesRegex(RuntimeError, "token is probably invalid"):
+                http_json("https://dev.azure.com/x", {})
 
 
 if __name__ == "__main__":
