@@ -22,6 +22,7 @@ platform components need CRDs, ClusterRoles and webhooks, and the
 | `kube-prometheus-stack/` | **done** | Prometheus + Alertmanager + Grafana + node-exporter + kube-state-metrics. `serviceMonitorSelectorNilUsesHelmValues: false` etc. set so it watches ServiceMonitors from ANY Helm release, in any namespace — without this, the four app charts' future ServiceMonitors would silently never be scraped. |
 | `loki/` | **done** | SingleBinary mode, filesystem-backed (not object-storage — see the values file for why that's a documented limitation, not an oversight). |
 | `alloy/` | **done** | Ships every pod's stdout/stderr to Loki. Not Promtail — Promtail reached end-of-life 2026-03-02. |
+| `dora-exporter/` | **done** | In-cluster exporter: reads Azure DevOps + GitHub Actions history and serves the four DORA metrics (`dora_*`) for the **HomeEase - DORA Metrics** dashboard. Needs one out-of-band secret (see its README). Deployed as an extra source of the `monitoring` Application. |
 | `ingress-nginx/` | placeholder | **Installed manually with Helm, not by Argo CD** (namespace `ingress-nginx`; every chart's NetworkPolicy allows traffic from that namespace name). Hosts are `<svc>.<ingress-ip-with-dashes>.nip.io`. |
 | `cert-manager/` | placeholder | Not installed. The Ingresses carry a `cert-manager.io/cluster-issuer` annotation that stays inert until it is; HTTPS currently serves ingress-nginx's self-signed default certificate. |
 
