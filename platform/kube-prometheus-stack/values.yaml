@@ -45,11 +45,22 @@ alertmanager:
             requests:
               storage: 1Gi
     secrets:
-      - alertmanager-teams
+      - alertmanager-smtp
 
+  # EMAIL ONLY. The Gmail app password lives in the `alertmanager-smtp` Secret (key `password`), mounted at
+  # /etc/alertmanager/secrets/alertmanager-smtp/ and read through smtp_auth_password_file. Never put it here.
+  # Create/rotate it out of band (see docs/monitoring-secrets.md).
   config:
+    global:
+      resolve_timeout: 5m
+      smtp_smarthost: smtp.gmail.com:587
+      smtp_from: adminuserproduct01@gmail.com
+      smtp_auth_username: adminuserproduct01@gmail.com
+      smtp_auth_password_file: /etc/alertmanager/secrets/alertmanager-smtp/password
+      smtp_require_tls: true
     route:
-      receiver: teams-monitoring
+      # Default: DevOps engineer only. This is where warnings (and anything unlabelled) go.
+      receiver: devops-email
       group_by: ['namespace', 'alertname']
       group_wait: 30s
       group_interval: 5m
@@ -58,6 +69,22 @@ alertmanager:
         - receiver: 'null'
           matchers:
             - alertname = "Watchdog"
+        # Time-based escalation. Alertmanager cannot escalate to a different person on its own
+        # (repeat_interval only re-sends to the SAME receiver), so Prometheus raises these two meta-alerts
+        # when a critical alert has been firing for 15 / 30 minutes (see CriticalUnresolved* in homeease-alerts).
+        - receiver: lead-email
+          matchers:
+            - escalation = "lead"
+          group_wait: 10s
+        - receiver: manager-email
+          matchers:
+            - escalation = "manager"
+          group_wait: 10s
+        # Critical alerts notify the DevOps engineer immediately.
+        - receiver: devops-email
+          matchers:
+            - severity = "critical"
+          group_wait: 10s
     inhibit_rules:
       - source_matchers:
           - severity = "critical"
@@ -66,10 +93,24 @@ alertmanager:
         equal: ['namespace', 'alertname']
     receivers:
       - name: 'null'
-      - name: teams-monitoring
-        msteamsv2_configs:
-          - webhook_url_file: /etc/alertmanager/secrets/alertmanager-teams/monitoring-url
+      - name: devops-email
+        email_configs:
+          - to: adminuserproduct01@gmail.com
             send_resolved: true
+            headers:
+              subject: '[HomeEase {{ .Status | toUpper }}] {{ .CommonLabels.alertname }} ({{ .CommonLabels.severity }})'
+      - name: lead-email
+        email_configs:
+          - to: srinidhisanjeevi@gmail.com
+            send_resolved: true
+            headers:
+              subject: '[HomeEase ESCALATION {{ .Status | toUpper }}] {{ .CommonLabels.alertname }}'
+      - name: manager-email
+        email_configs:
+          - to: srinidhip.s@zapcg.com
+            send_resolved: true
+            headers:
+              subject: '[HomeEase ESCALATION {{ .Status | toUpper }}] {{ .CommonLabels.alertname }}'
 
 grafana:
   admin:

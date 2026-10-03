@@ -7,38 +7,37 @@ This document describes how to create out-of-band Kubernetes Secrets for the Hom
 
 ---
 
-## 1. Alertmanager Microsoft Teams Secret
+## 1. Alertmanager e-mail (SMTP) Secret
 
-Alertmanager routes every alert to a single Teams receiver
-(`msteamsv2_configs`) — `teams-monitoring` — with no escalation tiers
-and no separate infra channel, by design (see
-`platform/kube-prometheus-stack/values.yaml` for the routing tree).
-Routing stays broken until this Secret exists: the mount is mandatory,
-so a missing Secret leaves the Alertmanager pod stuck in `Init`. The
-webhook URL lives only in the cluster, never in Git.
+Alerts are sent by **e-mail only** (Teams is not used). Alertmanager logs in to Gmail as
+`adminuserproduct01@gmail.com` (`smtp.gmail.com:587`, STARTTLS) and reads the Google **App Password** from a
+file, so it is never in Git.
 
-- **Secret name**: `alertmanager-teams` (namespace `monitoring`)
-- **Key**: `monitoring-url` — one Teams Workflow ("when a webhook is
-  received") URL, created in Power Automate.
+- **Secret name**: `alertmanager-smtp` (namespace `monitoring`), **key**: `password`
+- Mounted by `alertmanagerSpec.secrets` at `/etc/alertmanager/secrets/alertmanager-smtp/password`
+  and referenced by `smtp_auth_password_file` in `platform/kube-prometheus-stack/values.yaml`.
+
+Create or rotate it (hidden prompt, spaces removed, nothing printed):
 
 ```bash
-kubectl -n monitoring create secret generic alertmanager-teams \
-  --from-literal=monitoring-url='<MONITORING_TEAMS_WEBHOOK_URL>'
+read -rs -p "App password: " P; echo
+kubectl -n monitoring create secret generic alertmanager-smtp --from-literal=password="${P// /}" \
+  --dry-run=client -o yaml | kubectl apply -f -; unset P
 ```
+Alertmanager reads the file on config reload; if it was missing at start the pod stays in `Init`.
 
-This Secret is already referenced by `alertmanagerSpec.secrets` and every
-`webhook_url_file` in `platform/kube-prometheus-stack/values.yaml` — once
-it exists in the cluster, the next Argo CD sync (or `selfHeal`) picks it
-up with no other GitOps change needed.
+### Who gets what
+| Severity | Recipients |
+|---|---|
+| warning | DevOps engineer only |
+| critical | DevOps engineer immediately |
+| critical still firing after 15 min | + team lead (`CriticalUnresolved15m`, label `escalation=lead`) |
+| critical still firing after 30 min | + manager (`CriticalUnresolved30m`, label `escalation=manager`) |
 
-### Adding email as well (optional, not implemented)
-`values.yaml` documents but does not wire up an SMTP path for adding an
-"incidents" email alongside Teams: add a "Send an email (V2)" step to
-the `#incidents` Teams Workflow in Power Automate after its webhook
-trigger (no extra Secret needed), or add a real Alertmanager SMTP
-receiver — `alertmanager-smtp` Secret (key `password`), `global.smtp_*`
-settings, and `email_configs` on the incidents receivers. Neither is
-enabled today.
+Resolved messages (`send_resolved: true`) go to the same recipient(s). Addresses live in the `receivers` block of
+`values.yaml`. **Escalation note:** Alertmanager cannot escalate to a different person by itself
+(`repeat_interval` only repeats to the same receiver), so the 15/30-minute steps are Prometheus meta-alerts that
+fire while *any* critical alert has been continuously firing for that long.
 
 ## 2. Grafana Admin Credentials Secret
 

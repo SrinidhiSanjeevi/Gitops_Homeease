@@ -631,64 +631,14 @@ data:
           ]
         },
         {
-          "id": 14,
-          "title": "HTTP 4xx Errors",
-          "description": "Rate of 4xx HTTP errors from payment-service",
-          "type": "stat",
-          "gridPos": {
-            "x": 8,
-            "y": 15,
-            "w": 8,
-            "h": 5
-          },
-          "fieldConfig": {
-            "defaults": {
-              "unit": "reqps",
-              "decimals": 4,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 0.05
-                  },
-                  {
-                    "color": "red",
-                    "value": 0.2
-                  }
-                ]
-              }
-            }
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ]
-            },
-            "colorMode": "value",
-            "graphMode": "none"
-          },
-          "targets": [
-            {
-              "expr": "sum(rate(http_requests_total{job=\"payment-service\", code=~\"4..\"}[5m])) or vector(0)",
-              "legendFormat": ""
-            }
-          ]
-        },
-        {
           "id": 15,
-          "title": "HTTP 5xx Errors",
+          "title": "HTTP 5xx Errors (server errors)",
           "description": "Rate of 5xx HTTP errors from payment-service",
           "type": "stat",
           "gridPos": {
-            "x": 16,
+            "x": 12,
             "y": 15,
-            "w": 8,
+            "w": 12,
             "h": 5
           },
           "fieldConfig": {
@@ -733,7 +683,7 @@ data:
           "gridPos": {
             "x": 0,
             "y": 15,
-            "w": 8,
+            "w": 12,
             "h": 5
           },
           "fieldConfig": {

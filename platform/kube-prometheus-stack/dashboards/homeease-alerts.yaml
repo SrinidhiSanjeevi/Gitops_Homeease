@@ -6,149 +6,130 @@ metadata:
     release: kube-prometheus-stack
 spec:
   groups:
-    - name: homeease.rules
-      rules:
-        - alert: BackendPodUnavailable
-          expr: kube_deployment_status_replicas_available{namespace="homeease-dev", deployment="backend"} < 1
-          for: 2m
-          labels:
-            severity: critical
-          annotations:
-            summary: "backend has zero available replicas in homeease-dev"
-            description: >-
-              kube_deployment_status_replicas_available for the backend
-              Deployment has been below 1 for 2 minutes. The booking API
-              is down. Check `kubectl -n homeease-dev get pods,events`.
-
-        - alert: HighHttp5xxRate
-          expr: >-
-            (
-              100 * sum by (namespace, job) (rate(http_requests_total{code=~"5.."}[5m]))
-              / sum by (namespace, job) (rate(http_requests_total[5m]))
-              > 5
-            )
-            and sum by (namespace, job) (rate(http_requests_total[5m])) > 0.05
-          for: 5m
-          labels:
-            severity: warning
-          annotations:
-            summary: "{{ $labels.job }} is returning >5% 5xx responses"
-            description: >-
-              5xx error rate for {{ $labels.job }} has been above 5% for
-              5 minutes ({{ $value | printf "%.1f" }}% now). Threshold is
-              deliberately loose (5%, sustained) to avoid paging on a
-              single failed request or a brief deploy blip. Only evaluated
-              above ~3 requests/minute, so one 5xx on an idle service
-              doesn't count as 100%.
-
-        - alert: HighHttpLatency
-          expr: >-
-            histogram_quantile(0.95, sum by (le, namespace, job) (rate(http_request_duration_seconds_bucket[5m])))
-            > 1
-          for: 5m
-          labels:
-            severity: warning
-          annotations:
-            summary: "{{ $labels.job }} p95 latency above 1s"
-            description: >-
-              p95 request latency for {{ $labels.job }} has been above 1
-              second for 5 minutes ({{ $value | printf "%.2f" }}s now).
-              1s is a starting threshold for a dev-sized cluster — tune
-              once real traffic patterns are known.
-
-        - alert: PodCrashLooping
-          expr: increase(kube_pod_container_status_restarts_total{namespace="homeease-dev"}[15m]) > 3
-          for: 5m
-          labels:
-            severity: critical
-          annotations:
-            summary: "{{ $labels.pod }} has restarted more than 3 times in 15 minutes"
-            description: >-
-              {{ $labels.container }} in pod {{ $labels.pod }} has
-              restarted {{ $value | printf "%.0f" }} times in the last 15
-              minutes. Gated at >3 (not >0) so a single expected restart
-              during a rollout or an OOM-then-recover doesn't page —
-              this catches an actual crash loop.
-
-        - alert: ServiceUnavailable
-          expr: >-
-            max by (namespace, job) (up{job=~"backend|admin-backend|payment-service"}) == 0
-            or absent(up{job="backend"})
-            or absent(up{job="admin-backend"})
-            or absent(up{job="payment-service"})
-          for: 2m
-          labels:
-            severity: critical
-          annotations:
-            summary: "{{ $labels.job }} is DOWN"
-            description: >-
-              Prometheus has been unable to scrape any {{ $labels.job }}
-              pod for 2 minutes. Check pod health: `kubectl -n homeease-dev
-              get pods -l app.kubernetes.io/name={{ $labels.job }}`.
-
-        - alert: PaymentFailureRateHigh
-          expr: >-
-            100 * sum(rate(payment_verify_failed_total{job="payment-service"}[5m]))
-            / (
-              sum(rate(payment_verify_success_total{job="payment-service"}[5m]))
-              + sum(rate(payment_verify_failed_total{job="payment-service"}[5m]))
-              > 0
-            ) > 5
-          for: 5m
-          labels:
-            severity: warning
-          annotations:
-            summary: "Payment failure rate above 5%"
-            description: >-
-              The Razorpay payment verification failure rate has been above
-              5% for 5 minutes ({{ $value | printf "%.1f" }}% now). This
-              may indicate a Razorpay API issue, a signature mismatch bug,
-              or a configuration problem (RAZORPAY_KEY_SECRET mismatch).
-              Check payment-service logs.
-
-        - alert: BookingsAwaitingProfessional
-          expr: max(serviceexpress_bookings_by_status{status="Assigned"}) > 5
-          for: 15m
-          labels:
-            severity: warning
-          annotations:
-            summary: "More than 5 bookings are waiting for a professional"
-            description: >-
-              {{ $value | printf "%.0f" }} bookings have had no professional
-              assigned for 15 minutes. Professional capacity is short for
-              some category or area: set more professionals Available or
-              extend their service areas in the admin console.
-
-        - alert: PodPendingTooLong
-          expr: >-
-            sum by (namespace, pod) (kube_pod_status_phase{phase="Pending", namespace=~"homeease-dev|homeease-staging|homeease-prod"}) > 0
-          for: 5m
-          labels:
-            severity: critical
-          annotations:
-            summary: "{{ $labels.pod }} in {{ $labels.namespace }} has been Pending for 5+ minutes"
-            description: >-
-              A pod cannot be scheduled. On this cluster the usual cause is
-              node CPU pressure with cluster-autoscaler unable to add a
-              node (see ClusterCPURequestsNearCapacity, and check for a
-              maxed-out Azure regional core quota via `az monitor
-              activity-log list` on the node resource group). Run
-              `kubectl -n {{ $labels.namespace }} describe pod {{ $labels.pod }}`
-              for the scheduler's reason.
-
-        - alert: ClusterCPURequestsNearCapacity
-          expr: >-
-            100 * sum(kube_pod_container_resource_requests{resource="cpu"}) / sum(kube_node_status_allocatable{resource="cpu"})
-            > 90
-          for: 10m
-          labels:
-            severity: warning
-          annotations:
-            summary: "Cluster CPU requests above 90% of allocatable"
-            description: >-
-              {{ $value | printf "%.0f" }}% of allocatable CPU is requested
-              across the cluster. The next pod scheduled (a rollout, a new
-              deploy, an HPA scale-up) may go Pending. If cluster-autoscaler
-              cannot add a node — check for a maxed-out Azure subscription
-              core quota — this will not self-heal; either free up requests
-              or raise the quota at https://aka.ms/ProdportalCRP/#blade/Microsoft_Azure_Capacity/UsageAndQuota.ReactView.
+  - name: homeease.rules
+    rules:
+    - alert: BackendPodUnavailable
+      expr: kube_deployment_status_replicas_available{namespace="homeease-dev", deployment="backend"} < 1
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: backend has zero available replicas in homeease-dev
+        description: kube_deployment_status_replicas_available for the backend Deployment has been below 1 for 2 minutes. The booking API is down. Check `kubectl -n homeease-dev get pods,events`.
+    - alert: HighHttp5xxRate
+      expr: "(\n  100 * sum by (namespace, job) (rate(http_requests_total{code=~\"5..\"}[5m]))\n  / sum by (namespace, job) (rate(http_requests_total[5m]))\n  > 5\n) and sum by (namespace, job) (rate(http_requests_total[5m]))\
+        \ > 0.05"
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: '{{ $labels.job }} is returning >5% 5xx responses'
+        description: 5xx error rate for {{ $labels.job }} has been above 5% for 5 minutes ({{ $value | printf "%.1f" }}% now). Threshold is deliberately loose (5%, sustained) to avoid paging on a single
+          failed request or a brief deploy blip. Only evaluated above ~3 requests/minute, so one 5xx on an idle service doesn't count as 100%.
+    - alert: HighHttpLatency
+      expr: histogram_quantile(0.95, sum by (le, namespace, job) (rate(http_request_duration_seconds_bucket[5m]))) > 1
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: '{{ $labels.job }} p95 latency above 1s'
+        description: "p95 request latency for {{ $labels.job }} has been above 1 second for 5 minutes ({{ $value | printf \"%.2f\" }}s now). 1s is a starting threshold for a dev-sized cluster \u2014 tune\
+          \ once real traffic patterns are known."
+    - alert: PodCrashLooping
+      expr: increase(kube_pod_container_status_restarts_total{namespace="homeease-dev"}[15m]) > 3
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: '{{ $labels.pod }} has restarted more than 3 times in 15 minutes'
+        description: "{{ $labels.container }} in pod {{ $labels.pod }} has restarted {{ $value | printf \"%.0f\" }} times in the last 15 minutes. Gated at >3 (not >0) so a single expected restart during\
+          \ a rollout or an OOM-then-recover doesn't page \u2014 this catches an actual crash loop."
+    - alert: ServiceUnavailable
+      expr: max by (namespace, job) (up{job=~"backend|admin-backend|payment-service"}) == 0 or absent(up{job="backend"}) or absent(up{job="admin-backend"}) or absent(up{job="payment-service"})
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: '{{ $labels.job }} is DOWN'
+        description: 'Prometheus has been unable to scrape any {{ $labels.job }} pod for 2 minutes. Check pod health: `kubectl -n homeease-dev get pods -l app.kubernetes.io/name={{ $labels.job }}`.'
+    - alert: PaymentFailureRateHigh
+      expr: "100 * sum(rate(payment_verify_failed_total{job=\"payment-service\"}[5m])) / (\n  sum(rate(payment_verify_success_total{job=\"payment-service\"}[5m]))\n  + sum(rate(payment_verify_failed_total{job=\"\
+        payment-service\"}[5m]))\n  > 0\n) > 5"
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Payment failure rate above 5%
+        description: The Razorpay payment verification failure rate has been above 5% for 5 minutes ({{ $value | printf "%.1f" }}% now). This may indicate a Razorpay API issue, a signature mismatch bug,
+          or a configuration problem (RAZORPAY_KEY_SECRET mismatch). Check payment-service logs.
+    - alert: BookingsAwaitingProfessional
+      expr: max(serviceexpress_bookings_by_status{status="Assigned"}) > 5
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: More than 5 bookings are waiting for a professional
+        description: '{{ $value | printf "%.0f" }} bookings have had no professional assigned for 15 minutes. Professional capacity is short for some category or area: set more professionals Available or
+          extend their service areas in the admin console.'
+    - alert: PodPendingTooLong
+      expr: sum by (namespace, pod) (kube_pod_status_phase{phase="Pending", namespace=~"homeease-dev|homeease-staging|homeease-prod"}) > 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: '{{ $labels.pod }} in {{ $labels.namespace }} has been Pending for 5+ minutes'
+        description: A pod cannot be scheduled. On this cluster the usual cause is node CPU pressure with cluster-autoscaler unable to add a node (see ClusterCPURequestsNearCapacity, and check for a maxed-out
+          Azure regional core quota via `az monitor activity-log list` on the node resource group). Run `kubectl -n {{ $labels.namespace }} describe pod {{ $labels.pod }}` for the scheduler's reason.
+    - alert: ClusterCPURequestsNearCapacity
+      expr: 100 * sum(kube_pod_container_resource_requests{resource="cpu"}) / sum(kube_node_status_allocatable{resource="cpu"}) > 90
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: Cluster CPU requests above 90% of allocatable
+        description: "{{ $value | printf \"%.0f\" }}% of allocatable CPU is requested across the cluster. The next pod scheduled (a rollout, a new deploy, an HPA scale-up) may go Pending. If cluster-autoscaler\
+          \ cannot add a node \u2014 check for a maxed-out Azure subscription core quota \u2014 this will not self-heal; either free up requests or raise the quota at https://aka.ms/ProdportalCRP/#blade/Microsoft_Azure_Capacity/UsageAndQuota.ReactView."
+    - alert: NotificationServiceUnavailable
+      expr: max by (namespace, job) (up{job="notification-service"}) == 0
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: notification-service is down
+        description: 'The Prometheus target for notification-service has been down for 2 minutes: booking and provider emails are not being sent.'
+    - alert: NotificationDeliveryFailing
+      expr: sum(increase(serviceexpress_notification_failures_total{job="notification-service"}[15m])) > 0
+      for: 0m
+      labels:
+        severity: warning
+      annotations:
+        summary: Notification emails are failing
+        description: notification-service reported {{ $value | printf "%.0f" }} failed notification(s) in the last 15 minutes. Check its logs and the Gmail app password (alertmanager/notification secrets).
+    - alert: AzureMainPipelineFailing
+      expr: max by (pipeline) (dora_open_incident{pipeline=~"azure-devops/.*"}) == 1
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Azure DevOps pipeline {{ $labels.pipeline }} is failing on main
+        description: 'The latest completed run of {{ $labels.pipeline }} on main failed and no later run has succeeded. Source: dora_open_incident from dora-exporter (needs its Azure DevOps token).'
+  - name: homeease.escalation
+    rules:
+    - alert: CriticalUnresolved15m
+      expr: count(ALERTS{alertstate="firing", severity="critical"}) > 0
+      for: 15m
+      labels:
+        severity: escalation
+        escalation: lead
+      annotations:
+        summary: Critical alert(s) unresolved for 15 minutes
+        description: 'At least one critical alert has been firing continuously for 15 minutes. Escalated to the team lead. Open alerts: see Alertmanager / Prometheus /alerts.'
+    - alert: CriticalUnresolved30m
+      expr: count(ALERTS{alertstate="firing", severity="critical"}) > 0
+      for: 30m
+      labels:
+        severity: escalation
+        escalation: manager
+      annotations:
+        summary: Critical alert(s) unresolved for 30 minutes
+        description: At least one critical alert has been firing continuously for 30 minutes. Escalated to the manager.
