@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: homeease-red-k8s-dashboard
   labels:
-    grafana_dashboard: "1"
+    grafana_dashboard: '1'
 data:
   homeease-red-k8s.json: |
     {
@@ -12,76 +12,524 @@ data:
       "timezone": "browser",
       "schemaVersion": 39,
       "refresh": "30s",
-      "time": { "from": "now-1h", "to": "now" },
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
       "panels": [
         {
-          "id": 14, "title": "Total Pods", "type": "stat",
-          "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
-          "fieldConfig": { "defaults": { "unit": "short" } },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "count(kube_pod_info{namespace=\"homeease-dev\"})" }]
+          "id": 14,
+          "title": "Total Pods",
+          "type": "stat",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 0,
+            "y": 0
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            }
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "targets": [
+            {
+              "expr": "count(kube_pod_info{namespace=\"homeease-dev\"})"
+            }
+          ]
         },
         {
-          "id": 7, "title": "Running Pods", "type": "stat",
-          "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 },
+          "id": 7,
+          "title": "Running Pods",
+          "type": "stat",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 6,
+            "y": 0
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "short",
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              }
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(kube_pod_status_phase{namespace=\"homeease-dev\", phase=\"Running\"})" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "targets": [
+            {
+              "expr": "sum(kube_pod_status_phase{namespace=\"homeease-dev\", phase=\"Running\"})"
+            }
+          ]
         },
         {
-          "id": 15, "title": "Ready Pods", "type": "stat",
-          "gridPos": { "h": 5, "w": 6, "x": 12, "y": 0 },
+          "id": 15,
+          "title": "Ready Pods",
+          "type": "stat",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 12,
+            "y": 0
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "short",
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              }
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(kube_pod_status_ready{namespace=\"homeease-dev\", condition=\"true\"})" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "targets": [
+            {
+              "expr": "sum(kube_pod_status_ready{namespace=\"homeease-dev\", condition=\"true\"})"
+            }
+          ]
         },
         {
-          "id": 8, "title": "Available Replicas (by deployment)", "type": "stat",
-          "gridPos": { "h": 5, "w": 6, "x": 18, "y": 0 },
+          "id": 8,
+          "title": "Available Replicas (by deployment)",
+          "type": "stat",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 18,
+            "y": 0
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "short",
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              }
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "kube_deployment_status_replicas_available{namespace=\"homeease-dev\"}", "legendFormat": "{{deployment}}" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "targets": [
+            {
+              "expr": "kube_deployment_status_replicas_available{namespace=\"homeease-dev\"}",
+              "legendFormat": "{{deployment}}"
+            }
+          ]
         },
         {
-          "id": 9, "title": "Pod Restarts (1h, by pod)", "type": "stat",
-          "gridPos": { "h": 6, "w": 8, "x": 0, "y": 5 },
+          "id": 9,
+          "title": "Pod Restarts (last 1h, by pod)",
+          "type": "stat",
+          "gridPos": {
+            "x": 0,
+            "y": 5,
+            "w": 24,
+            "h": 4
+          },
           "fieldConfig": {
-            "defaults": { "decimals": 0,
+            "defaults": {
+              "decimals": 0,
               "unit": "short",
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 3 }] }
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 3
+                  }
+                ]
+              }
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "round(sum(increase(kube_pod_container_status_restarts_total{namespace=\"homeease-dev\"}[1h])) by (pod))", "legendFormat": "{{pod}}" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "targets": [
+            {
+              "expr": "round(sum(increase(kube_pod_container_status_restarts_total{namespace=\"homeease-dev\"}[1h])) by (pod))",
+              "legendFormat": "{{pod}}"
+            }
+          ]
         },
         {
-          "id": 11, "title": "CPU Usage (cores, by pod)", "type": "stat",
-          "gridPos": { "h": 6, "w": 8, "x": 8, "y": 5 },
-          "fieldConfig": { "defaults": { "unit": "short" } },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"homeease-dev\", container!=\"\", container!=\"POD\"}[5m])) by (pod)", "legendFormat": "{{pod}}" }]
+          "id": 20,
+          "type": "bargauge",
+          "title": "CPU usage by service (millicores)",
+          "description": "Real CPU actually used, summed over each service's pods (1000 millicores = 1 core). From cAdvisor via Prometheus.",
+          "gridPos": {
+            "x": 0,
+            "y": 9,
+            "w": 12,
+            "h": 8
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "blue",
+                    "value": null
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              },
+              "noValue": "No data",
+              "decimals": 1
+            }
+          },
+          "options": {
+            "orientation": "horizontal",
+            "displayMode": "gradient",
+            "showUnfilled": true,
+            "valueMode": "color",
+            "namePlacement": "left",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "expr": "1000 * sum by (service) (label_replace(sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"homeease-dev\", container!=\"\", container!=\"POD\"}[5m])), \"service\", \"$1\", \"pod\", \"(.*)-[a-z0-9]+-[a-z0-9]+\"))",
+              "legendFormat": "{{service}}",
+              "instant": true
+            }
+          ]
         },
         {
-          "id": 12, "title": "Memory Usage (by pod)", "type": "stat",
-          "gridPos": { "h": 6, "w": 8, "x": 16, "y": 5 },
-          "fieldConfig": { "defaults": { "unit": "bytes" } },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "targets": [{ "expr": "sum(container_memory_working_set_bytes{namespace=\"homeease-dev\", container!=\"\", container!=\"POD\"}) by (pod)", "legendFormat": "{{pod}}" }]
+          "id": 21,
+          "type": "bargauge",
+          "title": "CPU used vs requested (%)",
+          "description": "100% = the service uses everything it asked Kubernetes to reserve. Above 100% it is bursting.",
+          "gridPos": {
+            "x": 12,
+            "y": 9,
+            "w": 12,
+            "h": 8
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 70
+                  },
+                  {
+                    "color": "orange",
+                    "value": 90
+                  },
+                  {
+                    "color": "red",
+                    "value": 100
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              },
+              "noValue": "No data",
+              "max": 150,
+              "decimals": 0
+            }
+          },
+          "options": {
+            "orientation": "horizontal",
+            "displayMode": "gradient",
+            "showUnfilled": true,
+            "valueMode": "color",
+            "namePlacement": "left",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "expr": "100 * sum by (service) (label_replace(sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"homeease-dev\", container!=\"\", container!=\"POD\"}[5m])), \"service\", \"$1\", \"pod\", \"(.*)-[a-z0-9]+-[a-z0-9]+\")) / sum by (service) (label_replace(sum by (pod) (kube_pod_container_resource_requests{namespace=\"homeease-dev\", resource=\"cpu\"}), \"service\", \"$1\", \"pod\", \"(.*)-[a-z0-9]+-[a-z0-9]+\"))",
+              "legendFormat": "{{service}}",
+              "instant": true
+            }
+          ]
+        },
+        {
+          "id": 22,
+          "type": "bargauge",
+          "title": "Memory usage by service",
+          "description": "Working-set memory per service (what the OOM killer looks at).",
+          "gridPos": {
+            "x": 0,
+            "y": 17,
+            "w": 12,
+            "h": 8
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "blue",
+                    "value": null
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              },
+              "noValue": "No data"
+            }
+          },
+          "options": {
+            "orientation": "horizontal",
+            "displayMode": "gradient",
+            "showUnfilled": true,
+            "valueMode": "color",
+            "namePlacement": "left",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum by (service) (label_replace(sum by (pod) (container_memory_working_set_bytes{namespace=\"homeease-dev\", container!=\"\", container!=\"POD\"}), \"service\", \"$1\", \"pod\", \"(.*)-[a-z0-9]+-[a-z0-9]+\"))",
+              "legendFormat": "{{service}}",
+              "instant": true
+            }
+          ]
+        },
+        {
+          "id": 23,
+          "type": "bargauge",
+          "title": "Memory used vs limit (%)",
+          "description": "Close to 100% means the pod is about to be OOM-killed.",
+          "gridPos": {
+            "x": 12,
+            "y": 17,
+            "w": 12,
+            "h": 8
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 60
+                  },
+                  {
+                    "color": "orange",
+                    "value": 80
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              },
+              "noValue": "No data",
+              "max": 100,
+              "decimals": 0
+            }
+          },
+          "options": {
+            "orientation": "horizontal",
+            "displayMode": "gradient",
+            "showUnfilled": true,
+            "valueMode": "color",
+            "namePlacement": "left",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "expr": "100 * sum by (service) (label_replace(sum by (pod) (container_memory_working_set_bytes{namespace=\"homeease-dev\", container!=\"\", container!=\"POD\"}), \"service\", \"$1\", \"pod\", \"(.*)-[a-z0-9]+-[a-z0-9]+\")) / sum by (service) (label_replace(sum by (pod) (kube_pod_container_resource_limits{namespace=\"homeease-dev\", resource=\"memory\"}), \"service\", \"$1\", \"pod\", \"(.*)-[a-z0-9]+-[a-z0-9]+\"))",
+              "legendFormat": "{{service}}",
+              "instant": true
+            }
+          ]
+        },
+        {
+          "id": 24,
+          "type": "timeseries",
+          "title": "CPU over time (millicores)",
+          "description": "CPU trend per service.",
+          "gridPos": {
+            "x": 0,
+            "y": 25,
+            "w": 12,
+            "h": 8
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "min": 0,
+              "custom": {
+                "fillOpacity": 12,
+                "lineWidth": 2
+              }
+            }
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "expr": "1000 * sum by (service) (label_replace(sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"homeease-dev\", container!=\"\", container!=\"POD\"}[5m])), \"service\", \"$1\", \"pod\", \"(.*)-[a-z0-9]+-[a-z0-9]+\"))",
+              "legendFormat": "{{service}}"
+            }
+          ]
+        },
+        {
+          "id": 25,
+          "type": "timeseries",
+          "title": "Memory over time",
+          "description": "Memory trend per service.",
+          "gridPos": {
+            "x": 12,
+            "y": 25,
+            "w": 12,
+            "h": 8
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "min": 0,
+              "custom": {
+                "fillOpacity": 12,
+                "lineWidth": 2
+              }
+            }
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum by (service) (label_replace(sum by (pod) (container_memory_working_set_bytes{namespace=\"homeease-dev\", container!=\"\", container!=\"POD\"}), \"service\", \"$1\", \"pod\", \"(.*)-[a-z0-9]+-[a-z0-9]+\"))",
+              "legendFormat": "{{service}}"
+            }
+          ]
         }
       ]
     }

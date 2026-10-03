@@ -76,7 +76,7 @@ data:
           },
           "targets": [
             {
-              "expr": "dora_deployment_frequency_per_day",
+              "expr": "max by (pipeline) (dora_deployment_frequency_per_day)",
               "legendFormat": "{{pipeline}}"
             }
           ]
@@ -135,7 +135,7 @@ data:
           },
           "targets": [
             {
-              "expr": "dora_lead_time_seconds",
+              "expr": "max by (pipeline) (dora_lead_time_seconds)",
               "legendFormat": "{{pipeline}}"
             }
           ]
@@ -195,7 +195,7 @@ data:
           },
           "targets": [
             {
-              "expr": "dora_change_failure_rate_percent",
+              "expr": "max by (pipeline) (dora_change_failure_rate_percent)",
               "legendFormat": "{{pipeline}}"
             }
           ]
@@ -254,7 +254,7 @@ data:
           },
           "targets": [
             {
-              "expr": "dora_mttr_seconds",
+              "expr": "max by (pipeline) (dora_mttr_seconds)",
               "legendFormat": "{{pipeline}}"
             }
           ]
@@ -305,7 +305,7 @@ data:
           },
           "targets": [
             {
-              "expr": "dora_open_incident",
+              "expr": "max by (pipeline) (dora_open_incident)",
               "legendFormat": "{{pipeline}}"
             }
           ]
@@ -364,7 +364,7 @@ data:
           },
           "targets": [
             {
-              "expr": "time() - dora_last_success_timestamp_seconds",
+              "expr": "max by (pipeline) (time() - dora_last_success_timestamp_seconds)",
               "legendFormat": "{{pipeline}}"
             }
           ]
@@ -419,7 +419,7 @@ data:
           },
           "targets": [
             {
-              "expr": "dora_pipeline_duration_seconds",
+              "expr": "max by (pipeline) (dora_pipeline_duration_seconds)",
               "legendFormat": "{{pipeline}}"
             }
           ]
@@ -437,7 +437,7 @@ data:
           "description": "Completed, non-cancelled runs in the window.",
           "targets": [
             {
-              "expr": "dora_deployments_window",
+              "expr": "max by (pipeline, result) (dora_deployments_window)",
               "format": "table",
               "instant": true
             }
@@ -448,14 +448,7 @@ data:
               "options": {
                 "excludeByName": {
                   "Time": true,
-                  "__name__": true,
-                  "job": true,
-                  "instance": true,
-                  "endpoint": true,
-                  "namespace": true,
-                  "pod": true,
-                  "service": true,
-                  "container": true
+                  "__name__": true
                 },
                 "renameByName": {
                   "Value": "runs"
@@ -487,7 +480,7 @@ data:
           },
           "targets": [
             {
-              "expr": "dora_deployment_frequency_per_day",
+              "expr": "max by (pipeline) (dora_deployment_frequency_per_day)",
               "legendFormat": "{{pipeline}}"
             }
           ]
@@ -511,10 +504,25 @@ data:
           },
           "targets": [
             {
-              "expr": "dora_change_failure_rate_percent",
+              "expr": "max by (pipeline) (dora_change_failure_rate_percent)",
               "legendFormat": "{{pipeline}}"
             }
           ]
+        },
+        {
+          "id": 11,
+          "type": "text",
+          "title": "What these metrics mean",
+          "gridPos": {
+            "x": 0,
+            "y": 18,
+            "w": 24,
+            "h": 7
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "**How to read these (DORA = the 4 standard software-delivery metrics)**\n\n- **Deployment frequency**: how often a change reaches main successfully. Elite: daily or more. Here: successful pipeline runs on `main` per day.\n- **Lead time for changes**: time from the commit to the pipeline finishing. Elite: under 1 hour.\n- **Change failure rate**: share of runs on `main` that failed. Elite: 0-15%.\n- **Time to restore**: from a failed run to the next success. Elite: under 1 hour.\n\nSource: real run history of Azure DevOps (all pipelines) and GitHub Actions, read every 5 minutes by `dora-exporter`. Azure DevOps appears only when the exporter has its read-only token; the 30-day window includes early development failures."
+          }
         }
       ]
     }
