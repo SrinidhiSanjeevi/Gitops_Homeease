@@ -34,6 +34,11 @@ spec:
       path: platform/kube-prometheus-stack/dashboards
     - repoURL: https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git
       targetRevision: main
+      path: platform/dora-exporter
+      directory:
+        include: "{configmap,deployment,service,servicemonitor}.yaml"
+    - repoURL: https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git
+      targetRevision: main
       ref: values
   destination:
     server: https://kubernetes.default.svc

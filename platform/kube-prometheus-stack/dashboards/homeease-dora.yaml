@@ -1,0 +1,520 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homeease-dora-dashboard
+  labels:
+    grafana_dashboard: '1'
+data:
+  homeease-dora.json: |
+    {
+      "title": "HomeEase - DORA Metrics",
+      "uid": "homeease-dora",
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "refresh": "1m",
+      "time": {
+        "from": "now-7d",
+        "to": "now"
+      },
+      "tags": [
+        "homeease",
+        "dora"
+      ],
+      "panels": [
+        {
+          "id": 1,
+          "type": "stat",
+          "title": "Deployment Frequency (per day)",
+          "description": "DORA: successful runs on main per day. Elite = on demand (daily+), High = weekly, Medium = monthly.",
+          "gridPos": {
+            "x": 0,
+            "y": 0,
+            "w": 6,
+            "h": 6
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "noValue": "Waiting for data",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0.03333333333333333
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 0.14285714285714285
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 2
+            }
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value_and_name",
+            "orientation": "vertical"
+          },
+          "targets": [
+            {
+              "expr": "dora_deployment_frequency_per_day",
+              "legendFormat": "{{pipeline}}"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "type": "stat",
+          "title": "Lead Time for Changes",
+          "description": "DORA: median time from commit to the pipeline finishing. Elite < 1 hour, High < 1 day.",
+          "gridPos": {
+            "x": 6,
+            "y": 0,
+            "w": 6,
+            "h": 6
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "noValue": "Waiting for data",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 86400
+                  },
+                  {
+                    "color": "orange",
+                    "value": 604800
+                  },
+                  {
+                    "color": "red",
+                    "value": 2592000
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              }
+            }
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value_and_name",
+            "orientation": "vertical"
+          },
+          "targets": [
+            {
+              "expr": "dora_lead_time_seconds",
+              "legendFormat": "{{pipeline}}"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "type": "stat",
+          "title": "Change Failure Rate",
+          "description": "DORA: share of runs on main that failed. Elite 0-15%.",
+          "gridPos": {
+            "x": 12,
+            "y": 0,
+            "w": 6,
+            "h": 6
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "noValue": "Waiting for data",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 15
+                  },
+                  {
+                    "color": "orange",
+                    "value": 30
+                  },
+                  {
+                    "color": "red",
+                    "value": 45
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 1
+            }
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value_and_name",
+            "orientation": "vertical"
+          },
+          "targets": [
+            {
+              "expr": "dora_change_failure_rate_percent",
+              "legendFormat": "{{pipeline}}"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "type": "stat",
+          "title": "Time to Restore (MTTR)",
+          "description": "DORA: mean time from a failed run to the next successful one. Elite < 1 hour.",
+          "gridPos": {
+            "x": 18,
+            "y": 0,
+            "w": 6,
+            "h": 6
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "noValue": "No resolved incident",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 3600
+                  },
+                  {
+                    "color": "orange",
+                    "value": 86400
+                  },
+                  {
+                    "color": "red",
+                    "value": 604800
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              }
+            }
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value_and_name",
+            "orientation": "vertical"
+          },
+          "targets": [
+            {
+              "expr": "dora_mttr_seconds",
+              "legendFormat": "{{pipeline}}"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "type": "stat",
+          "title": "Current State of main",
+          "description": "OK = latest run on main passed. INCIDENT = latest run failed and is not yet fixed.",
+          "gridPos": {
+            "x": 0,
+            "y": 6,
+            "w": 6,
+            "h": 5
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "noValue": "Waiting for data",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              }
+            }
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value_and_name",
+            "orientation": "vertical"
+          },
+          "targets": [
+            {
+              "expr": "dora_open_incident",
+              "legendFormat": "{{pipeline}}"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "type": "stat",
+          "title": "Time Since Last Successful Deploy",
+          "description": "Freshness of production delivery.",
+          "gridPos": {
+            "x": 6,
+            "y": 6,
+            "w": 6,
+            "h": 5
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "noValue": "Waiting for data",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 86400
+                  },
+                  {
+                    "color": "orange",
+                    "value": 259200
+                  },
+                  {
+                    "color": "red",
+                    "value": 604800
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              }
+            }
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value_and_name",
+            "orientation": "vertical"
+          },
+          "targets": [
+            {
+              "expr": "time() - dora_last_success_timestamp_seconds",
+              "legendFormat": "{{pipeline}}"
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "type": "stat",
+          "title": "Pipeline Duration (median)",
+          "description": "How long a run takes from start to finish.",
+          "gridPos": {
+            "x": 12,
+            "y": 6,
+            "w": 6,
+            "h": 5
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "noValue": "Waiting for data",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 1200
+                  },
+                  {
+                    "color": "red",
+                    "value": 2400
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              }
+            }
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value_and_name",
+            "orientation": "vertical"
+          },
+          "targets": [
+            {
+              "expr": "dora_pipeline_duration_seconds",
+              "legendFormat": "{{pipeline}}"
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "type": "table",
+          "title": "Runs on main in window (success / failed)",
+          "gridPos": {
+            "x": 18,
+            "y": 6,
+            "w": 6,
+            "h": 5
+          },
+          "description": "Completed, non-cancelled runs in the window.",
+          "targets": [
+            {
+              "expr": "dora_deployments_window",
+              "format": "table",
+              "instant": true
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "job": true,
+                  "instance": true,
+                  "endpoint": true,
+                  "namespace": true,
+                  "pod": true,
+                  "service": true,
+                  "container": true
+                },
+                "renameByName": {
+                  "Value": "runs"
+                }
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "Waiting for data"
+            }
+          }
+        },
+        {
+          "id": 9,
+          "type": "timeseries",
+          "title": "Deployment frequency over time",
+          "gridPos": {
+            "x": 0,
+            "y": 11,
+            "w": 12,
+            "h": 7
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "decimals": 2
+            }
+          },
+          "targets": [
+            {
+              "expr": "dora_deployment_frequency_per_day",
+              "legendFormat": "{{pipeline}}"
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "type": "timeseries",
+          "title": "Change failure rate over time",
+          "gridPos": {
+            "x": 12,
+            "y": 11,
+            "w": 12,
+            "h": 7
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "max": 100,
+              "min": 0
+            }
+          },
+          "targets": [
+            {
+              "expr": "dora_change_failure_rate_percent",
+              "legendFormat": "{{pipeline}}"
+            }
+          ]
+        }
+      ]
+    }

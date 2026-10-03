@@ -1,0 +1,177 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homeease-logs-dashboard
+  labels:
+    grafana_dashboard: '1'
+data:
+  homeease-logs.json: |
+    {
+      "title": "HomeEase - Logs (Alloy \u2192 Loki)",
+      "uid": "homeease-logs",
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "refresh": "30s",
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "tags": [
+        "homeease",
+        "logs"
+      ],
+      "panels": [
+        {
+          "id": 1,
+          "type": "timeseries",
+          "title": "Log volume by service (lines/min)",
+          "datasource": "Loki",
+          "gridPos": {
+            "x": 0,
+            "y": 0,
+            "w": 12,
+            "h": 7
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum by (service) (count_over_time({namespace=\"homeease-dev\"}[1m]))",
+              "legendFormat": "{{service}}",
+              "datasource": "Loki"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "type": "timeseries",
+          "title": "Errors by service (lines/min, level=error)",
+          "datasource": "Loki",
+          "gridPos": {
+            "x": 12,
+            "y": 0,
+            "w": 12,
+            "h": 7
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "red"
+              }
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum by (service) (count_over_time({namespace=\"homeease-dev\"} | json | level=\"50\" [1m]))",
+              "legendFormat": "{{service}}",
+              "datasource": "Loki"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "type": "logs",
+          "title": "Application errors (live)",
+          "datasource": "Loki",
+          "gridPos": {
+            "x": 0,
+            "y": 7,
+            "w": 24,
+            "h": 8
+          },
+          "options": {
+            "showTime": true,
+            "wrapLogMessage": true,
+            "sortOrder": "Descending",
+            "enableLogDetails": true
+          },
+          "targets": [
+            {
+              "expr": "{namespace=\"homeease-dev\"} | json | level=\"50\"",
+              "legendFormat": "",
+              "datasource": "Loki"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "type": "logs",
+          "title": "Payment events: webhooks, failures, refunds",
+          "datasource": "Loki",
+          "gridPos": {
+            "x": 0,
+            "y": 15,
+            "w": 24,
+            "h": 8
+          },
+          "description": "Razorpay webhook events (payment.captured / payment.failed), signature problems and refunds from payment-service.",
+          "options": {
+            "showTime": true,
+            "wrapLogMessage": true,
+            "sortOrder": "Descending",
+            "enableLogDetails": true
+          },
+          "targets": [
+            {
+              "expr": "{service=\"payment-service\"} |~ \"(?i)webhook|payment.failed|refund|signature\"",
+              "legendFormat": "",
+              "datasource": "Loki"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "type": "logs",
+          "title": "Notification service",
+          "datasource": "Loki",
+          "gridPos": {
+            "x": 0,
+            "y": 23,
+            "w": 24,
+            "h": 7
+          },
+          "options": {
+            "showTime": true,
+            "wrapLogMessage": true,
+            "sortOrder": "Descending"
+          },
+          "targets": [
+            {
+              "expr": "{service=\"notification-service\"}",
+              "legendFormat": "",
+              "datasource": "Loki"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "type": "logs",
+          "title": "All HomeEase logs (live tail)",
+          "datasource": "Loki",
+          "gridPos": {
+            "x": 0,
+            "y": 30,
+            "w": 24,
+            "h": 10
+          },
+          "options": {
+            "showTime": true,
+            "wrapLogMessage": false,
+            "sortOrder": "Descending",
+            "enableLogDetails": true
+          },
+          "targets": [
+            {
+              "expr": "{namespace=\"homeease-dev\"}",
+              "legendFormat": "",
+              "datasource": "Loki"
+            }
+          ]
+        }
+      ]
+    }

@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: homeease-business-dashboard
   labels:
-    grafana_dashboard: "1"
+    grafana_dashboard: '1'
 data:
   homeease-business.json: |
     {
@@ -12,212 +12,666 @@ data:
       "timezone": "browser",
       "schemaVersion": 39,
       "refresh": "30s",
-      "time": { "from": "now-1h", "to": "now" },
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
       "panels": [
         {
           "id": 1,
           "title": "Total Bookings",
           "description": "All-time total bookings from DB (serviceexpress_total_bookings gauge, refreshed every 30s by metricsCollector)",
           "type": "stat",
-          "gridPos": { "h": 5, "w": 4, "x": 0, "y": 0 },
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 0,
+            "y": 0
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "color": { "mode": "fixed", "fixedColor": "blue" },
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] }
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "blue"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "blue",
+                    "value": null
+                  }
+                ]
+              }
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_total_bookings)", "legendFormat": "" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max(serviceexpress_total_bookings)",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 2,
           "title": "Completed Bookings",
           "description": "Current count of bookings in Completed status (DB gauge)",
           "type": "stat",
-          "gridPos": { "h": 5, "w": 4, "x": 4, "y": 0 },
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 4,
+            "y": 0
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "color": { "mode": "fixed", "fixedColor": "green" },
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "green"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_bookings_by_status{status=\"Completed\"})", "legendFormat": "" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max(serviceexpress_bookings_by_status{status=\"Completed\"})",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 3,
           "title": "Confirmed Bookings",
           "description": "Current count of bookings in Confirmed status (DB gauge)",
           "type": "stat",
-          "gridPos": { "h": 5, "w": 4, "x": 8, "y": 0 },
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 8,
+            "y": 0
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "color": { "mode": "fixed", "fixedColor": "semi-dark-green" },
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "text", "value": null }] }
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "semi-dark-green"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_bookings_by_status{status=\"Confirmed\"})", "legendFormat": "" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max(serviceexpress_bookings_by_status{status=\"Confirmed\"})",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 4,
           "title": "Cancelled Bookings",
           "description": "Current count of bookings in Cancelled status (DB gauge)",
           "type": "stat",
-          "gridPos": { "h": 5, "w": 4, "x": 12, "y": 0 },
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 12,
+            "y": 0
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "color": { "mode": "fixed", "fixedColor": "red" },
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }] }
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "red"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  }
+                ]
+              }
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_bookings_by_status{status=\"Cancelled\"})", "legendFormat": "" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max(serviceexpress_bookings_by_status{status=\"Cancelled\"})",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 5,
           "title": "Active Bookings",
-          "description": "In-flight bookings (Created+Assigned+Confirmed) — in-process gauge per pod",
+          "description": "In-flight bookings (Created+Assigned+Confirmed) \u2014 in-process gauge per pod",
           "type": "stat",
-          "gridPos": { "h": 5, "w": 4, "x": 16, "y": 0 },
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 16,
+            "y": 0
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "text", "value": null }] }
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(max by (status) (serviceexpress_bookings_by_status{status=~\"Created|Assigned|Confirmed\"}))", "legendFormat": "" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum(max by (status) (serviceexpress_bookings_by_status{status=~\"Created|Assigned|Confirmed\"}))",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 6,
-          "title": "Total Revenue (₹)",
+          "title": "Total Revenue (\u20b9)",
           "description": "Money actually collected: totalPrice of Paid and cash-collected bookings plus late-cancellation fees (DB gauge, backend metricsCollector)",
           "type": "stat",
-          "gridPos": { "h": 5, "w": 4, "x": 20, "y": 0 },
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 20,
+            "y": 0
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "currencyINR",
               "decimals": 0,
-              "color": { "mode": "fixed", "fixedColor": "gold" },
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "gold", "value": null }] }
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "gold"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "gold",
+                    "value": null
+                  }
+                ]
+              }
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_total_revenue)", "legendFormat": "" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max(serviceexpress_total_revenue)",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 7,
           "title": "Total Users",
           "description": "Registered customer accounts (DB gauge)",
           "type": "stat",
-          "gridPos": { "h": 5, "w": 4, "x": 0, "y": 5 },
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 0,
+            "y": 5
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "text", "value": null }] }
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_total_users)", "legendFormat": "" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max(serviceexpress_total_users)",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 8,
           "title": "Total Professionals",
           "description": "Registered professionals (DB gauge)",
           "type": "stat",
-          "gridPos": { "h": 5, "w": 4, "x": 4, "y": 5 },
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 4,
+            "y": 5
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "text", "value": null }] }
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_total_professionals)", "legendFormat": "" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max(serviceexpress_total_professionals)",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 9,
           "title": "Available Professionals",
           "description": "Professionals with status=Available (DB gauge)",
           "type": "stat",
-          "gridPos": { "h": 5, "w": 4, "x": 8, "y": 5 },
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 8,
+            "y": 5
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "color": { "mode": "fixed", "fixedColor": "green" },
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "green"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_available_professionals)", "legendFormat": "" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max(serviceexpress_available_professionals)",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 10,
           "title": "Total Services",
           "description": "Service catalog size (DB gauge)",
           "type": "stat",
-          "gridPos": { "h": 5, "w": 4, "x": 12, "y": 5 },
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 12,
+            "y": 5
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "text", "value": null }] }
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_total_services)", "legendFormat": "" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max(serviceexpress_total_services)",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 11,
           "title": "Emergency Requests",
           "description": "Total emergency requests ever created (DB gauge)",
           "type": "stat",
-          "gridPos": { "h": 5, "w": 4, "x": 16, "y": 5 },
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 16,
+            "y": 5
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "text", "value": null }, { "color": "orange", "value": 1 }] }
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  }
+                ]
+              }
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_total_emergencies)", "legendFormat": "" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max(serviceexpress_total_emergencies)",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 12,
           "title": "Active Emergencies",
           "description": "Emergency requests not yet Resolved or Cancelled (DB gauge)",
           "type": "stat",
-          "gridPos": { "h": 5, "w": 4, "x": 20, "y": 5 },
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 20,
+            "y": 5
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] }
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              }
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none", "textMode": "value" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_active_emergencies)", "legendFormat": "" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "textMode": "value"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max(serviceexpress_active_emergencies)",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 13,
           "title": "Booking Confirmation Rate (all bookings)",
           "description": "% of booking requests that were confirmed in the last 15 minutes",
           "type": "gauge",
-          "gridPos": { "h": 6, "w": 8, "x": 0, "y": 10 },
+          "gridPos": {
+            "h": 6,
+            "w": 8,
+            "x": 0,
+            "y": 10
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "percent",
@@ -225,18 +679,49 @@ data:
               "min": 0,
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 40 }, { "color": "green", "value": 70 }]
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 40
+                  },
+                  {
+                    "color": "green",
+                    "value": 70
+                  }
+                ]
               }
             }
           },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "100 * (max(serviceexpress_bookings_by_status{status=\"Confirmed\"}) + max(serviceexpress_bookings_by_status{status=\"Completed\"})) / (max(serviceexpress_total_bookings) > 0)", "legendFormat": "" }]
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "100 * (max(serviceexpress_bookings_by_status{status=\"Confirmed\"}) + max(serviceexpress_bookings_by_status{status=\"Completed\"})) / (max(serviceexpress_total_bookings) > 0)",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 14,
           "title": "Booking Cancellation Rate (all bookings)",
           "description": "% of booking requests that were cancelled in the last 15 minutes",
           "type": "gauge",
-          "gridPos": { "h": 6, "w": 8, "x": 8, "y": 10 },
+          "gridPos": {
+            "h": 6,
+            "w": 8,
+            "x": 8,
+            "y": 10
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "percent",
@@ -244,18 +729,49 @@ data:
               "min": 0,
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 20 }, { "color": "red", "value": 40 }]
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 20
+                  },
+                  {
+                    "color": "red",
+                    "value": 40
+                  }
+                ]
               }
             }
           },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "100 * max(serviceexpress_bookings_by_status{status=\"Cancelled\"}) / (max(serviceexpress_total_bookings) > 0)", "legendFormat": "" }]
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "100 * max(serviceexpress_bookings_by_status{status=\"Cancelled\"}) / (max(serviceexpress_total_bookings) > 0)",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 15,
           "title": "Booking Completion Rate (confirmed bookings)",
           "description": "% of confirmed bookings that reached Completed in the last 15 minutes",
           "type": "gauge",
-          "gridPos": { "h": 6, "w": 8, "x": 16, "y": 10 },
+          "gridPos": {
+            "h": 6,
+            "w": 8,
+            "x": 16,
+            "y": 10
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "percent",
@@ -263,142 +779,477 @@ data:
               "min": 0,
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 50 }, { "color": "green", "value": 80 }]
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 50
+                  },
+                  {
+                    "color": "green",
+                    "value": 80
+                  }
+                ]
               }
             }
           },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "100 * max(serviceexpress_bookings_by_status{status=\"Completed\"}) / ((max(serviceexpress_bookings_by_status{status=\"Completed\"}) + max(serviceexpress_bookings_by_status{status=\"Confirmed\"})) > 0)", "legendFormat": "" }]
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "100 * max(serviceexpress_bookings_by_status{status=\"Completed\"}) / ((max(serviceexpress_bookings_by_status{status=\"Completed\"}) + max(serviceexpress_bookings_by_status{status=\"Confirmed\"})) > 0)",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 16,
-          "title": "Professional Assignment Latency (p95)",
+          "title": "Professional Assignment Latency (p95, live)",
           "description": "95th percentile time from booking creation to a professional being assigned, over the selected time range. Empty when no assignment happened in the range.",
           "type": "stat",
-          "gridPos": { "h": 6, "w": 6, "x": 0, "y": 16 },
+          "gridPos": {
+            "x": 6,
+            "y": 21,
+            "w": 6,
+            "h": 5
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "s",
               "decimals": 2,
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 5 }, { "color": "red", "value": 10 }]
-              }
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 5
+                  },
+                  {
+                    "color": "red",
+                    "value": 10
+                  }
+                ]
+              },
+              "noValue": "No assignments in range"
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "histogram_quantile(0.95, sum(increase(serviceexpress_professional_assignment_time_seconds_bucket[$__range])) by (le))", "legendFormat": "" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "histogram_quantile(0.95, sum(increase(serviceexpress_professional_assignment_time_seconds_bucket[$__range])) by (le))",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 17,
-          "title": "Booking Completion Latency (p95)",
+          "title": "Booking Completion Latency (p95, live)",
           "description": "95th percentile end-to-end booking latency from creation to completion (seconds).",
           "type": "stat",
-          "gridPos": { "h": 6, "w": 6, "x": 6, "y": 16 },
+          "gridPos": {
+            "x": 12,
+            "y": 21,
+            "w": 6,
+            "h": 5
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "s",
               "decimals": 0,
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1800 }, { "color": "red", "value": 7200 }]
-              }
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 1800
+                  },
+                  {
+                    "color": "red",
+                    "value": 7200
+                  }
+                ]
+              },
+              "noValue": "No completions in range"
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "histogram_quantile(0.95, sum(increase(serviceexpress_booking_latency_seconds_bucket[$__range])) by (le))", "legendFormat": "" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "histogram_quantile(0.95, sum(increase(serviceexpress_booking_latency_seconds_bucket[$__range])) by (le))",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 18,
-          "title": "Booking Request Throughput",
+          "title": "Booking Request Rate (live)",
           "description": "Current booking request rate (requests per second)",
           "type": "stat",
-          "gridPos": { "h": 6, "w": 6, "x": 12, "y": 16 },
+          "gridPos": {
+            "x": 18,
+            "y": 21,
+            "w": 6,
+            "h": 5
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "reqps",
               "decimals": 4,
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "text", "value": null }] }
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              },
+              "noValue": "No bookings in last 5m"
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(rate(serviceexpress_booking_requests_total[5m]))", "legendFormat": "" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum(rate(serviceexpress_booking_requests_total[5m]))",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 19,
           "title": "Bookings Awaiting a Professional",
           "description": "Number of bookings currently waiting for professional assignment",
           "type": "stat",
-          "gridPos": { "h": 6, "w": 6, "x": 18, "y": 16 },
+          "gridPos": {
+            "x": 0,
+            "y": 21,
+            "w": 6,
+            "h": 5
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "short",
               "decimals": 0,
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 10 }, { "color": "red", "value": 50 }]
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 10
+                  },
+                  {
+                    "color": "red",
+                    "value": 50
+                  }
+                ]
               }
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "max(serviceexpress_bookings_by_status{status=\"Assigned\"})", "legendFormat": "" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max(serviceexpress_bookings_by_status{status=\"Assigned\"})",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 20,
           "title": "Backend API",
           "description": "Binary UP/DOWN for the backend service (up{job='backend'})",
           "type": "stat",
-          "gridPos": { "h": 5, "w": 6, "x": 0, "y": 22 },
+          "gridPos": {
+            "x": 0,
+            "y": 16,
+            "w": 6,
+            "h": 5
+          },
           "fieldConfig": {
             "defaults": {
               "mappings": [
-                { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "DOWN",
+                      "color": "red"
+                    },
+                    "1": {
+                      "text": "UP",
+                      "color": "green"
+                    }
+                  }
+                }
               ],
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              }
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "min(up{job=\"backend\"})", "legendFormat": "" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "background",
+            "graphMode": "none"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "min(up{job=\"backend\"})",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 21,
           "title": "Admin Backend",
           "description": "Binary UP/DOWN for the admin-backend service",
           "type": "stat",
-          "gridPos": { "h": 5, "w": 6, "x": 6, "y": 22 },
+          "gridPos": {
+            "x": 6,
+            "y": 16,
+            "w": 6,
+            "h": 5
+          },
           "fieldConfig": {
             "defaults": {
               "mappings": [
-                { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "DOWN",
+                      "color": "red"
+                    },
+                    "1": {
+                      "text": "UP",
+                      "color": "green"
+                    }
+                  }
+                }
               ],
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              }
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "min(up{job=\"admin-backend\"})", "legendFormat": "" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "background",
+            "graphMode": "none"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "min(up{job=\"admin-backend\"})",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 22,
           "title": "Payment Service",
           "description": "Binary UP/DOWN for the payment-service",
           "type": "stat",
-          "gridPos": { "h": 5, "w": 6, "x": 12, "y": 22 },
+          "gridPos": {
+            "x": 12,
+            "y": 16,
+            "w": 6,
+            "h": 5
+          },
           "fieldConfig": {
             "defaults": {
               "mappings": [
-                { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "DOWN",
+                      "color": "red"
+                    },
+                    "1": {
+                      "text": "UP",
+                      "color": "green"
+                    }
+                  }
+                }
               ],
-              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              }
             }
           },
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "min(up{job=\"payment-service\"})", "legendFormat": "" }]
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "background",
+            "graphMode": "none"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "min(up{job=\"payment-service\"})",
+              "legendFormat": ""
+            }
+          ]
         },
         {
           "id": 23,
           "title": "Service Availability %",
           "description": "% of the 3 application services currently UP",
           "type": "gauge",
-          "gridPos": { "h": 5, "w": 6, "x": 18, "y": 22 },
+          "gridPos": {
+            "x": 18,
+            "y": 16,
+            "w": 6,
+            "h": 5
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "percent",
@@ -406,11 +1257,37 @@ data:
               "min": 0,
               "thresholds": {
                 "mode": "absolute",
-                "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 67 }, { "color": "green", "value": 100 }]
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 67
+                  },
+                  {
+                    "color": "green",
+                    "value": 100
+                  }
+                ]
               }
             }
           },
-          "datasource": { "type": "prometheus", "uid": "prometheus" }, "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "100 * sum(max by (job) (up{job=~\"backend|admin-backend|payment-service\"})) / 3", "legendFormat": "" }]
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "100 * sum(max by (job) (up{job=~\"backend|admin-backend|payment-service\"})) / 3",
+              "legendFormat": ""
+            }
+          ]
         }
       ]
     }
