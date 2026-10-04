@@ -1,6 +1,6 @@
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/notification-service
-  tag: "e38d9df508cc"
+  tag: "5e46733b9c1d"
 workloadIdentity:
   enabled: true
   clientId: "5ec7c467-e340-4f94-a418-c0481cca8ec7"
@@ -17,7 +17,6 @@ resources:
     cpu: 50m
 updateStrategy:
   type: Recreate
-
 # Dev: every email is also copied to the admin mailbox so the whole flow can be checked from one inbox.
 env:
   notificationBcc: "adminuserproduct01@gmail.com"
