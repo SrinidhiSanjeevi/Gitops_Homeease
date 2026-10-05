@@ -1,6 +1,6 @@
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/backend
-  tag: 2b224e5cb354
+  tag: a2822dbb135f
 ingress:
   host: api.52-140-83-144.nip.io
 workloadIdentity:
