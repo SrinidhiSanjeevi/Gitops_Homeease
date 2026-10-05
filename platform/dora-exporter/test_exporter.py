@@ -2,7 +2,7 @@ import unittest
 import urllib.request
 from unittest import mock
 
-from exporter import compute_dora, http_json, render
+from exporter import commit_time, compute_dora, http_json, render
 
 DAY = 86400
 NOW = 100 * DAY
@@ -52,6 +52,11 @@ class HttpTests(unittest.TestCase):
         with mock.patch.object(urllib.request, "urlopen", return_value=Resp()):
             with self.assertRaisesRegex(RuntimeError, "token is probably invalid"):
                 http_json("https://dev.azure.com/x", {})
+
+    def test_unknown_commit_falls_back_instead_of_failing_the_whole_fetch(self):
+        # A pipeline for another repository has a commit GitHub cannot find (HTTP 422); that must not abort the fetch.
+        with mock.patch("exporter.http_json", side_effect=RuntimeError("HTTP 422 from api.github.com")):
+            self.assertIsNone(commit_time("owner/app", "deadbeef", "", {}))
 
 
 if __name__ == "__main__":

@@ -136,7 +136,7 @@ def commit_time(repo, sha, gh_token, cache):
     try:
         data = http_json(f"https://api.github.com/repos/{repo}/commits/{sha}", headers)
         cache[sha] = parse_ts(data["commit"]["committer"]["date"])
-    except (urllib.error.URLError, KeyError, ValueError):
+    except (urllib.error.URLError, RuntimeError, KeyError, ValueError):
         cache[sha] = None
     return cache[sha]
 
