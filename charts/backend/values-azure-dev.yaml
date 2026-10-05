@@ -16,6 +16,13 @@ extraLabels:
   homeease.io/cloud: azure
 env:
   azureStorageAccountName: "sthomeeaseimgayhiue"
+  # Demo: several people on one wifi share a public IP, so the defaults (10 sign-ins / 200 calls per
+  # 15 minutes) lock them out. Raised for dev only.
+  rateLimits:
+    RATE_LIMIT_AUTH_MAX: "300"
+    RATE_LIMIT_GENERAL_MAX: "5000"
+    RATE_LIMIT_PAYMENT_MAX: "200"
+    RATE_LIMIT_EMERGENCY_MAX: "200"
 resources:
   requests:
     cpu: 50m

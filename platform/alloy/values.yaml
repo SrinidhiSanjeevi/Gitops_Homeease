@@ -39,9 +39,11 @@ alloy:
       }
 
   resources:
+    # Requests are deliberately tiny: the 2-node AKS cluster has its CPU *requests* fully booked by
+    # system pods while real usage is ~20%, so a 50m request left one Alloy pod Pending forever.
     requests:
-      cpu: 50m
-      memory: 128Mi
+      cpu: 1m
+      memory: 64Mi
     limits:
       cpu: 200m
       memory: 256Mi

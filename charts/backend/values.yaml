@@ -45,6 +45,9 @@ env:
   paymentServiceUrl: http://payment-service:5002
   notificationServiceUrl: http://notification-service:5003
   azureStorageAccountName: ""
+  # Per-IP request limits per 15 minutes (backend defaults apply when empty). Visitors behind one
+  # wifi/NAT share an IP, so demo environments raise these.
+  rateLimits: {}
 
 workloadIdentity:
   enabled: false

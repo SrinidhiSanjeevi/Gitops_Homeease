@@ -83,6 +83,10 @@ spec:
               value: {{ .Values.env.notificationServiceUrl }}
             - name: APP_VERSION
               value: {{ .Values.image.tag | quote }}
+            {{- range $name, $value := .Values.env.rateLimits }}
+            - name: {{ $name }}
+              value: {{ $value | quote }}
+            {{- end }}
             {{- if .Values.env.azureStorageAccountName }}
             - name: AZURE_STORAGE_ACCOUNT_NAME
               value: {{ .Values.env.azureStorageAccountName | quote }}
