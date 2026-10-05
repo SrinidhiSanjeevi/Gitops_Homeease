@@ -20,7 +20,7 @@ data:
         {
           "id": 1,
           "title": "Total Bookings",
-          "description": "All-time total bookings from DB (serviceexpress_total_bookings gauge, refreshed every 30s by metricsCollector)",
+          "description": "All-time total bookings from DB (homeease_total_bookings gauge, refreshed every 30s by metricsCollector)",
           "type": "stat",
           "gridPos": {
             "h": 5,
@@ -67,7 +67,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "max(serviceexpress_total_bookings)",
+              "expr": "max(homeease_total_bookings)",
               "legendFormat": ""
             }
           ]
@@ -122,7 +122,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "max(serviceexpress_bookings_by_status{status=\"Completed\"})",
+              "expr": "max(homeease_bookings_by_status{status=\"Completed\"})",
               "legendFormat": ""
             }
           ]
@@ -177,7 +177,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "max(serviceexpress_bookings_by_status{status=\"Confirmed\"})",
+              "expr": "max(homeease_bookings_by_status{status=\"Confirmed\"})",
               "legendFormat": ""
             }
           ]
@@ -232,7 +232,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "max(serviceexpress_bookings_by_status{status=\"Cancelled\"})",
+              "expr": "max(homeease_bookings_by_status{status=\"Cancelled\"})",
               "legendFormat": ""
             }
           ]
@@ -283,7 +283,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum(max by (status) (serviceexpress_bookings_by_status{status=~\"Created|Assigned|Confirmed\"}))",
+              "expr": "sum(max by (status) (homeease_bookings_by_status{status=~\"Created|Assigned|Confirmed\"}))",
               "legendFormat": ""
             }
           ]
@@ -338,7 +338,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "max(serviceexpress_total_revenue)",
+              "expr": "max(homeease_total_revenue)",
               "legendFormat": ""
             }
           ]
@@ -389,7 +389,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "max(serviceexpress_total_users)",
+              "expr": "max(homeease_total_users)",
               "legendFormat": ""
             }
           ]
@@ -440,7 +440,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "max(serviceexpress_total_professionals)",
+              "expr": "max(homeease_total_professionals)",
               "legendFormat": ""
             }
           ]
@@ -495,7 +495,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "max(serviceexpress_available_professionals)",
+              "expr": "max(homeease_available_professionals)",
               "legendFormat": ""
             }
           ]
@@ -546,7 +546,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "max(serviceexpress_total_services)",
+              "expr": "max(homeease_total_services)",
               "legendFormat": ""
             }
           ]
@@ -601,7 +601,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "max(serviceexpress_total_emergencies)",
+              "expr": "max(homeease_total_emergencies)",
               "legendFormat": ""
             }
           ]
@@ -656,7 +656,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "max(serviceexpress_active_emergencies)",
+              "expr": "max(homeease_active_emergencies)",
               "legendFormat": ""
             }
           ]
@@ -706,7 +706,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "100 * (max(serviceexpress_bookings_by_status{status=\"Confirmed\"}) + max(serviceexpress_bookings_by_status{status=\"Completed\"})) / (max(serviceexpress_total_bookings) > 0)",
+              "expr": "100 * (max(homeease_bookings_by_status{status=\"Confirmed\"}) + max(homeease_bookings_by_status{status=\"Completed\"})) / (max(homeease_total_bookings) > 0)",
               "legendFormat": ""
             }
           ]
@@ -756,7 +756,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "100 * max(serviceexpress_bookings_by_status{status=\"Cancelled\"}) / (max(serviceexpress_total_bookings) > 0)",
+              "expr": "100 * max(homeease_bookings_by_status{status=\"Cancelled\"}) / (max(homeease_total_bookings) > 0)",
               "legendFormat": ""
             }
           ]
@@ -806,7 +806,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "100 * max(serviceexpress_bookings_by_status{status=\"Completed\"}) / ((max(serviceexpress_bookings_by_status{status=\"Completed\"}) + max(serviceexpress_bookings_by_status{status=\"Confirmed\"})) > 0)",
+              "expr": "100 * max(homeease_bookings_by_status{status=\"Completed\"}) / ((max(homeease_bookings_by_status{status=\"Completed\"}) + max(homeease_bookings_by_status{status=\"Confirmed\"})) > 0)",
               "legendFormat": ""
             }
           ]
@@ -865,7 +865,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "histogram_quantile(0.95, sum(increase(serviceexpress_professional_assignment_time_seconds_bucket[$__range])) by (le))",
+              "expr": "histogram_quantile(0.95, sum(increase(homeease_professional_assignment_time_seconds_bucket[$__range])) by (le))",
               "legendFormat": ""
             }
           ]
@@ -924,7 +924,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "histogram_quantile(0.95, sum(increase(serviceexpress_booking_latency_seconds_bucket[$__range])) by (le))",
+              "expr": "histogram_quantile(0.95, sum(increase(homeease_booking_latency_seconds_bucket[$__range])) by (le))",
               "legendFormat": ""
             }
           ]
@@ -975,7 +975,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum(rate(serviceexpress_booking_requests_total[5m]))",
+              "expr": "sum(rate(homeease_booking_requests_total[5m]))",
               "legendFormat": ""
             }
           ]
@@ -1033,7 +1033,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "max(serviceexpress_bookings_by_status{status=\"Assigned\"})",
+              "expr": "max(homeease_bookings_by_status{status=\"Assigned\"})",
               "legendFormat": ""
             }
           ]

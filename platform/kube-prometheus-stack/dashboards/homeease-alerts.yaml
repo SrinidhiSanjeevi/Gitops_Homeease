@@ -63,7 +63,7 @@ spec:
         description: The Razorpay payment verification failure rate has been above 5% for 5 minutes ({{ $value | printf "%.1f" }}% now). This may indicate a Razorpay API issue, a signature mismatch bug,
           or a configuration problem (RAZORPAY_KEY_SECRET mismatch). Check payment-service logs.
     - alert: BookingsAwaitingProfessional
-      expr: max(serviceexpress_bookings_by_status{status="Assigned"}) > 5
+      expr: max(homeease_bookings_by_status{status="Assigned"}) > 5
       for: 15m
       labels:
         severity: warning
@@ -98,7 +98,7 @@ spec:
         summary: notification-service is down
         description: 'The Prometheus target for notification-service has been down for 2 minutes: booking and provider emails are not being sent.'
     - alert: NotificationDeliveryFailing
-      expr: sum(increase(serviceexpress_notification_failures_total{job="notification-service"}[15m])) > 0
+      expr: sum(increase(homeease_notification_failures_total{job="notification-service"}[15m])) > 0
       for: 0m
       labels:
         severity: warning
