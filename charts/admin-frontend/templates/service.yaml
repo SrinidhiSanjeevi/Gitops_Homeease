@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "admin-frontend.labels" . | nindent 4 }}
 spec:
-  type: ClusterIP
+  type: {{ if .Values.publicService.enabled }}LoadBalancer{{ else }}ClusterIP{{ end }}
   selector:
     {{- include "admin-frontend.selectorLabels" . | nindent 4 }}
   ports:

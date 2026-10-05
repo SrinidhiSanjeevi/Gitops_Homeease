@@ -20,4 +20,13 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
+    {{- if .Values.publicService.enabled }}
+    # Reached directly through its own public IP (not through the ingress).
+    - from:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 8080
+    {{- end }}
 {{- end }}

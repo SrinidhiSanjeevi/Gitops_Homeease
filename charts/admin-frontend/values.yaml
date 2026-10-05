@@ -7,6 +7,11 @@ service:
   port: 80
   targetPortName: http
 
+# Gives the admin console its own public IP (service type LoadBalancer) so it can be opened by IP address
+# where hostnames such as nip.io are blocked. The admin sign-in still protects it. Off by default.
+publicService:
+  enabled: false
+
 resources:
   requests:
     cpu: 50m
