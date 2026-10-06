@@ -1,6 +1,6 @@
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/admin-frontend
-  tag: c3c0aabad723
+  tag: cc6644b40fbd
 # Reached through its own ingress controller (platform/ingress-nginx-admin) at a free Azure DNS name,
 # so the old plain-HTTP public IP is no longer needed.
 publicService:

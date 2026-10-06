@@ -1,6 +1,6 @@
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/frontend
-  tag: c3c0aabad723
+  tag: cc6644b40fbd
 ingress:
   host: homeease-app.centralindia.cloudapp.azure.com
   sslRedirect: true
