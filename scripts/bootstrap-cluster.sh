@@ -28,7 +28,10 @@ echo "== Argo CD"
 helm upgrade --install argocd argo/argo-cd -n argocd --create-namespace
 
 echo "== ingress-nginx (installed by Helm, not Argo CD: every chart's NetworkPolicy allows this namespace name)"
-helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx --create-namespace
+# The Azure LB health probe must hit /healthz: the default probe path "/" returns 404 on a controller
+# with no catch-all host, which marks port 80 down (HTTP-01 certificate challenges then time out).
+helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx --create-namespace \
+  --set-string 'controller.service.annotations.service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path=/healthz'
 
 echo "== ingress-nginx-admin (second controller: own public IP + Azure DNS label for the admin console)"
 helm upgrade --install ingress-nginx-admin ingress-nginx/ingress-nginx -n ingress-nginx -f platform/ingress-nginx-admin/values.yaml
