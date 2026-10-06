@@ -2,9 +2,9 @@ image:
   repository: acrhomeeasedev01.azurecr.io/homeease/frontend
   tag: 301b844fbb44
 ingress:
-  host: home.52-140-83-144.nip.io
-  sslRedirect: false
-  extraHostlessRule: true
+  host: homeease-app.centralindia.cloudapp.azure.com
+  sslRedirect: true
+  extraHostlessRule: false
 extraLabels:
   homeease.io/environment: dev
   homeease.io/cloud: azure

@@ -5,7 +5,7 @@ publicService:
   enabled: true
 ingress:
   host: admin-console.52-140-83-144.nip.io
-  sslRedirect: false
+  sslRedirect: true
   extraHostlessRule: false
 extraLabels:
   homeease.io/environment: dev
