@@ -1,0 +1,18 @@
+# Second ingress-nginx controller, dedicated to the admin console.
+# Why: Azure allows one DNS label per public IP, and a Let's Encrypt certificate needs a hostname
+# the corporate web filter does not block (nip.io is categorised "Dynamic DNS" and blocked).
+# This controller gets its own public IP, labelled homeease-admin.centralindia.cloudapp.azure.com.
+#
+# Install into the ingress-nginx namespace (every chart's NetworkPolicy allows that namespace):
+#   helm upgrade --install ingress-nginx-admin ingress-nginx/ingress-nginx -n ingress-nginx \
+#     -f platform/ingress-nginx-admin/values.yaml
+controller:
+  ingressClassResource:
+    name: nginx-admin
+    controllerValue: k8s.io/ingress-nginx-admin
+  ingressClass: nginx-admin
+  electionID: ingress-nginx-admin-leader
+  service:
+    annotations:
+      service.beta.kubernetes.io/azure-dns-label-name: homeease-admin
+      service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: /healthz

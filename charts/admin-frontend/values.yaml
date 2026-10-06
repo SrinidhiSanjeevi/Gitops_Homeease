@@ -30,6 +30,7 @@ pdb:
 
 ingress:
   enabled: true
+  className: nginx
   host: admin-console.dev.example.com
   tlsSecretName: admin-frontend-tls
   clusterIssuer: letsencrypt-prod

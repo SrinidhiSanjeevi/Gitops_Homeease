@@ -1,10 +1,14 @@
 image:
   repository: acrhomeeasedev01.azurecr.io/homeease/admin-frontend
   tag: a2822dbb135f
+# Reached through its own ingress controller (platform/ingress-nginx-admin) at a free Azure DNS name,
+# so the old plain-HTTP public IP is no longer needed.
 publicService:
-  enabled: true
+  enabled: false
 ingress:
-  host: admin-console.52-140-83-144.nip.io
+  className: nginx-admin
+  clusterIssuer: letsencrypt-admin
+  host: homeease-admin.centralindia.cloudapp.azure.com
   sslRedirect: true
   extraHostlessRule: false
 extraLabels:

@@ -30,6 +30,15 @@ helm upgrade --install argocd argo/argo-cd -n argocd --create-namespace
 echo "== ingress-nginx (installed by Helm, not Argo CD: every chart's NetworkPolicy allows this namespace name)"
 helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx --create-namespace
 
+echo "== ingress-nginx-admin (second controller: own public IP + Azure DNS label for the admin console)"
+helm upgrade --install ingress-nginx-admin ingress-nginx/ingress-nginx -n ingress-nginx -f platform/ingress-nginx-admin/values.yaml
+
+echo "== cert-manager (HTTPS certificates from Let's Encrypt)"
+helm repo add jetstack https://charts.jetstack.io >/dev/null 2>&1 || true
+helm repo update >/dev/null
+helm upgrade --install cert-manager jetstack/cert-manager -n cert-manager --create-namespace --set crds.enabled=true --wait
+kubectl apply -f platform/cert-manager/clusterissuers.yaml
+
 echo "== monitoring secrets (out-of-band, never in Git)"
 kubectl create namespace monitoring --dry-run=client -o yaml | kubectl apply -f -
 kubectl -n monitoring create secret generic grafana-admin-credentials \
