@@ -982,12 +982,12 @@ data:
         },
         {
           "id": 19,
-          "title": "Bookings Awaiting a Professional",
-          "description": "Number of bookings currently waiting for professional assignment",
+          "title": "Pending Bookings (today)",
+          "description": "Open bookings scheduled for today or overdue (DB gauge). Professionals are assigned automatically, so this is work due today.",
           "type": "stat",
           "gridPos": {
             "x": 0,
-            "y": 21,
+            "y": 26,
             "w": 6,
             "h": 5
           },
@@ -1033,7 +1033,65 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "max(homeease_bookings_by_status{status=\"Assigned\"})",
+              "expr": "max(homeease_bookings_by_schedule{bucket=\"Pending\"})",
+              "legendFormat": ""
+            }
+          ]
+        },
+        {
+          "id": 24,
+          "title": "Upcoming Bookings (later days)",
+          "description": "Open bookings scheduled for tomorrow or later (DB gauge).",
+          "type": "stat",
+          "gridPos": {
+            "x": 6,
+            "y": 26,
+            "w": 6,
+            "h": 5
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 10
+                  },
+                  {
+                    "color": "red",
+                    "value": 50
+                  }
+                ]
+              }
+            }
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max(homeease_bookings_by_schedule{bucket=\"Upcoming\"})",
               "legendFormat": ""
             }
           ]
