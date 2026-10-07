@@ -50,3 +50,8 @@ alloy:
 
 controller:
   type: daemonset
+
+# Prometheus must watch the log pipeline itself: 42,873 entries were dropped
+# (ingester_error) with nothing to alert on, because Alloy was never scraped.
+serviceMonitor:
+  enabled: true
