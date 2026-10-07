@@ -133,3 +133,11 @@ spec:
       annotations:
         summary: Critical alert(s) unresolved for 30 minutes
         description: At least one critical alert has been firing continuously for 30 minutes. Escalated to the manager.
+    - alert: LogPipelineDroppingEntries
+      expr: rate(loki_write_dropped_entries_total[10m]) > 0
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: Alloy is dropping log entries (reason={{ $labels.reason }})
+        description: 'Logs are being lost between Alloy and Loki. Check loki-0 ingester logs.'
