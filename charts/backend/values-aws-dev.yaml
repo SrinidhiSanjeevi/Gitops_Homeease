@@ -2,7 +2,7 @@
 # The image block is rewritten by app_Homeease/.github/workflows/aws-ci.yml (Promote step) - do not hand-edit tag.
 image:
   repository: 226236025590.dkr.ecr.ap-south-1.amazonaws.com/homeease/backend
-  tag: "cc6644b40fbd"
+  tag: "743190bbf973"
 # Not public: only the two frontends are exposed (their nginx proxies /api), same as the ECS design.
 ingress:
   enabled: false
