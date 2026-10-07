@@ -1,0 +1,18 @@
+# AWS (EKS) values. Same chart and image as Azure; only the platform wiring differs.
+# The image block is rewritten by app_Homeease/.github/workflows/aws-ci.yml (Promote step) - do not hand-edit tag.
+image:
+  repository: 226236025590.dkr.ecr.ap-south-1.amazonaws.com/homeease/admin-frontend
+  tag: "cc6644b40fbd"
+# Own ingress controller (class nginx-admin) = own NLB = own CloudFront distribution, mirroring Azure.
+ingress:
+  className: nginx-admin
+  host: ""
+  tlsEnabled: false
+  sslRedirect: false
+  extraHostlessRule: true
+extraLabels:
+  homeease.io/environment: dev
+  homeease.io/cloud: aws
+resources:
+  requests:
+    cpu: 25m

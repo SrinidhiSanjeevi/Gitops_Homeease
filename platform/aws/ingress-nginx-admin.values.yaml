@@ -1,0 +1,15 @@
+# Second ingress controller (class "nginx-admin") = a second NLB = the admin console's own CloudFront
+# distribution. Mirrors platform/ingress-nginx-admin (Azure) for the same reason: the admin console gets
+# its own entry point, separate from the customer site.
+controller:
+  ingressClassResource:
+    name: nginx-admin
+    controllerValue: k8s.io/ingress-nginx-admin
+  ingressClass: nginx-admin
+  electionID: ingress-nginx-admin-leader
+  service:
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: nlb
+      service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+      service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+      service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: "homeease-ingress=admin"

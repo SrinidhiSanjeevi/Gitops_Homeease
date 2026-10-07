@@ -42,6 +42,8 @@ networkPolicy:
   enabled: true
 
 env:
+  # Free-form extra environment variables (name: value), e.g. TRUST_PROXY_HOPS.
+  extra: {}
   paymentServiceUrl: http://payment-service:5002
   notificationServiceUrl: http://notification-service:5003
   azureStorageAccountName: ""
@@ -53,12 +55,21 @@ workloadIdentity:
   enabled: false
   clientId: ""
 
+# AWS (EKS): IAM Roles for Service Accounts. The Azure equivalent is workloadIdentity above.
+irsa:
+  enabled: false
+  roleArn: ""
+
 keyVault:
   name: ""
   tenantId: ""
 
 secretProviderClass:
   enabled: false
+  # azure (Key Vault, default) or aws (Secrets Manager). For aws each object uses `awsSecret`
+  # (the Secrets Manager name) instead of `keyVaultObject`, and `region` is required.
+  provider: azure
+  region: ""
   secretName: backend-secrets
   objects:
     - keyVaultObject: booking-mongo-uri

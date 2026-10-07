@@ -7,17 +7,22 @@ metadata:
   labels:
     {{- include "frontend.labels" . | nindent 4 }}
   annotations:
+    {{- if .Values.ingress.tlsEnabled }}
     cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer }}
+    {{- end }}
     {{- if not .Values.ingress.sslRedirect }}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     {{- end }}
 spec:
   ingressClassName: nginx
+  {{- if .Values.ingress.tlsEnabled }}
   tls:
     - hosts:
         - {{ .Values.ingress.host }}
       secretName: {{ .Values.ingress.tlsSecretName }}
+  {{- end }}
   rules:
+    {{- if .Values.ingress.host }}
     - host: {{ .Values.ingress.host }}
       http:
         paths:
@@ -28,6 +33,7 @@ spec:
                 name: frontend
                 port:
                   name: http
+    {{- end }}
     {{- if .Values.ingress.extraHostlessRule }}
     - http:
         paths:

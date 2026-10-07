@@ -1,0 +1,30 @@
+# AWS (EKS) values. Same chart and image as Azure; only the platform wiring differs.
+# The image block is rewritten by app_Homeease/.github/workflows/aws-ci.yml (Promote step) - do not hand-edit tag.
+image:
+  repository: 226236025590.dkr.ecr.ap-south-1.amazonaws.com/homeease/payment-service
+  tag: "c3c0aabad723"
+# Own IAM role: payment-service is the one place a mistake has a financial consequence.
+irsa:
+  enabled: true
+  roleArn: arn:aws:iam::226236025590:role/homeease-eks-dev-payment
+secretProviderClass:
+  enabled: true
+  provider: aws
+  region: ap-south-1
+  objects:
+    - awsSecret: homeease/dev/payment-service/mongo-uri
+      envKey: MONGO_URI
+    - awsSecret: homeease/dev/payment-service/razorpay-key-id
+      envKey: RAZORPAY_KEY_ID
+    - awsSecret: homeease/dev/payment-service/razorpay-key-secret
+      envKey: RAZORPAY_KEY_SECRET
+    - awsSecret: homeease/dev/payment-service/razorpay-webhook-secret
+      envKey: RAZORPAY_WEBHOOK_SECRET
+extraLabels:
+  homeease.io/environment: dev
+  homeease.io/cloud: aws
+hpa:
+  minReplicas: 2
+resources:
+  requests:
+    cpu: 50m

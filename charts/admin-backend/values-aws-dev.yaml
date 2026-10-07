@@ -1,0 +1,33 @@
+# AWS (EKS) values. Same chart and image as Azure; only the platform wiring differs.
+# The image block is rewritten by app_Homeease/.github/workflows/aws-ci.yml (Promote step) - do not hand-edit tag.
+image:
+  repository: 226236025590.dkr.ecr.ap-south-1.amazonaws.com/homeease/admin-backend
+  tag: "c3c0aabad723"
+ingress:
+  enabled: false
+irsa:
+  enabled: true
+  roleArn: arn:aws:iam::226236025590:role/homeease-eks-dev-app
+secretProviderClass:
+  enabled: true
+  provider: aws
+  region: ap-south-1
+  objects:
+    - awsSecret: homeease/dev/admin-backend/mongo-uri
+      envKey: MONGO_URI
+    - awsSecret: homeease/dev/admin-backend/jwt-secret
+      envKey: JWT_SECRET
+    - awsSecret: homeease/dev/admin-backend/azure-storage-account-key
+      envKey: AZURE_STORAGE_ACCOUNT_KEY
+extraLabels:
+  homeease.io/environment: dev
+  homeease.io/cloud: aws
+env:
+  azureStorageAccountName: "sthomeeaseimgayhiue"
+  extra:
+    TRUST_PROXY_HOPS: "3"
+hpa:
+  minReplicas: 2
+resources:
+  requests:
+    cpu: 50m

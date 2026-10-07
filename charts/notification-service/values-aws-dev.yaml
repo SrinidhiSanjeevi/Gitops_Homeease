@@ -1,0 +1,28 @@
+# AWS (EKS) values. Same chart and image as Azure; only the platform wiring differs.
+# The image block is rewritten by app_Homeease/.github/workflows/aws-ci.yml (Promote step) - do not hand-edit tag.
+image:
+  repository: 226236025590.dkr.ecr.ap-south-1.amazonaws.com/homeease/notification-service
+  tag: "a2822dbb135f"
+irsa:
+  enabled: true
+  roleArn: arn:aws:iam::226236025590:role/homeease-eks-dev-notification
+secretProviderClass:
+  enabled: true
+  provider: aws
+  region: ap-south-1
+  objects:
+    - awsSecret: homeease/dev/notification-service/mongo-uri
+      envKey: MONGO_URI
+    - awsSecret: homeease/dev/notification-service/email-user
+      envKey: EMAIL_USER
+    - awsSecret: homeease/dev/notification-service/email-pass
+      envKey: EMAIL_PASS
+extraLabels:
+  homeease.io/environment: dev
+  homeease.io/cloud: aws
+# Dev: every email is also copied to the admin mailbox so the whole flow can be checked from one inbox.
+env:
+  notificationBcc: "adminuserproduct01@gmail.com"
+resources:
+  requests:
+    cpu: 50m

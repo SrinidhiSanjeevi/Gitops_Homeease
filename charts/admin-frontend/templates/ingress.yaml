@@ -7,18 +7,23 @@ metadata:
   labels:
     {{- include "admin-frontend.labels" . | nindent 4 }}
   annotations:
+    {{- if .Values.ingress.tlsEnabled }}
     cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer }}
+    {{- end }}
     nginx.ingress.kubernetes.io/proxy-body-size: "6m"
     {{- if not .Values.ingress.sslRedirect }}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     {{- end }}
 spec:
   ingressClassName: {{ .Values.ingress.className }}
+  {{- if .Values.ingress.tlsEnabled }}
   tls:
     - hosts:
         - {{ .Values.ingress.host }}
       secretName: {{ .Values.ingress.tlsSecretName }}
+  {{- end }}
   rules:
+    {{- if .Values.ingress.host }}
     - host: {{ .Values.ingress.host }}
       http:
         paths:
@@ -29,6 +34,7 @@ spec:
                 name: admin-frontend
                 port:
                   name: http
+    {{- end }}
     {{- if .Values.ingress.extraHostlessRule }}
     - http:
         paths:

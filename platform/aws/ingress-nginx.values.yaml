@@ -1,0 +1,15 @@
+# Customer ingress controller on EKS (class "nginx"). Installed by scripts/bootstrap-eks.sh into the
+# ingress-nginx namespace (every chart's NetworkPolicy allows that namespace name).
+#
+# Service type LoadBalancer becomes an internet-facing NLB. CloudFront is the only intended client: it
+# terminates TLS and forwards HTTP here. The additional-resource-tags annotation gives the NLB a stable tag
+# that terraform/aws/environments/eks-dev uses to find it (the NLB DNS name is not known until it exists).
+controller:
+  ingressClassResource:
+    name: nginx
+  service:
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: nlb
+      service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+      service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+      service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: "homeease-ingress=customer"

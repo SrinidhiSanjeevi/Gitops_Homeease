@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: homeease
+  namespace: argocd
+spec:
+  description: HomeEase application services on EKS (frontend, admin-frontend, backend, admin-backend, payment-service, notification-service)
+
+  sourceRepos:
+    - "https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git"
+
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: "homeease-dev"
+
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+
+  namespaceResourceWhitelist:
+    - group: "apps"
+      kind: Deployment
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: ServiceAccount
+    - group: ""
+      kind: ConfigMap
+    - group: "autoscaling"
+      kind: HorizontalPodAutoscaler
+    - group: "policy"
+      kind: PodDisruptionBudget
+    - group: "networking.k8s.io"
+      kind: NetworkPolicy
+    - group: "networking.k8s.io"
+      kind: Ingress
+    - group: "secrets-store.csi.x-k8s.io"
+      kind: SecretProviderClass
+    - group: "monitoring.coreos.com"
+      kind: ServiceMonitor
+
+  roles:
+    - name: readonly
+      description: Read-only access for viewing sync status and history
+      policies:
+        - p, proj:homeease:readonly, applications, get, homeease/*, allow
+      groups: []
