@@ -34,6 +34,8 @@ ingress:
   host: admin-console.dev.example.com
   tlsSecretName: admin-frontend-tls
   clusterIssuer: letsencrypt-prod
+  # false when TLS is terminated in front of the cluster (CloudFront on AWS): no cert-manager, no tls block.
+  tlsEnabled: true
   sslRedirect: true
   extraHostlessRule: false
 

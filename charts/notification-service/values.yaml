@@ -33,6 +33,8 @@ networkPolicy:
   enabled: true
 
 env:
+  # Free-form extra environment variables (name: value), e.g. TRUST_PROXY_HOPS.
+  extra: {}
   bookingServiceUrl: http://backend:5000
   # Optional: comma-separated addresses that receive a copy (BCC) of every email, e.g. an admin/ops mailbox.
   notificationBcc: ""
@@ -41,12 +43,21 @@ workloadIdentity:
   enabled: false
   clientId: ""
 
+# AWS (EKS): IAM Roles for Service Accounts. The Azure equivalent is workloadIdentity above.
+irsa:
+  enabled: false
+  roleArn: ""
+
 keyVault:
   name: ""
   tenantId: ""
 
 secretProviderClass:
   enabled: false
+  # azure (Key Vault, default) or aws (Secrets Manager). For aws each object uses `awsSecret`
+  # (the Secrets Manager name) instead of `keyVaultObject`, and `region` is required.
+  provider: azure
+  region: ""
   secretName: notification-service-secrets
   objects:
     - keyVaultObject: notification-mongo-uri

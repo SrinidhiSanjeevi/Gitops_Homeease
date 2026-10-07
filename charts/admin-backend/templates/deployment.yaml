@@ -83,6 +83,10 @@ spec:
             - name: AZURE_STORAGE_ACCOUNT_NAME
               value: {{ .Values.env.azureStorageAccountName | quote }}
             {{- end }}
+            {{- range $name, $value := .Values.env.extra }}
+            - name: {{ $name }}
+              value: {{ $value | quote }}
+            {{- end }}
           {{- if .Values.secretProviderClass.enabled }}
           envFrom:
             - secretRef:

@@ -84,6 +84,10 @@ spec:
             - name: NOTIFICATION_BCC
               value: {{ .Values.env.notificationBcc | quote }}
             {{- end }}
+            {{- range $name, $value := .Values.env.extra }}
+            - name: {{ $name }}
+              value: {{ $value | quote }}
+            {{- end }}
           {{- if .Values.secretProviderClass.enabled }}
           envFrom:
             - secretRef:

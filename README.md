@@ -38,3 +38,11 @@ flowchart LR
 ## Monitoring
 
 Prometheus and Grafana (`kube-prometheus-stack`), Loki for logs and Alloy shipping container logs run as the `monitoring` application. Dashboards are provisioned from `platform/kube-prometheus-stack/dashboards`: business overview, payment service, RED metrics, logs, alerts and DORA. Details are in `platform/README.md`.
+
+## AWS (EKS)
+
+The same charts also deploy to an EKS cluster. Argo CD there watches `argocd/aws/bootstrap`, which points at `charts/<service>/values-aws-dev.yaml`. Differences from Azure are values, not templates:
+
+- **Secrets** come from AWS Secrets Manager through the Secrets Store CSI driver (`secretProviderClass.provider: aws`) and an IAM role per service group (IRSA), instead of Key Vault and workload identity.
+- **Ingress** is two ingress-nginx controllers behind two NLBs, fronted by CloudFront for HTTPS (`platform/aws/`). Only the frontends are exposed.
+- **Bootstrap:** `scripts/bootstrap-eks.sh` (once). The Azure charts' rendered output is unchanged by the AWS options.

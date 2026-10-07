@@ -1,0 +1,46 @@
+# AWS (EKS) values. Same chart and image as Azure; only the platform wiring differs.
+# The image block is rewritten by app_Homeease/.github/workflows/aws-ci.yml (Promote step) - do not hand-edit tag.
+image:
+  repository: 226236025590.dkr.ecr.ap-south-1.amazonaws.com/homeease/backend
+  tag: "cc6644b40fbd"
+# Not public: only the two frontends are exposed (their nginx proxies /api), same as the ECS design.
+ingress:
+  enabled: false
+# IRSA: this pod's service account assumes an IAM role that can read only this service group's secrets.
+irsa:
+  enabled: true
+  roleArn: arn:aws:iam::226236025590:role/homeease-eks-dev-app
+secretProviderClass:
+  enabled: true
+  provider: aws
+  region: ap-south-1
+  objects:
+    - awsSecret: homeease/dev/backend/mongo-uri
+      envKey: MONGO_URI
+    - awsSecret: homeease/dev/backend/jwt-secret
+      envKey: JWT_SECRET
+    - awsSecret: homeease/dev/backend/email-user
+      envKey: EMAIL_USER
+    - awsSecret: homeease/dev/backend/email-pass
+      envKey: EMAIL_PASS
+    - awsSecret: homeease/dev/backend/azure-storage-account-key
+      envKey: AZURE_STORAGE_ACCOUNT_KEY
+extraLabels:
+  homeease.io/environment: dev
+  homeease.io/cloud: aws
+env:
+  azureStorageAccountName: "sthomeeaseimgayhiue"
+  rateLimits:
+    RATE_LIMIT_AUTH_MAX: "300"
+    RATE_LIMIT_GENERAL_MAX: "5000"
+    RATE_LIMIT_PAYMENT_MAX: "200"
+    RATE_LIMIT_EMERGENCY_MAX: "200"
+  extra:
+    # Client IP chain: CloudFront -> ingress-nginx -> frontend nginx -> backend. VERIFY after first deploy
+    # (sign in from two networks and confirm the rate-limit buckets are separate); adjust if not.
+    TRUST_PROXY_HOPS: "3"
+hpa:
+  minReplicas: 2
+resources:
+  requests:
+    cpu: 50m
