@@ -2,7 +2,7 @@
 # The image block is rewritten by app_Homeease/.github/workflows/aws-ci.yml (Promote step) - do not hand-edit tag.
 image:
   repository: 226236025590.dkr.ecr.ap-south-1.amazonaws.com/homeease/frontend
-  tag: "c3c0aabad723"
+  tag: "743190bbf973"
 # Reached through CloudFront -> NLB -> ingress-nginx. CloudFront terminates TLS and forwards plain HTTP, so:
 # no cert-manager, no tls block, no http->https redirect (it would loop), and a hostless rule because the
 # Host header is the NLB name, which is not known when this file is written.
