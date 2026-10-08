@@ -2,7 +2,7 @@
 
 In-cluster exporter that turns real CI/CD history into the four DORA metrics for Grafana.
 Sources: **Azure DevOps** (every pipeline, branch `main`) and **GitHub Actions** (`aws-ci`, branch `main`).
-Deployed by the `monitoring` Argo CD Application (extra source `platform/dora-exporter`).
+Deployed on AKS by the `monitoring` Argo CD Application (extra source `platform/dora-exporter`); not deployed on EKS.
 
 | Metric | Meaning |
 |---|---|
@@ -22,5 +22,6 @@ kubectl -n monitoring rollout restart deploy/dora-exporter
 ```
 Without the secret the exporter still runs and reports GitHub Actions only.
 
-## Tests
-`python3 -m unittest -q test_exporter` (pure functions; no network).
+## Code
+The exporter runs from the `exporter.py` key in `configmap.yaml`; `exporter.py` in this folder is the same
+code kept as a plain file for reading and local runs. Change both together.
