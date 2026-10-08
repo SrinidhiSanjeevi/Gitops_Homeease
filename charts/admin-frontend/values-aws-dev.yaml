@@ -2,7 +2,7 @@
 # The image block is rewritten by app_Homeease/.github/workflows/aws-ci.yml (Promote step) - do not hand-edit tag.
 image:
   repository: 226236025590.dkr.ecr.ap-south-1.amazonaws.com/homeease/admin-frontend
-  tag: "743190bbf973"
+  tag: "af0d6208e3fb"
 # Own ingress controller (class nginx-admin) = own NLB = own CloudFront distribution, mirroring Azure.
 ingress:
   className: nginx-admin
