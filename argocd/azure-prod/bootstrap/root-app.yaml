@@ -1,3 +1,5 @@
+# Apply to the PROD cluster's own Argo CD only. The names (homeease-root, project homeease) match
+# argocd/azure, so applying this to the dev AKS Argo CD would overwrite the dev root app.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

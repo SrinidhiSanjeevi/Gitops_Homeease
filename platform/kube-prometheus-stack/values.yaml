@@ -49,7 +49,7 @@ alertmanager:
 
   # EMAIL ONLY. The Gmail app password lives in the `alertmanager-smtp` Secret (key `password`), mounted at
   # /etc/alertmanager/secrets/alertmanager-smtp/ and read through smtp_auth_password_file. Never put it here.
-  # Create/rotate it out of band (see docs/monitoring-secrets.md).
+  # Create/rotate it out of band with scripts/bootstrap-cluster.sh (AKS) or scripts/bootstrap-eks.sh (EKS).
   config:
     global:
       resolve_timeout: 5m

@@ -1,8 +1,4 @@
-# Kustomize render output
-/.render/
-
 # Local overrides
-kustomization.local.yaml
 *.local.yaml
 
 # Editor/OS noise
@@ -11,3 +7,11 @@ kustomization.local.yaml
 # Python bytecode
 __pycache__/
 *.pyc
+
+# Helm / local tooling
+*.tgz
+charts/*/charts/
+*kubeconfig*
+.env
+.vscode/
+.idea/
