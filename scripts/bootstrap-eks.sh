@@ -58,7 +58,9 @@ helm upgrade --install csi-secrets-store secrets-store-csi-driver/secrets-store-
   --set 'tokenRequests[0].audience=sts.amazonaws.com' --wait
 
 echo "== AWS Secrets Manager provider for the CSI driver (uses each pod's IRSA role)"
-helm upgrade --install secrets-provider-aws aws-secrets-manager/secrets-store-csi-driver-provider-aws -n kube-system --wait
+# The provider chart bundles its own copy of the CSI driver; the driver installed above is the one we configure.
+helm upgrade --install secrets-provider-aws aws-secrets-manager/secrets-store-csi-driver-provider-aws -n kube-system \
+  --set secrets-store-csi-driver.install=false --wait
 
 echo "== ingress-nginx, customer (installed by Helm, not Argo CD: every chart's NetworkPolicy allows this namespace)"
 helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx --create-namespace \
