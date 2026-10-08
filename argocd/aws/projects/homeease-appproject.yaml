@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: homeease
+  name: homeease-aws
   namespace: argocd
 spec:
   description: HomeEase application services on EKS (frontend, admin-frontend, backend, admin-backend, payment-service, notification-service)
@@ -10,7 +10,7 @@ spec:
     - "https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git"
 
   destinations:
-    - server: https://kubernetes.default.svc
+    - name: eks-dev
       namespace: "homeease-dev"
 
   clusterResourceWhitelist:
@@ -43,5 +43,5 @@ spec:
     - name: readonly
       description: Read-only access for viewing sync status and history
       policies:
-        - p, proj:homeease:readonly, applications, get, homeease/*, allow
+        - p, proj:homeease-aws:readonly, applications, get, homeease-aws/*, allow
       groups: []

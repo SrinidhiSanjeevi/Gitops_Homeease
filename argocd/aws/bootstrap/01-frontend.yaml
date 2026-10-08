@@ -1,13 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: frontend-dev
+  name: frontend-aws-dev
   namespace: argocd
   labels:
     homeease.io/service: frontend
     homeease.io/environment: dev
+    homeease.io/cloud: aws
 spec:
-  project: homeease
+  project: homeease-aws
   source:
     repoURL: https://github.com/SrinidhiSanjeevi/Gitops_Homeease.git
     targetRevision: main
@@ -16,7 +17,7 @@ spec:
       valueFiles:
         - values-aws-dev.yaml
   destination:
-    server: https://kubernetes.default.svc
+    name: eks-dev
     namespace: homeease-dev
   syncPolicy:
     automated:

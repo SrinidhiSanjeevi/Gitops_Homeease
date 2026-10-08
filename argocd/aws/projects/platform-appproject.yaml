@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: platform
+  name: platform-aws
   namespace: argocd
 spec:
   description: Cluster platform components on EKS — Prometheus, Grafana, Alertmanager, Loki, Alloy
@@ -12,7 +12,7 @@ spec:
     - "https://grafana.github.io/helm-charts"
 
   destinations:
-    - server: https://kubernetes.default.svc
+    - name: eks-dev
       namespace: "monitoring"
 
   clusterResourceWhitelist:
@@ -39,5 +39,5 @@ spec:
     - name: readonly
       description: Read-only access for viewing sync status and history
       policies:
-        - p, proj:platform:readonly, applications, get, platform/*, allow
+        - p, proj:platform-aws:readonly, applications, get, platform-aws/*, allow
       groups: []
