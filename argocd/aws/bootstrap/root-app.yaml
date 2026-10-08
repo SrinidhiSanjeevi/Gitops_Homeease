@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: homeease-root
+  name: homeease-root-aws
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io

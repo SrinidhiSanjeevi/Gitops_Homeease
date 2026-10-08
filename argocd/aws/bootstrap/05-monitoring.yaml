@@ -3,12 +3,12 @@ kind: Application
 # AWS: same stack as Azure minus the dora-exporter, which reads Azure DevOps history. A GitHub Actions
 # DORA exporter is a follow-up; the DORA dashboard stays installed but empty until then.
 metadata:
-  name: monitoring
+  name: monitoring-aws
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
 spec:
-  project: platform
+  project: platform-aws
   sources:
     - repoURL: https://prometheus-community.github.io/helm-charts
       chart: kube-prometheus-stack
@@ -38,7 +38,7 @@ spec:
       targetRevision: main
       ref: values
   destination:
-    server: https://kubernetes.default.svc
+    name: eks-dev
     namespace: monitoring
   syncPolicy:
     automated:
